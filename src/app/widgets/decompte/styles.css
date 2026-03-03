@@ -749,6 +749,22 @@ body {
 .croise-table tr:hover td.col-highlight { background: #fef3c7; }
 .croise-table tr.croise-row-commune:hover td.col-highlight { background: #fde68a; }
 
+/* Colonne Total : surbrillance bleue */
+.croise-table th.col-total,
+.recap-table th.col-total {
+  background: #000091;
+  color: #fff;
+}
+.croise-table td.col-total,
+.recap-table td.col-total {
+  background: #e8e8f8;
+  color: #000091;
+  font-weight: 700;
+}
+.croise-table tr.total-row td.col-total { background: #c5c5e8 !important; }
+.croise-table tr:hover td.col-total { background: #d8d8f0; }
+.croise-table tr.croise-row-commune:hover td.col-total { background: #d0d0ec; }
+
 .commune-detail-list { display: flex; flex-direction: column; gap: 0.5rem; }
 .commune-detail-item {
   background: #fff;

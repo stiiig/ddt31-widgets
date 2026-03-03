@@ -711,12 +711,12 @@ export default function DecomptePage() {
           </div>
           <div className="recap-table-wrap">
             <table className="recap-table">
-              <thead><tr><th>Période</th>{colHeaders}<th className="col-num">Total</th></tr></thead>
+              <thead><tr><th>Période</th>{colHeaders}<th className="col-num col-total">Total</th></tr></thead>
               <tbody>
                 <tr>
                   <td><strong>{moisLabel(m, a)}</strong>{isCurrent && <span style={{ color: "#000091", fontSize: ".65rem" }}> ◀ en cours</span>}</td>
                   {DOC_TYPES.map(dt => <NumCell key={dt.key} v={counters[dt.key] || 0} hl={dt.highlight} />)}
-                  <td className="col-num">{total || <span style={{ color: "#ccc" }}>0</span>}</td>
+                  <td className="col-num col-total">{total || <span style={{ color: "#ccc" }}>0</span>}</td>
                 </tr>
               </tbody>
             </table>
@@ -760,7 +760,7 @@ export default function DecomptePage() {
         </div>
         <div className="recap-table-wrap">
           <table className="recap-table">
-            <thead><tr><th>Période</th>{colHeaders}<th className="col-num">Total</th></tr></thead>
+            <thead><tr><th>Période</th>{colHeaders}<th className="col-num col-total">Total</th></tr></thead>
             <tbody>
               {rows.map((r, i) => (
                 <tr key={i} className={r.isTotal ? "total-row" : ""}>
@@ -770,7 +770,7 @@ export default function DecomptePage() {
                     {!r.isTotal && <StatutChips sel={r.statut} />}
                   </td>
                   {DOC_TYPES.map(dt => <NumCell key={dt.key} v={r.counters[dt.key] || 0} hl={dt.highlight} />)}
-                  <td className="col-num">{totalCounters(r.counters) || <span style={{ color: "#ccc" }}>0</span>}</td>
+                  <td className="col-num col-total">{totalCounters(r.counters) || <span style={{ color: "#ccc" }}>0</span>}</td>
                 </tr>
               ))}
             </tbody>
@@ -843,7 +843,7 @@ export default function DecomptePage() {
     return (
       <div className="croise-wrap">
         <table className="croise-table">
-          <thead><tr><th>Commune</th>{DOC_TYPES.map(dt => <th key={dt.key} className={`col-num${dt.highlight ? " col-highlight" : ""}`} title={dt.label}>{dt.code}</th>)}<th className="col-num">Total</th></tr></thead>
+          <thead><tr><th>Commune</th>{DOC_TYPES.map(dt => <th key={dt.key} className={`col-num${dt.highlight ? " col-highlight" : ""}`} title={dt.label}>{dt.code}</th>)}<th className="col-num col-total">Total</th></tr></thead>
           <tbody>
             {communeList.map(c => {
               const statuts = vue === "annee" && c.statutsAnnee?.length ? c.statutsAnnee[0].sels : (c.statut || []);
@@ -852,14 +852,14 @@ export default function DecomptePage() {
                   onClick={() => { const comm = communesById.get(c.id); if (comm) handleSelectCommune(comm); }}>
                   <td>{c.nom}<StatutChips sel={statuts} /></td>
                   {DOC_TYPES.map(dt => <NumCell key={dt.key} v={c.counters[dt.key] || 0} hl={dt.highlight} />)}
-                  <td className="col-num" style={{ fontWeight: 700 }}>{c.total}</td>
+                  <td className="col-num col-total" style={{ fontWeight: 700 }}>{c.total}</td>
                 </tr>
               );
             })}
             <tr className="total-row">
               <td><strong>TOTAL</strong></td>
               {DOC_TYPES.map(dt => <NumCell key={dt.key} v={totals[dt.key] || 0} hl={dt.highlight} />)}
-              <td className="col-num"><strong>{grandTotal}</strong></td>
+              <td className="col-num col-total"><strong>{grandTotal}</strong></td>
             </tr>
           </tbody>
         </table>

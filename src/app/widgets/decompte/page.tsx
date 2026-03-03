@@ -29,18 +29,18 @@ const LOG_COLS = {
 };
 
 const DOC_TYPES: DocType[] = [
-  { key: "Trans_Proro",     code: "Trans/Proro",  label: "Transmissions & Prorogations",     icon: "fa-arrows-rotate",     color: "#6366f1" },
+  { key: "PD",              code: "PD",            label: "Permis de Démolir",                icon: "fa-hammer",            color: "#8b5cf6" },
+  { key: "PC",              code: "PC",            label: "Permis de Construire",             icon: "fa-building",          color: "#000091", highlight: true },
+  { key: "Pcm",             code: "Pcm",           label: "Permis de Construire modificatif", icon: "fa-pen-to-square",     color: "#4338ca", highlight: true },
+  { key: "PA",              code: "PA",            label: "Permis d'Aménager",                icon: "fa-map-location-dot",  color: "#0891b2", highlight: true },
+  { key: "Pam",             code: "Pam",           label: "Permis d'Aménager modificatif",    icon: "fa-map-pin",           color: "#0e7490", highlight: true },
+  { key: "Permis_ZA",       code: "ZA",            label: "Permis Zone Agricole",             icon: "fa-wheat-awn",         color: "#65a30d", highlight: true },
+  { key: "Trans_Proro",     code: "Trans/Proro",   label: "Transmissions & Prorogations",     icon: "fa-arrows-rotate",     color: "#6366f1" },
   { key: "Retraits_Rejets", code: "Ret./Rej.",     label: "Retraits & Rejets",                icon: "fa-ban",               color: "#ef4444" },
   { key: "Refus_Sursis",    code: "Ref./Sursis",   label: "Refus & Sursis",                   icon: "fa-circle-xmark",      color: "#f97316" },
-  { key: "PD",              code: "PD",             label: "Permis de Démolir",                icon: "fa-hammer",            color: "#8b5cf6" },
-  { key: "CU",              code: "CU",             label: "Certificat d'Urbanisme",           icon: "fa-file-circle-check", color: "#14b8a6" },
-  { key: "DP",              code: "DP",             label: "Déclaration Préalable",            icon: "fa-file-lines",        color: "#3b82f6", hero: true },
-  { key: "DP_Division",     code: "DP Div.",        label: "DP Division",                      icon: "fa-scissors",          color: "#0369a1" },
-  { key: "PC",              code: "PC",             label: "Permis de Construire",             icon: "fa-building",          color: "#000091" },
-  { key: "Pcm",             code: "Pcm",            label: "Permis de Construire modificatif", icon: "fa-pen-to-square",     color: "#4338ca" },
-  { key: "PA",              code: "PA",             label: "Permis d'Aménager",                icon: "fa-map-location-dot",  color: "#0891b2" },
-  { key: "Pam",             code: "Pam",            label: "Permis d'Aménager modificatif",    icon: "fa-map-pin",           color: "#0e7490" },
-  { key: "Permis_ZA",       code: "ZA",             label: "Permis Zone Agricole",             icon: "fa-wheat-awn",         color: "#65a30d" },
+  { key: "CU",              code: "CU",            label: "Certificat d'Urbanisme",           icon: "fa-file-circle-check", color: "#14b8a6" },
+  { key: "DP",              code: "DP",            label: "Déclaration Préalable",            icon: "fa-file-lines",        color: "#3b82f6", hero: true },
+  { key: "DP_Division",     code: "DP Div.",       label: "DP Division",                      icon: "fa-scissors",          color: "#0369a1" },
 ];
 
 const DEBOUNCE_DELAY_MS   = 250;
@@ -51,7 +51,7 @@ const MONTHS_FR = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","A
 /* ══════════════════════════════════════
    TYPES
 ══════════════════════════════════════ */
-type DocType = { key: string; code: string; label: string; icon: string; color: string; hero?: boolean; };
+type DocType = { key: string; code: string; label: string; icon: string; color: string; hero?: boolean; highlight?: boolean; };
 type Commune = { id: number; nom: string; insee: string; arr: string; };
 type DecompteRow = { id: number; annee: number; mois: number; [key: string]: number; };
 type DecompteRowAll = DecompteRow & { communeId: number; };
@@ -555,8 +555,8 @@ export default function DecomptePage() {
     })}</>;
   }
 
-  function NumCell({ v }: { v: number }) {
-    return <td className={`col-num${v === 0 ? " zero" : ""}`}>{v}</td>;
+  function NumCell({ v, hl }: { v: number; hl?: boolean }) {
+    return <td className={`col-num${v === 0 ? " zero" : ""}${hl ? " col-highlight" : ""}`}>{v}</td>;
   }
 
   /* ── Saisie Tab ── */
@@ -693,7 +693,7 @@ export default function DecomptePage() {
       </div>
     );
     const a = dashYear; const m = dashMonth;
-    const colHeaders = DOC_TYPES.map(dt => <th key={dt.key} className="col-num">{dt.code}</th>);
+    const colHeaders = DOC_TYPES.map(dt => <th key={dt.key} className={`col-num${dt.highlight ? " col-highlight" : ""}`}>{dt.code}</th>);
 
     if (vue === "mois") {
       const row = decompteRows.find(r => r.annee === a && r.mois === m);
@@ -713,7 +713,7 @@ export default function DecomptePage() {
               <tbody>
                 <tr>
                   <td><strong>{moisLabel(m, a)}</strong>{isCurrent && <span style={{ color: "#000091", fontSize: ".65rem" }}> ◀ en cours</span>}</td>
-                  {DOC_TYPES.map(dt => <NumCell key={dt.key} v={counters[dt.key] || 0} />)}
+                  {DOC_TYPES.map(dt => <NumCell key={dt.key} v={counters[dt.key] || 0} hl={dt.highlight} />)}
                   <td className="col-num">{total || <span style={{ color: "#ccc" }}>0</span>}</td>
                 </tr>
               </tbody>
@@ -767,7 +767,7 @@ export default function DecomptePage() {
                     {r.isCurrent && !r.isTotal && <span style={{ color: "#000091", fontSize: ".65rem" }}> ◀ en cours</span>}
                     {!r.isTotal && <StatutChips sel={r.statut} />}
                   </td>
-                  {DOC_TYPES.map(dt => <NumCell key={dt.key} v={r.counters[dt.key] || 0} />)}
+                  {DOC_TYPES.map(dt => <NumCell key={dt.key} v={r.counters[dt.key] || 0} hl={dt.highlight} />)}
                   <td className="col-num">{totalCounters(r.counters) || <span style={{ color: "#ccc" }}>0</span>}</td>
                 </tr>
               ))}
@@ -841,7 +841,7 @@ export default function DecomptePage() {
     return (
       <div className="croise-wrap">
         <table className="croise-table">
-          <thead><tr><th>Commune</th>{DOC_TYPES.map(dt => <th key={dt.key} className="col-num" title={dt.label}>{dt.code}</th>)}<th className="col-num">Total</th></tr></thead>
+          <thead><tr><th>Commune</th>{DOC_TYPES.map(dt => <th key={dt.key} className={`col-num${dt.highlight ? " col-highlight" : ""}`} title={dt.label}>{dt.code}</th>)}<th className="col-num">Total</th></tr></thead>
           <tbody>
             {communeList.map(c => {
               const statuts = vue === "annee" && c.statutsAnnee?.length ? c.statutsAnnee[0].sels : (c.statut || []);
@@ -849,14 +849,14 @@ export default function DecomptePage() {
                 <tr key={c.id} className="croise-row-commune" style={{ cursor: "pointer" }} title={`Voir le détail de ${c.nom}`}
                   onClick={() => { const comm = communesById.get(c.id); if (comm) handleSelectCommune(comm); }}>
                   <td>{c.nom}<StatutChips sel={statuts} /></td>
-                  {DOC_TYPES.map(dt => <NumCell key={dt.key} v={c.counters[dt.key] || 0} />)}
+                  {DOC_TYPES.map(dt => <NumCell key={dt.key} v={c.counters[dt.key] || 0} hl={dt.highlight} />)}
                   <td className="col-num" style={{ fontWeight: 700 }}>{c.total}</td>
                 </tr>
               );
             })}
             <tr className="total-row">
               <td><strong>TOTAL</strong></td>
-              {DOC_TYPES.map(dt => <NumCell key={dt.key} v={totals[dt.key] || 0} />)}
+              {DOC_TYPES.map(dt => <NumCell key={dt.key} v={totals[dt.key] || 0} hl={dt.highlight} />)}
               <td className="col-num"><strong>{grandTotal}</strong></td>
             </tr>
           </tbody>

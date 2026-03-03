@@ -735,6 +735,20 @@ body {
 .croise-table tr.croise-row-commune:hover td { background: #eef0fb; }
 .croise-table tr.croise-row-commune:hover td:first-child { background: #e4e7f7; color: #000091; }
 
+/* Colonnes en surbrillance : PC, Pcm, PA, Pam, ZA */
+.croise-table th.col-highlight,
+.recap-table th.col-highlight {
+  background: #d8daf5;
+  color: #000091;
+}
+.croise-table td.col-highlight,
+.recap-table td.col-highlight {
+  background: #f0f0fc;
+}
+.croise-table tr.total-row td.col-highlight { background: #e8e8f8 !important; }
+.croise-table tr:hover td.col-highlight { background: #e4e5f7; }
+.croise-table tr.croise-row-commune:hover td.col-highlight { background: #dddff5; }
+
 .commune-detail-list { display: flex; flex-direction: column; gap: 0.5rem; }
 .commune-detail-item {
   background: #fff;

@@ -1245,6 +1245,9 @@
       cursor: pointer;
       box-shadow: none;
     }
+    input[type="date"].field-styled::-webkit-calendar-picker-indicator {
+      cursor: pointer;
+    }
     input[type="date"].field-styled:hover {
       background: var(--background-contrast-blue-france-hover);
     }

@@ -631,6 +631,7 @@
       font-weight: 400;
       color: var(--text-mention-grey);
       white-space: nowrap;
+      margin-left: 0.35rem;
     }
     .taille-seuil-hint:empty { display: none; }
 

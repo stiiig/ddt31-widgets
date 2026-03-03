@@ -1797,16 +1797,6 @@ export default function EnregistrementPage() {
                   </fieldset>
                 </div>
 
-                {/* Contrôle preview */}
-                {(selectedMotifs.length > 0 || selectedObjets.length > 0 || selectedCommune) && (
-                  <div style={{ display: "flex", gap: "1rem", alignItems: "center", padding: "0.75rem 1rem", background: "#f5f5fe", borderRadius: "0.375rem", border: "1px solid #e0e0f8" }}>
-                    <span style={{ fontSize: "0.8rem", color: "#555", fontWeight: 600 }}>Décision calculée :</span>
-                    <span style={{ fontWeight: 700, color: controlePreview.controle ? "#CE0500" : "#18753C" }}>
-                      {controlePreview.controle ? "Oui (contrôle)" : "Non (pas de contrôle)"}
-                    </span>
-                    <span style={{ fontSize: "0.8rem", color: "#666" }}>— {controlePreview.raison}</span>
-                  </div>
-                )}
               </section>
 
               {/* Action bar */}

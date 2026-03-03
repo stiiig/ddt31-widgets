@@ -31,9 +31,9 @@ const LOG_COLS = {
 const DOC_TYPES: DocType[] = [
   { key: "PD",              code: "PD",            label: "Permis de Démolir",                icon: "fa-hammer",            color: "#8b5cf6", highlight: true },
   { key: "PC",              code: "PC",            label: "Permis de Construire",             icon: "fa-building",          color: "#000091", highlight: true },
-  { key: "Pcm",             code: "Pcm",           label: "Permis de Construire modificatif", icon: "fa-pen-to-square",     color: "#4338ca", highlight: true },
+  { key: "Pcm",             code: "PCM",           label: "Permis de Construire modificatif", icon: "fa-pen-to-square",     color: "#4338ca", highlight: true },
   { key: "PA",              code: "PA",            label: "Permis d'Aménager",                icon: "fa-map-location-dot",  color: "#0891b2", highlight: true },
-  { key: "Pam",             code: "Pam",           label: "Permis d'Aménager modificatif",    icon: "fa-map-pin",           color: "#0e7490", highlight: true },
+  { key: "Pam",             code: "PAM",           label: "Permis d'Aménager modificatif",    icon: "fa-map-pin",           color: "#0e7490", highlight: true },
   { key: "Permis_ZA",       code: "ZA",            label: "Permis Zone Agricole",             icon: "fa-wheat-awn",         color: "#65a30d", highlight: true },
   { key: "Trans_Proro",     code: "Trans/Proro",   label: "Transmissions & Prorogations",     icon: "fa-arrows-rotate",     color: "#6366f1" },
   { key: "Retraits_Rejets", code: "Ret./Rej.",     label: "Retraits & Rejets",                icon: "fa-ban",               color: "#ef4444" },
@@ -159,6 +159,7 @@ export default function DecomptePage() {
   const decompteRowsRef  = useRef<DecompteRow[]>([]);
   const allRowsRef       = useRef<DecompteRowAll[]>([]);
   const communesByIdRef  = useRef<Map<number, Commune>>(new Map());
+  const communesRef      = useRef<Commune[]>([]);
   const logsRef          = useRef<LogEntry[]>([]);
   const logCountRef      = useRef(0);
 
@@ -170,6 +171,7 @@ export default function DecomptePage() {
   useEffect(() => { decompteRowsRef.current = decompteRows; }, [decompteRows]);
   useEffect(() => { allRowsRef.current = allRows; }, [allRows]);
   useEffect(() => { communesByIdRef.current = communesById; }, [communesById]);
+  useEffect(() => { communesRef.current = communes; }, [communes]);
   useEffect(() => { logsRef.current = logs; }, [logs]);
   useEffect(() => { logCountRef.current = logCount; }, [logCount]);
 
@@ -387,7 +389,7 @@ export default function DecomptePage() {
   function filterCommunes(q: string): Commune[] {
     const nq = norm(q);
     const isNum = /^\d{3,}$/.test(q.trim());
-    return communes.map(c => {
+    return communesRef.current.map(c => {
       const nn = norm(c.nom); const ni = norm(c.insee); let score = 0;
       if (isNum) { if (ni === nq) score=100; else if (ni.startsWith(nq)) score=80; else if (ni.includes(nq)) score=50; else return null; }
       else        { if (nn === nq) score=100; else if (nn.startsWith(nq)) score=80; else if (nn.includes(nq)) score=50; else return null; }

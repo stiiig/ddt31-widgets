@@ -29,7 +29,7 @@ const LOG_COLS = {
 };
 
 const DOC_TYPES: DocType[] = [
-  { key: "PD",              code: "PD",            label: "Permis de Démolir",                icon: "fa-hammer",            color: "#8b5cf6" },
+  { key: "PD",              code: "PD",            label: "Permis de Démolir",                icon: "fa-hammer",            color: "#8b5cf6", highlight: true },
   { key: "PC",              code: "PC",            label: "Permis de Construire",             icon: "fa-building",          color: "#000091", highlight: true },
   { key: "Pcm",             code: "Pcm",           label: "Permis de Construire modificatif", icon: "fa-pen-to-square",     color: "#4338ca", highlight: true },
   { key: "PA",              code: "PA",            label: "Permis d'Aménager",                icon: "fa-map-location-dot",  color: "#0891b2", highlight: true },

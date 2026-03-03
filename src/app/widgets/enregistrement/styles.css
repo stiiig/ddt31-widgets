@@ -329,10 +329,7 @@
       color: #6D28D9;
     }
     .commune-arr-badge--reglementation.is-visible { display: inline-flex; }
-    /* Quand badges visibles : décaler le padding-right de l'input */
-    .commune-input-wrap.has-arr .commune-input {
-      padding-right: 13rem; /* sel + log + arr + reglementation + clear */
-    }
+
 
     /* Wrapper input+clear du champ commune */
     .commune-input-wrap {
@@ -2242,9 +2239,6 @@ input[type="date"].is-empty::-webkit-datetime-edit-year-field{
 }
 .commune-arr-badge--reglementation.is-visible { display: inline-flex; }
 
-/* Décaler le padding-right de l'input quand badges visibles */
-.commune-input-wrap.has-arr .commune-input {
-  padding-right: 13rem;
-}
+
 
 

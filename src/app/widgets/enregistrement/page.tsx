@@ -1378,6 +1378,11 @@ export default function EnregistrementPage() {
   const currentSelections = selectedCommune
     ? getStatutSelection(statutsByKeyRef.current, selectedCommune.id, currentTrimestre, formReceptionPref)
     : [];
+  const visibleSelBadges = currentSelections.filter(s => SHOW_SELECTIONS.has(s));
+  // padding-right dynamique : 2.5rem (bouton ×) + N × 5.5rem par badge sélection
+  const communeInputPaddingRight = visibleSelBadges.length > 0
+    ? `${2.5 + visibleSelBadges.length * 5.5}rem`
+    : undefined;
 
   const communeConcernee = currentSelections.some(s => SHOW_SELECTIONS.has(s)) ||
     [...selectedMotifs, ...selectedObjets].some(item => {
@@ -1610,6 +1615,7 @@ export default function EnregistrementPage() {
                             className="field-styled commune-input"
                             placeholder="Sélectionner une commune…"
                             autoComplete="off"
+                            style={communeInputPaddingRight ? { paddingRight: communeInputPaddingRight } : undefined}
                             value={communeQuery}
                             onChange={e => {
                               setCommuneQuery(e.target.value);

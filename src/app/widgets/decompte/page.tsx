@@ -35,12 +35,12 @@ const DOC_TYPES: DocType[] = [
   { key: "PA",              code: "PA",            label: "Permis d'Aménager",                icon: "fa-map-location-dot",  color: "#0891b2", highlight: true },
   { key: "Pam",             code: "PAM",           label: "Permis d'Aménager modificatif",    icon: "fa-map-pin",           color: "#0e7490", highlight: true },
   { key: "Permis_ZA",       code: "ZA",            label: "Permis Zone Agricole",             icon: "fa-wheat-awn",         color: "#65a30d", highlight: true },
+  { key: "DP",              code: "DP",            label: "Déclaration Préalable",            icon: "fa-file-lines",        color: "#3b82f6", hero: true },
+  { key: "DP_Division",     code: "DP Div.",       label: "DP Division",                      icon: "fa-scissors",          color: "#0369a1" },
   { key: "Trans_Proro",     code: "Trans/Proro",   label: "Transmissions & Prorogations",     icon: "fa-arrows-rotate",     color: "#6366f1" },
   { key: "Retraits_Rejets", code: "Ret./Rej.",     label: "Retraits & Rejets",                icon: "fa-ban",               color: "#ef4444" },
   { key: "Refus_Sursis",    code: "Ref./Sursis",   label: "Refus & Sursis",                   icon: "fa-circle-xmark",      color: "#f97316" },
   { key: "CU",              code: "CU",            label: "Certificat d'Urbanisme",           icon: "fa-file-circle-check", color: "#14b8a6" },
-  { key: "DP",              code: "DP",            label: "Déclaration Préalable",            icon: "fa-file-lines",        color: "#3b82f6", hero: true },
-  { key: "DP_Division",     code: "DP Div.",       label: "DP Division",                      icon: "fa-scissors",          color: "#0369a1" },
 ];
 
 const DEBOUNCE_DELAY_MS   = 250;

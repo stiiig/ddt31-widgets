@@ -519,6 +519,7 @@ export default function EnregistrementPage() {
   const [statutsByKey, setStatutsByKey] = useState<Map<string, Statut>>(new Map());
   const statutsByKeyRef = useRef<Map<string, Statut>>(new Map());
   const [statutsStatus, setStatutsStatus] = useState<string>("unknown");
+  const statutsStatusRef = useRef<string>("unknown");
 
   // — Choices —
   const [typeChoices, setTypeChoices] = useState<string[]>([]);
@@ -691,6 +692,7 @@ export default function EnregistrementPage() {
     try {
       r = await api.fetchTable(TABLE_STATUT);
     } catch {
+      statutsStatusRef.current = "missing_table";
       setStatutsStatus("missing_table");
       return;
     }
@@ -699,7 +701,7 @@ export default function EnregistrementPage() {
     const colSel     = pickCol(r, ["Selection", "Sélection", "Sélection ?", "Selection ?"]);
     const colDebut   = pickCol(r, ["Debut", "Début", "Date_debut"]);
     const colFin     = pickCol(r, ["Fin", "Date_fin"]);
-    if (!colCommune || !colTrim || !colSel) { setStatutsStatus("missing_columns"); return; }
+    if (!colCommune || !colTrim || !colSel) { statutsStatusRef.current = "missing_columns"; setStatutsStatus("missing_columns"); return; }
 
     const newMap = new Map<string, Statut>();
     (r.id as number[]).forEach((_, i) => {
@@ -718,6 +720,7 @@ export default function EnregistrementPage() {
     });
     statutsByKeyRef.current = newMap;
     setStatutsByKey(newMap);
+    statutsStatusRef.current = "ok";
     setStatutsStatus("ok");
   }
 
@@ -790,7 +793,7 @@ export default function EnregistrementPage() {
         await loadActesColSet(docApi);
         await buildActesIndex(docApi);
 
-        const env = checkEnvironmentNow(statutsStatus, actesColSetRef.current);
+        const env = checkEnvironmentNow(statutsStatusRef.current, actesColSetRef.current);
         setEnvErrors(env.errors);
         setEnvWarnings(env.warnings);
       } catch (e: unknown) {

@@ -146,7 +146,7 @@
     .req { color: var(--text-default-error); font-weight: 700; }
 
     /* Réduction de la taille des labels et inputs */
-    .fr-label { font-size: 0.875rem; }
+    .fr-label { font-size: 0.8125rem; }
     .fr-input, .fr-select {
       font-size: 0.875rem;
       border-color: #000091 !important;

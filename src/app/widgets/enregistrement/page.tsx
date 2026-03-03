@@ -1494,6 +1494,34 @@ export default function EnregistrementPage() {
                   Informations générales
                 </h2>
                 <div className="fr-grid-row fr-grid-row--gutters">
+                  {/* Réception préf */}
+                  <div className="fr-col-12 fr-col-md-2">
+                    <div className={`date-group ctrl-group${errors.receptionPref ? " fr-input-group--error" : ""}`}>
+                      <label className="fr-label" htmlFor="receptionPref">
+                        <i className="fa-solid fa-calendar" /> Réception préf. <span className="req">*</span>
+                      </label>
+                      <input id="receptionPref" className={`field-styled${formReceptionPref ? "" : " is-empty"}`} type="date"
+                        value={formReceptionPref}
+                        onChange={e => { setFormReceptionPref(e.target.value); setErrors(p => ({ ...p, receptionPref: "" })); }}
+                        aria-invalid={errors.receptionPref ? "true" : undefined}
+                      />
+                      {errors.receptionPref && <p className="fr-error-text fr-mt-1v">{errors.receptionPref}</p>}
+                    </div>
+                  </div>
+                  {/* Visa mairie */}
+                  <div className="fr-col-12 fr-col-md-2">
+                    <div className={`date-group ctrl-group${errors.visaMairie ? " fr-input-group--error" : ""}`}>
+                      <label className="fr-label" htmlFor="visaMairie">
+                        <i className="fa-solid fa-calendar" /> Visa mairie <span className="req">*</span>
+                      </label>
+                      <input id="visaMairie" className={`field-styled${formVisaMairie ? "" : " is-empty"}`} type="date"
+                        value={formVisaMairie}
+                        onChange={e => { setFormVisaMairie(e.target.value); setErrors(p => ({ ...p, visaMairie: "" })); }}
+                        aria-invalid={errors.visaMairie ? "true" : undefined}
+                      />
+                      {errors.visaMairie && <p className="fr-error-text fr-mt-1v">{errors.visaMairie}</p>}
+                    </div>
+                  </div>
                   {/* Type */}
                   <div className="fr-col-12 fr-col-md-3">
                     <div className={`ctrl-group${errors.type ? " fr-input-group--error" : ""}`}>
@@ -1534,34 +1562,6 @@ export default function EnregistrementPage() {
                         hasError={!!errors.origine}
                       />
                       {errors.origine && <p className="fr-error-text fr-mt-1v">{errors.origine}</p>}
-                    </div>
-                  </div>
-                  {/* Visa mairie */}
-                  <div className="fr-col-12 fr-col-md-2">
-                    <div className={`date-group ctrl-group${errors.visaMairie ? " fr-input-group--error" : ""}`}>
-                      <label className="fr-label" htmlFor="visaMairie">
-                        <i className="fa-solid fa-calendar" /> Date visa mairie <span className="req">*</span>
-                      </label>
-                      <input id="visaMairie" className={`field-styled${formVisaMairie ? "" : " is-empty"}`} type="date"
-                        value={formVisaMairie}
-                        onChange={e => { setFormVisaMairie(e.target.value); setErrors(p => ({ ...p, visaMairie: "" })); }}
-                        aria-invalid={errors.visaMairie ? "true" : undefined}
-                      />
-                      {errors.visaMairie && <p className="fr-error-text fr-mt-1v">{errors.visaMairie}</p>}
-                    </div>
-                  </div>
-                  {/* Réception préf */}
-                  <div className="fr-col-12 fr-col-md-2">
-                    <div className={`date-group ctrl-group${errors.receptionPref ? " fr-input-group--error" : ""}`}>
-                      <label className="fr-label" htmlFor="receptionPref">
-                        <i className="fa-solid fa-calendar" /> Date réception préf. <span className="req">*</span>
-                      </label>
-                      <input id="receptionPref" className={`field-styled${formReceptionPref ? "" : " is-empty"}`} type="date"
-                        value={formReceptionPref}
-                        onChange={e => { setFormReceptionPref(e.target.value); setErrors(p => ({ ...p, receptionPref: "" })); }}
-                        aria-invalid={errors.receptionPref ? "true" : undefined}
-                      />
-                      {errors.receptionPref && <p className="fr-error-text fr-mt-1v">{errors.receptionPref}</p>}
                     </div>
                   </div>
                   {/* Nom projet */}

@@ -2177,4 +2177,74 @@ input[type="date"].is-empty::-webkit-datetime-edit-year-field{
   background: #e0e0e0;
 }
 
+/* ================= BADGES COMMUNE (arrondissement + sélection trimestrielle) ================= */
+
+/* Conteneur des badges superposés dans le champ commune */
+.commune-input-badges {
+  display: none;
+  align-items: center;
+  gap: 0.25rem;
+  position: absolute;
+  right: 2.5rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.commune-input-wrap.has-arr .commune-input-badges { display: flex; }
+
+/* Badge de base (arrondissement) */
+.commune-arr-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.45rem;
+  border-radius: 2px;
+  background: var(--background-contrast-blue-france);
+  border: 1px solid var(--border-default-grey);
+  color: var(--text-title-grey);
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Badge logements */
+.commune-arr-badge--log {
+  display: none;
+  background: #DBEAFE;
+  border-color: #BFDBFE;
+  color: #1E40AF;
+}
+.commune-arr-badge--log.is-visible { display: inline-flex; }
+
+/* Badge sélection trimestrielle (Fixe / Ciblée / Rotation) */
+.commune-arr-badge--sel {
+  background: #EFE0FF;
+  border-color: #D8B4FE;
+  color: #6B21A8;
+}
+.commune-arr-badge--sel.is-visible { display: inline-flex; }
+.commune-arr-badge--sel.sel-fixe    { background: #EFE0FF; border-color: #D8B4FE; color: #6B21A8; }
+.commune-arr-badge--sel.sel-ciblee  { background: #FFF0D9; border-color: #FDE68A; color: #92400E; }
+.commune-arr-badge--sel.sel-rotation { background: #FDE8FC; border-color: #F0ABFC; color: #86198F; }
+
+/* Badge enjeu */
+.commune-arr-badge--enjeu {
+  background: #FEE2E2;
+  border-color: #FECACA;
+  color: #991B1B;
+}
+
+/* Badge réglementation */
+.commune-arr-badge--reglementation {
+  display: none;
+  background: #F3F0FF;
+  border-color: #E9D5FF;
+  color: #6D28D9;
+}
+.commune-arr-badge--reglementation.is-visible { display: inline-flex; }
+
+/* Décaler le padding-right de l'input quand badges visibles */
+.commune-input-wrap.has-arr .commune-input {
+  padding-right: 13rem;
+}
+
 

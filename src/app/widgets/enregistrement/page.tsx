@@ -1737,9 +1737,9 @@ export default function EnregistrementPage() {
                   <fieldset className="fr-fieldset" aria-label="Objets d'autorisation">
                     <div className="fr-fieldset__content motif-grid-2col">
                       {[
-                        { key: "ZN", kind: "motif" as const },
+                        { key: "ZN", kind: "motif" as const, label: "Zone naturelle" },
                         { key: "ERP 1/2/3", kind: "objet" as const, label: "ERP cat. 1 à 3" },
-                        { key: "ZA", kind: "motif" as const },
+                        { key: "ZA", kind: "motif" as const, label: "Zone agricole" },
                         { key: "ERP 4/5", kind: "objet" as const, label: "ERP cat. 4 et 5" },
                         { key: "EE", kind: "objet" as const, label: "Évaluation environnementale" },
                         { key: "Signalé", kind: "objet" as const },

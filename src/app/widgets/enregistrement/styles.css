@@ -654,6 +654,7 @@
       font-weight: 700;
       white-space: nowrap;
       flex-shrink: 0;
+      margin-right: 0.4rem;
       transition: background 0.15s, color 0.15s;
     }
     /* Badge seul (Signalé, Aléatoire, Site classé) : texte légèrement plus grand */

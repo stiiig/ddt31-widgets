@@ -576,6 +576,7 @@
       min-width: 0;
     }
     .motif-item__label {
+      font-size: 0.8125rem !important; /* 13px — override DSFR fr-fieldset .fr-label */
       font-weight: 600;
       margin-bottom: 0;
       cursor: pointer;

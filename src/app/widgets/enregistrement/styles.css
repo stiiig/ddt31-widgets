@@ -361,8 +361,7 @@
       background: white;
     }
     .commune-input::placeholder {
-      color: var(--text-mention-grey);
-      font-style: italic;
+      color: #999;
       font-weight: 400;
     }
     /* Quand une commune est saisie/sélectionnée : même style que la valeur des dropdowns */
@@ -1258,8 +1257,7 @@
       border-color: var(--text-action-high-blue-france);
     }
     input[type="date"].field-styled.is-empty {
-      color: var(--text-mention-grey);
-      font-style: italic;
+      color: #999;
       font-weight: 400;
     }
     input[type="date"].field-styled.is-empty::-webkit-datetime-edit,
@@ -1267,8 +1265,7 @@
     input[type="date"].field-styled.is-empty::-webkit-datetime-edit-month-field,
     input[type="date"].field-styled.is-empty::-webkit-datetime-edit-day-field,
     input[type="date"].field-styled.is-empty::-webkit-datetime-edit-year-field {
-      color: var(--text-mention-grey);
-      font-style: italic;
+      color: #999;
     }
 
     /* Restyling champs texte et textarea */
@@ -1343,16 +1340,14 @@
 /* Dates (input[type="date"]) : style "placeholder" (état vide) en gris léger + italique
    NB: les navigateurs n'exposent pas toujours un vrai ::placeholder pour type=date. */
 input[type="date"].is-empty{
-  color: var(--text-mention-grey);
-  font-style: italic;
+  color: #999;
 }
 input[type="date"].is-empty::-webkit-datetime-edit,
 input[type="date"].is-empty::-webkit-datetime-edit-text,
 input[type="date"].is-empty::-webkit-datetime-edit-month-field,
 input[type="date"].is-empty::-webkit-datetime-edit-day-field,
 input[type="date"].is-empty::-webkit-datetime-edit-year-field{
-  color: var(--text-mention-grey);
-  font-style: italic;
+  color: #999;
 }
 
 

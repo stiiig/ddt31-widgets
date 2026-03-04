@@ -439,6 +439,9 @@ export default function StrategiePage() {
                         style={{ fontSize: "0.6rem", opacity: 0.55, marginLeft: "0.15rem" }} />
                     </th>
                     <th>Arrondissement</th>
+                    <th>Sélection</th>
+                    <th>Début</th>
+                    <th>Fin</th>
                     <th
                       className={`strat-th-sortable${sortBy === "periode" ? " strat-th-sorted" : ""}`}
                       onClick={() => setSortBy("periode")}
@@ -448,9 +451,6 @@ export default function StrategiePage() {
                       <i className={`fa-solid ${sortBy === "periode" ? "fa-arrow-up-1-9" : "fa-sort"}`}
                         style={{ fontSize: "0.6rem", opacity: 0.55, marginLeft: "0.15rem" }} />
                     </th>
-                    <th>Sélection</th>
-                    <th>Début</th>
-                    <th>Fin</th>
                     <th>Explications</th>
                   </tr>
                 </thead>
@@ -466,11 +466,6 @@ export default function StrategiePage() {
                         <td className="strat-td-arr">
                           {commune?.arr || "—"}
                         </td>
-                        <td className="strat-td-periode">
-                          {periodeLabel
-                            ? <span className="period-chip">{periodeLabel}</span>
-                            : <span style={{ color: "#bbb" }}>—</span>}
-                        </td>
                         <td>
                           <div className="strat-td-sel">
                             {row.selection.length > 0
@@ -483,6 +478,11 @@ export default function StrategiePage() {
                         </td>
                         <td className="strat-td-date">{formatDate(row.debut)}</td>
                         <td className="strat-td-date">{formatDate(row.fin)}</td>
+                        <td className="strat-td-periode">
+                          {periodeLabel
+                            ? <span className="period-chip">{periodeLabel}</span>
+                            : <span style={{ color: "#bbb" }}>—</span>}
+                        </td>
                         <td className="strat-td-expl">{row.explications || ""}</td>
                       </tr>
                     );

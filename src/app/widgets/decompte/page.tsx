@@ -52,7 +52,7 @@ const MONTHS_FR = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","A
    TYPES
 ══════════════════════════════════════ */
 type DocType = { key: string; code: string; label: string; icon: string; color: string; hero?: boolean; highlight?: boolean; };
-type Commune = { id: number; nom: string; insee: string; arr: string; };
+type Commune = { id: number; nom: string; insee: string; arr: string; papier: boolean; };
 type DecompteRow = { id: number; annee: number; mois: number; [key: string]: number; };
 type DecompteRowAll = DecompteRow & { communeId: number; };
 type Statut = { selection: string[]; debut: Date | null; fin: Date | null; };
@@ -228,18 +228,21 @@ export default function DecomptePage() {
   /* ── Chargement données ── */
   async function loadCommunes(api: GristDocAPI) {
     const tbl = await api.fetchTable(TABLE_COMMUNES);
-    const colNom   = pickCol(tbl, [COM.Nom, "Nom_commune", "Nom"]);
-    const colInsee = pickCol(tbl, [COM.INSEE, "Code_INSEE", "INSEE"]);
-    const colArr   = pickCol(tbl, [COM.ARR, "Arrondissement"]);
+    const colNom    = pickCol(tbl, [COM.Nom, "Nom_commune", "Nom"]);
+    const colInsee  = pickCol(tbl, [COM.INSEE, "Code_INSEE", "INSEE"]);
+    const colArr    = pickCol(tbl, [COM.ARR, "Arrondissement"]);
+    const colPapier = pickCol(tbl, ["Papier", "papier"]);
     if (!colNom) { showToast("error", "Configuration", "Colonne 'Nom commune' introuvable dans la table Communes."); return; }
-    const ids = (tbl.id as number[]) || [];
-    const noms   = (colNom   ? (tbl[colNom]   as string[]) : []) || [];
-    const insees = (colInsee ? (tbl[colInsee] as string[]) : []) || [];
-    const arrs   = (colArr   ? (tbl[colArr]   as string[]) : []) || [];
+    const ids     = (tbl.id as number[]) || [];
+    const noms    = (colNom    ? (tbl[colNom]    as string[])  : []) || [];
+    const insees  = (colInsee  ? (tbl[colInsee]  as string[])  : []) || [];
+    const arrs    = (colArr    ? (tbl[colArr]    as string[])  : []) || [];
+    const papiers = (colPapier ? (tbl[colPapier] as unknown[]) : []) || [];
     const communesList: Commune[] = [];
     const byId = new Map<number, Commune>();
     ids.forEach((id, i) => {
-      const c: Commune = { id, nom: (noms[i] ?? "").toString().trim(), insee: (insees[i] ?? "").toString().trim(), arr: (arrs[i] ?? "").toString().trim() };
+      const papier = colPapier ? Boolean(papiers[i]) : false;
+      const c: Commune = { id, nom: (noms[i] ?? "").toString().trim(), insee: (insees[i] ?? "").toString().trim(), arr: (arrs[i] ?? "").toString().trim(), papier };
       if (c.nom) { communesList.push(c); byId.set(id, c); }
     });
     communesList.sort((a, b) => a.nom.localeCompare(b.nom, "fr"));
@@ -843,8 +846,8 @@ export default function DecomptePage() {
 
     // Totaux par tag (seulement si au moins une commune avec ce tag)
     const TAG_DEFS = [
-      { tag: "Rotation", cls: "tag-total-row--rotation" },
       { tag: "Fixe",     cls: "tag-total-row--fixe"     },
+      { tag: "Rotation", cls: "tag-total-row--rotation" },
       { tag: "Ciblée",   cls: "tag-total-row--ciblee"   },
     ];
     const tagTotals = TAG_DEFS.map(({ tag, cls }) => {
@@ -858,6 +861,21 @@ export default function DecomptePage() {
       const total = filtered.reduce((s, c) => s + c.total, 0);
       return { tag, cls, counters, total };
     }).filter(Boolean);
+
+    // Total combiné Fixe+Rotation+Ciblée
+    const combinedFiltered = communeList.filter(c => {
+      const sels = vue === "annee" && c.statutsAnnee?.length ? c.statutsAnnee[0].sels : (c.statut || []);
+      return sels.some(s => s === "Fixe" || s === "Rotation" || s === "Ciblée");
+    });
+    const combinedCounters = Object.fromEntries(DOC_TYPES.map(dt => [dt.key, 0]));
+    combinedFiltered.forEach(c => DOC_TYPES.forEach(dt => { combinedCounters[dt.key] += c.counters[dt.key]; }));
+    const combinedTotal = combinedFiltered.reduce((s, c) => s + c.total, 0);
+
+    // Total Papier
+    const papierFiltered = communeList.filter(c => communesById.get(c.id)?.papier === true);
+    const papierCounters = Object.fromEntries(DOC_TYPES.map(dt => [dt.key, 0]));
+    papierFiltered.forEach(c => DOC_TYPES.forEach(dt => { papierCounters[dt.key] += c.counters[dt.key]; }));
+    const papierTotal = papierFiltered.reduce((s, c) => s + c.total, 0);
 
     return (
       <div className="croise-wrap">
@@ -888,6 +906,20 @@ export default function DecomptePage() {
                 <td className="col-num col-total"><strong>{tt!.total}</strong></td>
               </tr>
             ))}
+            {combinedFiltered.length > 0 && (
+              <tr className="combined-total-row">
+                <td><strong>Total Fixe+Rotation+Ciblée</strong></td>
+                {DOC_TYPES.map(dt => <NumCell key={dt.key} v={combinedCounters[dt.key] || 0} hl={dt.highlight} />)}
+                <td className="col-num col-total"><strong>{combinedTotal}</strong></td>
+              </tr>
+            )}
+            {papierFiltered.length > 0 && (
+              <tr className="papier-total-row">
+                <td><strong>Total Papier</strong></td>
+                {DOC_TYPES.map(dt => <NumCell key={dt.key} v={papierCounters[dt.key] || 0} hl={dt.highlight} />)}
+                <td className="col-num col-total"><strong>{papierTotal}</strong></td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

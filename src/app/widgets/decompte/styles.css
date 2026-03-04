@@ -783,6 +783,18 @@ body {
 .croise-table tr.tag-total-row--fixe td.col-total     { background: #fce47a; color: #713f12; }
 .croise-table tr.tag-total-row--ciblee td.col-total   { background: #ffa5a5; color: #991b1b; }
 
+/* Ligne Total combiné Fixe+Rotation+Ciblée */
+.croise-table tr.combined-total-row td               { font-weight: 700; background: #e4e4e4; color: #222; }
+.croise-table tr.combined-total-row td.col-highlight { background: #d4d0ea; }
+.croise-table tr.combined-total-row td.col-num       { color: #222; }
+.croise-table tr.combined-total-row td.col-total     { background: #c4c4c4; color: #111; }
+
+/* Ligne Total Papier (couleur normale) */
+.croise-table tr.papier-total-row td               { font-weight: 700; background: #f5f5fe; color: #000091; }
+.croise-table tr.papier-total-row td.col-highlight { background: #ede9fe; }
+.croise-table tr.papier-total-row td.col-num       { color: #000091; }
+.croise-table tr.papier-total-row td.col-total     { background: #c5c5e8; color: #000091; }
+
 .commune-detail-list { display: flex; flex-direction: column; gap: 0.5rem; }
 .commune-detail-item {
   background: #fff;

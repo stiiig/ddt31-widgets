@@ -8,67 +8,95 @@ import type { GristDocAPI } from "./meta";
 export type GristUser = { name: string; email: string };
 
 /* ─────────────────────────────────────────────────────────────────
+   tryDecodeJwt
+   Si le token Grist est un JWT, on peut décoder le payload (base64url)
+   sans aucun appel réseau ni CORS.
+───────────────────────────────────────────────────────────────── */
+function tryDecodeJwt(token: string): GristUser | null {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+    // base64url → base64 standard
+    const b64  = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+    const json = atob(b64);
+    const payload = JSON.parse(json);
+    const name  = payload.name  || payload.email || payload.sub || "";
+    const email = payload.email || "";
+    if (name) return { name, email };
+  } catch {
+    // pas un JWT valide
+  }
+  return null;
+}
+
+/* ─────────────────────────────────────────────────────────────────
    fetchGristUser
    Tente plusieurs méthodes pour récupérer l'utilisateur courant.
-   Les console.warn permettent de diagnostiquer en cas d'échec.
+   Tout est client-side (postMessage ou décodage JWT) — pas de fetch
+   cross-origin. L'app est un export statique GitHub Pages : les
+   routes API Next.js ne sont pas disponibles.
 ───────────────────────────────────────────────────────────────── */
 async function fetchGristUser(setGristUser: (u: GristUser) => void) {
   const gristRaw = (window as any).grist;
   const rawDocApi = gristRaw?.docApi;
 
-  // ── Méthode 1 : getAccessToken → proxy Next.js → REST /api/profile ──
-  // On passe par /api/grist-profile (même domaine) pour éviter le CORS.
+  // ── Méthode 1 : grist.getUserProfile() — postMessage vers Grist ──
+  // Disponible dans les versions récentes du plugin API Grist.
+  if (typeof gristRaw?.getUserProfile === "function") {
+    try {
+      const profile = await gristRaw.getUserProfile();
+      const name  = profile?.name  || profile?.email || "";
+      const email = profile?.email || "";
+      if (name) {
+        setGristUser({ name, email });
+        return;
+      }
+      console.warn("[DDT31] getUserProfile() vide :", profile);
+    } catch (e) {
+      console.warn("[DDT31] Méthode 1 (getUserProfile) échouée :", e);
+    }
+  } else {
+    console.warn("[DDT31] grist.getUserProfile n'est pas disponible");
+  }
+
+  // ── Méthode 2 : getAccessToken → décodage JWT (zéro réseau) ──────
+  // Le token retourné est souvent un JWT signé dont le payload contient
+  // name / email sans qu'on ait besoin d'appeler l'API REST.
   if (typeof rawDocApi?.getAccessToken === "function") {
     try {
       const tokenResult = await rawDocApi.getAccessToken({ readOnly: true });
-      const { token, baseUrl } = tokenResult ?? {};
-
-      if (token && baseUrl) {
-        const resp = await fetch("/api/grist-profile", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token, baseUrl }),
-        });
-        if (resp.ok) {
-          const p = await resp.json();
-          const name = p.name || p.email || "";
-          if (name) {
-            setGristUser({ name, email: p.email || "" });
-            return;
-          }
-          console.warn("[DDT31] /api/grist-profile OK mais name/email vides :", p);
-        } else {
-          console.warn("[DDT31] /api/grist-profile status :", resp.status);
+      const { token } = tokenResult ?? {};
+      if (token) {
+        const user = tryDecodeJwt(token);
+        if (user) {
+          setGristUser(user);
+          return;
         }
+        console.warn("[DDT31] JWT décodé mais sans name/email :", token.slice(0, 40) + "...");
       } else {
         console.warn("[DDT31] getAccessToken a retourné :", tokenResult);
       }
     } catch (e) {
-      console.warn("[DDT31] Méthode 1 (proxy grist-profile) échouée :", e);
+      console.warn("[DDT31] Méthode 2 (JWT decode) échouée :", e);
     }
   } else {
     console.warn("[DDT31] grist.docApi.getAccessToken n'est pas disponible");
   }
 
-  // ── Méthode 2 : getUserTeams → owner de l'org personnelle ───────
+  // ── Méthode 3 : getUserTeams → owner de l'org personnelle ────────
   if (typeof gristRaw?.getUserTeams === "function") {
     try {
       const teams = await gristRaw.getUserTeams();
-      // getUserTeams retourne un tableau d'orgs ; l'org personnelle est
-      // celle dont l'utilisateur courant est propriétaire.
       const orgs: any[] = Array.isArray(teams) ? teams : (teams?.orgs ?? []);
       for (const org of orgs) {
         if (org?.owner?.name) {
-          setGristUser({
-            name:  org.owner.name,
-            email: org.owner.email || "",
-          });
+          setGristUser({ name: org.owner.name, email: org.owner.email || "" });
           return;
         }
       }
       console.warn("[DDT31] getUserTeams : aucun owner.name trouvé :", orgs);
     } catch (e) {
-      console.warn("[DDT31] Méthode 2 (getUserTeams) échouée :", e);
+      console.warn("[DDT31] Méthode 3 (getUserTeams) échouée :", e);
     }
   } else {
     console.warn("[DDT31] grist.getUserTeams n'est pas disponible");

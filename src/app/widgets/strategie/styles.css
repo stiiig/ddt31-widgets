@@ -171,6 +171,7 @@ body {
 .tag-filter-btn--fixe.active     { background: #fef9c3; border-color: #fde047; color: #713f12; opacity: 1; }
 .tag-filter-btn--ciblee.active   { background: #ffe4e4; border-color: #ff9898; color: #b91c1c; opacity: 1; }
 .tag-filter-btn--rotation.active { background: #ffedd5; border-color: #fdba74; color: #9a3412; opacity: 1; }
+.arr-filter-btn.active           { background: #e8e8f8; border-color: #000091; color: #000091; opacity: 1; }
 
 /* ── Statut chips (inline dans la table) ── */
 .statut-chip {

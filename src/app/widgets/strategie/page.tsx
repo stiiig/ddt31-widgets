@@ -120,14 +120,16 @@ export default function StrategiePage() {
   const docApiRef  = useRef<GristDocAPI | null>(null);
 
   // ── State ──
-  const [communes,   setCommunes]   = useState<Map<number, Commune>>(new Map());
-  const [statuts,    setStatuts]    = useState<StatutRow[]>([]);
-  const [loading,    setLoading]    = useState(true);
-  const [vue,        setVue]        = useState<VueType>("mois");
-  const [year,       setYear]       = useState(() => new Date().getFullYear());
-  const [month,      setMonth]      = useState(() => new Date().getMonth() + 1);
-  const [tagFilters, setTagFilters] = useState<Set<string>>(new Set(TAGS_FILTRES));
-  const [toasts,     setToasts]     = useState<Toast[]>([]);
+  const [communes,       setCommunes]       = useState<Map<number, Commune>>(new Map());
+  const [statuts,        setStatuts]        = useState<StatutRow[]>([]);
+  const [arrondissements,setArrondissements]= useState<string[]>([]);
+  const [loading,        setLoading]        = useState(true);
+  const [vue,            setVue]            = useState<VueType>("mois");
+  const [year,           setYear]           = useState(() => new Date().getFullYear());
+  const [month,          setMonth]          = useState(() => new Date().getMonth() + 1);
+  const [tagFilters,     setTagFilters]     = useState<Set<string>>(new Set(TAGS_FILTRES));
+  const [arrFilters,     setArrFilters]     = useState<Set<string>>(new Set());
+  const [toasts,         setToasts]         = useState<Toast[]>([]);
 
   // ── Refs ──
   useEffect(() => { docApiRef.current = docApi; }, [docApi]);
@@ -173,6 +175,13 @@ export default function StrategiePage() {
       });
       setCommunes(comMap);
 
+      // Calcule la liste triée des arrondissements uniques
+      const arrSet = new Set<string>();
+      comMap.forEach(c => { if (c.arr) arrSet.add(c.arr); });
+      const arrList = Array.from(arrSet).sort((a, b) => a.localeCompare(b, "fr", { numeric: true }));
+      setArrondissements(arrList);
+      setArrFilters(new Set(arrList)); // tous cochés par défaut
+
       // Table Communes_Statut
       const statTable = await api.fetchTable(TABLE_STATUT);
       const comColS = pickCol(statTable as Record<string, unknown>, [STAT_COLS.Commune, "Commune", "commune"]);
@@ -185,10 +194,10 @@ export default function StrategiePage() {
       const rows: StatutRow[] = sIds.map((id: number, i: number) => ({
         id,
         communeId:    comColS ? Number((statTable as Record<string, unknown[]>)[comColS][i] ?? 0) : 0,
-        selection:    selCol  ? cleanSelection((statTable as Record<string, unknown[]>)[selCol][i])         : [],
-        debut:        debCol  ? parseDate((statTable as Record<string, unknown[]>)[debCol][i])              : null,
-        fin:          finCol  ? parseDate((statTable as Record<string, unknown[]>)[finCol][i])              : null,
-        explications: expCol  ? String((statTable as Record<string, unknown[]>)[expCol][i] ?? "")          : "",
+        selection:    selCol  ? cleanSelection((statTable as Record<string, unknown[]>)[selCol][i])    : [],
+        debut:        debCol  ? parseDate((statTable as Record<string, unknown[]>)[debCol][i])         : null,
+        fin:          finCol  ? parseDate((statTable as Record<string, unknown[]>)[finCol][i])         : null,
+        explications: expCol  ? String((statTable as Record<string, unknown[]>)[expCol][i] ?? "")     : "",
       }));
       setStatuts(rows);
     } catch (e) {
@@ -220,17 +229,23 @@ export default function StrategiePage() {
   function filteredStatuts(): StatutRow[] {
     const { start, end } = periodBounds(vue, year, month);
     return statuts.filter(row => {
-      // Chevauchement de période : debut <= end ET (fin absent OU fin >= start)
+      // Chevauchement de période
       const debutOk = !row.debut || row.debut <= end;
       const finOk   = !row.fin   || row.fin   >= start;
       if (!debutOk || !finOk) return false;
-      // Filtre tags : au moins un tag sélectionné correspond
-      if (tagFilters.size === 0) return true;
-      return row.selection.some(s => tagFilters.has(s));
+      // Filtre tags
+      if (tagFilters.size === 0) return false;
+      if (!row.selection.some(s => tagFilters.has(s))) return false;
+      // Filtre arrondissement
+      if (arrFilters.size > 0 && arrondissements.length > 0) {
+        const arr = communes.get(row.communeId)?.arr || "";
+        if (!arrFilters.has(arr)) return false;
+      }
+      return true;
     });
   }
 
-  // ── Toggle tag filter ──
+  // ── Toggles filtres ──
   function toggleTag(tag: string) {
     setTagFilters(prev => {
       const next = new Set(prev);
@@ -239,19 +254,25 @@ export default function StrategiePage() {
     });
   }
 
-  // ── Chip classe ──
+  function toggleArr(arr: string) {
+    setArrFilters(prev => {
+      const next = new Set(prev);
+      if (next.has(arr)) next.delete(arr); else next.add(arr);
+      return next;
+    });
+  }
+
+  // ── Classes CSS ──
   function selChipClass(s: string): string {
-    if (s === "Fixe")       return "statut-chip statut-chip--fixe";
-    if (s === "Ciblée")     return "statut-chip statut-chip--ciblee";
-    if (s === "Rotation")   return "statut-chip statut-chip--rotation";
+    if (s === "Fixe")     return "statut-chip statut-chip--fixe";
+    if (s === "Ciblée")   return "statut-chip statut-chip--ciblee";
+    if (s === "Rotation") return "statut-chip statut-chip--rotation";
     return "statut-chip statut-chip--nonciblee";
   }
 
-  // ── Tag filter button class ──
   function tagBtnClass(tag: string, active: boolean): string {
-    const base = "tag-filter-btn";
     const color = tag === "Fixe" ? "tag-filter-btn--fixe" : tag === "Ciblée" ? "tag-filter-btn--ciblee" : "tag-filter-btn--rotation";
-    return `${base} ${color}${active ? " active" : ""}`;
+    return `tag-filter-btn ${color}${active ? " active" : ""}`;
   }
 
   const label = periodLabel(vue, year, month);
@@ -267,10 +288,7 @@ export default function StrategiePage() {
           <div className="app-header__logo">
             <i className="fa-solid fa-landmark" />DDT 31
           </div>
-          <div className="app-header__title">
-            <i className="fa-solid fa-map-location-dot" style={{ marginRight: "0.5rem", opacity: 0.85 }} />
-            Stratégie
-          </div>
+          <div className="app-header__title">Stratégie</div>
         </header>
 
         {/* ── Content ── */}
@@ -280,7 +298,7 @@ export default function StrategiePage() {
           <div className="dashboard-toolbar">
             <span className="dashboard-toolbar__period">Période&nbsp;:</span>
 
-            {/* Navigation mois/trim/année */}
+            {/* Navigation */}
             <div className="dash-nav">
               <button className="dash-nav-btn" type="button" aria-label="Période précédente"
                 onClick={() => navigatePeriod(-1)}>
@@ -306,7 +324,6 @@ export default function StrategiePage() {
 
             {/* Filtre tags */}
             <div className="tag-filter-bar">
-              <span className="tag-filter-label">Tags :</span>
               {TAGS_FILTRES.map(tag => (
                 <button key={tag} type="button"
                   className={tagBtnClass(tag, tagFilters.has(tag))}
@@ -319,10 +336,29 @@ export default function StrategiePage() {
               ))}
             </div>
 
+            {/* Filtre arrondissements */}
+            {arrondissements.length > 0 && (
+              <div className="tag-filter-bar">
+                {arrondissements.map(arr => {
+                  const active = arrFilters.has(arr);
+                  return (
+                    <button key={arr} type="button"
+                      className={`tag-filter-btn arr-filter-btn${active ? " active" : ""}`}
+                      onClick={() => toggleArr(arr)}>
+                      {active
+                        ? <i className="fa-solid fa-check" />
+                        : <i className="fa-solid fa-xmark" style={{ opacity: 0.5 }} />}
+                      {arr}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+
             {/* Compteur */}
             {!loading && (
               <span className="strat-count">
-                <strong>{rows.length}</strong> ligne{rows.length !== 1 ? "s" : ""}
+                <strong>{rows.length}</strong> commune{rows.length !== 1 ? "s" : ""}
               </span>
             )}
           </div>
@@ -345,7 +381,7 @@ export default function StrategiePage() {
                 <thead>
                   <tr>
                     <th>Commune</th>
-                    <th>ARR</th>
+                    <th>Arrondissement</th>
                     <th>Sélection</th>
                     <th>Début</th>
                     <th>Fin</th>

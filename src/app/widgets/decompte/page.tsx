@@ -644,7 +644,7 @@ export default function DecomptePage() {
             {paperMode && editable && (
               <div className="papier-mode-banner">
                 <i className="fa-solid fa-file-circle-check" />
-                <span>Mode Papier activé — chaque acte ajouté sera aussi comptabilisé en Papier</span>
+                <span>Mode Papier activé — chaque acte ajouté sera comptabilisé en Papier</span>
                 <button type="button" className="papier-mode-banner__close" onClick={() => setPaperMode(false)} aria-label="Désactiver">
                   <i className="fa-solid fa-xmark" />
                 </button>

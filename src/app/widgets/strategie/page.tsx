@@ -127,11 +127,12 @@ export default function StrategiePage() {
   const [statuts,        setStatuts]        = useState<StatutRow[]>([]);
   const [arrondissements,setArrondissements]= useState<string[]>([]);
   const [loading,        setLoading]        = useState(true);
-  const [vue,            setVue]            = useState<VueType>("mois");
+  const [vue,            setVue]            = useState<VueType>("trimestre");
   const [year,           setYear]           = useState(() => new Date().getFullYear());
   const [month,          setMonth]          = useState(() => new Date().getMonth() + 1);
   const [tagFilters,     setTagFilters]     = useState<Set<string>>(new Set(TAGS_FILTRES));
   const [arrFilters,     setArrFilters]     = useState<Set<string>>(new Set());
+  const [sortBy,         setSortBy]         = useState<"periode" | "commune">("periode");
   const [toasts,         setToasts]         = useState<Toast[]>([]);
 
   // ── Refs ──
@@ -272,6 +273,33 @@ export default function StrategiePage() {
     });
   }
 
+  // ── Période d'une ligne (trimestre du début) ──
+  function rowPeriodeLabel(row: StatutRow): string {
+    if (!row.debut) return "";
+    const t = Math.floor(row.debut.getMonth() / 3) + 1;
+    return `T${t} ${row.debut.getFullYear()}`;
+  }
+
+  function rowPeriodeSortKey(row: StatutRow): number {
+    return row.debut ? row.debut.getTime() : Infinity;
+  }
+
+  function sortedRows(filtered: StatutRow[]): StatutRow[] {
+    return [...filtered].sort((a, b) => {
+      if (sortBy === "commune") {
+        const na = communes.get(a.communeId)?.nom || "";
+        const nb = communes.get(b.communeId)?.nom || "";
+        return na.localeCompare(nb, "fr");
+      }
+      // tri par période de début, puis commune
+      const diff = rowPeriodeSortKey(a) - rowPeriodeSortKey(b);
+      if (diff !== 0) return diff;
+      const na = communes.get(a.communeId)?.nom || "";
+      const nb = communes.get(b.communeId)?.nom || "";
+      return na.localeCompare(nb, "fr");
+    });
+  }
+
   // ── Classes CSS ──
   function selChipClass(s: string): string {
     if (s === "Fixe")     return "statut-chip statut-chip--fixe";
@@ -286,7 +314,7 @@ export default function StrategiePage() {
   }
 
   const label = periodLabel(vue, year, month);
-  const rows  = filteredStatuts();
+  const rows  = sortedRows(filteredStatuts());
 
   /* ── Render ── */
   return (
@@ -401,8 +429,25 @@ export default function StrategiePage() {
               <table className="strat-table">
                 <thead>
                   <tr>
-                    <th>Commune</th>
+                    <th
+                      className={`strat-th-sortable${sortBy === "commune" ? " strat-th-sorted" : ""}`}
+                      onClick={() => setSortBy(s => s === "commune" ? "periode" : "commune")}
+                      title="Cliquer pour trier par commune"
+                    >
+                      Commune{" "}
+                      <i className={`fa-solid ${sortBy === "commune" ? "fa-arrow-up-a-z" : "fa-sort"}`}
+                        style={{ fontSize: "0.6rem", opacity: 0.55, marginLeft: "0.15rem" }} />
+                    </th>
                     <th>Arrondissement</th>
+                    <th
+                      className={`strat-th-sortable${sortBy === "periode" ? " strat-th-sorted" : ""}`}
+                      onClick={() => setSortBy("periode")}
+                      title="Cliquer pour trier par période"
+                    >
+                      Période{" "}
+                      <i className={`fa-solid ${sortBy === "periode" ? "fa-arrow-up-1-9" : "fa-sort"}`}
+                        style={{ fontSize: "0.6rem", opacity: 0.55, marginLeft: "0.15rem" }} />
+                    </th>
                     <th>Sélection</th>
                     <th>Début</th>
                     <th>Fin</th>
@@ -412,6 +457,7 @@ export default function StrategiePage() {
                 <tbody>
                   {rows.map(row => {
                     const commune = communes.get(row.communeId);
+                    const periodeLabel = rowPeriodeLabel(row);
                     return (
                       <tr key={row.id}>
                         <td className="strat-td-commune">
@@ -419,6 +465,11 @@ export default function StrategiePage() {
                         </td>
                         <td className="strat-td-arr">
                           {commune?.arr || "—"}
+                        </td>
+                        <td className="strat-td-periode">
+                          {periodeLabel
+                            ? <span className="period-chip">{periodeLabel}</span>
+                            : <span style={{ color: "#bbb" }}>—</span>}
                         </td>
                         <td>
                           <div className="strat-td-sel">

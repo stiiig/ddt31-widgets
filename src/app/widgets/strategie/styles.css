@@ -232,6 +232,13 @@ body {
 .strat-table tr:last-child td { border-bottom: none; }
 .strat-table tr:hover td { background: #f9f9ff; }
 
+.strat-th-sortable {
+  cursor: pointer;
+  user-select: none;
+}
+.strat-th-sortable:hover { background: #e4e4e4; }
+.strat-th-sorted { background: #e8e8f8 !important; color: #000091; }
+
 .strat-td-commune {
   font-weight: 600;
   color: #161616;
@@ -242,6 +249,19 @@ body {
   font-weight: 600;
   color: #555;
   background: #f5f5f5;
+  white-space: nowrap;
+}
+.strat-td-periode { white-space: nowrap; }
+.period-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.5rem;
+  border-radius: 2rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: #dbeafe;
+  border: 1px solid #bfdbfe;
+  color: #1d4ed8;
   white-space: nowrap;
 }
 .strat-td-sel {

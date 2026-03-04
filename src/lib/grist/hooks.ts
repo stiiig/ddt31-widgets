@@ -1,15 +1,30 @@
 // src/lib/grist/hooks.ts
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { initGristOrMock } from "./init";
 import type { GristDocAPI } from "./meta";
 
 export type GristUser = { name: string; email: string };
 
+const LS_KEY = "ddt31_user";
+
+export function getLocalUser(): GristUser | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw) as GristUser;
+  } catch { return null; }
+}
+
+export function saveLocalUser(user: GristUser) {
+  if (typeof window === "undefined") return;
+  try { localStorage.setItem(LS_KEY, JSON.stringify(user)); } catch { /* ignore */ }
+}
+
 /* ─────────────────────────────────────────────────────────────────
    tryDecodeJwtPayload
-   Décode le payload d'un JWT (base64url) sans vérification de sig.
 ───────────────────────────────────────────────────────────────── */
 function tryDecodeJwtPayload(token: string): Record<string, any> | null {
   try {
@@ -17,16 +32,13 @@ function tryDecodeJwtPayload(token: string): Record<string, any> | null {
     if (parts.length !== 3) return null;
     const b64  = parts[1].replace(/-/g, "+").replace(/_/g, "/");
     return JSON.parse(atob(b64));
-  } catch {
-    return null;
-  }
+  } catch { return null; }
 }
 
 /* ─────────────────────────────────────────────────────────────────
    fetchGristUser
-   Tente plusieurs méthodes pour récupérer l'utilisateur courant.
-   Tout est client-side (postMessage / fetchTable) — pas de fetch
-   cross-origin. L'app est un export statique GitHub Pages.
+   Tout client-side : postMessage ou localStorage. Pas de fetch
+   cross-origin (export statique GitHub Pages).
 ───────────────────────────────────────────────────────────────── */
 async function fetchGristUser(
   setGristUser: (u: GristUser) => void,
@@ -35,110 +47,52 @@ async function fetchGristUser(
   const gristRaw = (window as any).grist;
   const rawDocApi = gristRaw?.docApi ?? docApi;
 
-  // ── Méthode 1 : grist.getUserProfile() — postMessage vers Grist ──
+  // ── Méthode 1 : grist.getUserProfile() — postMessage ─────────────
   if (typeof gristRaw?.getUserProfile === "function") {
     try {
       const profile = await gristRaw.getUserProfile();
       const name  = profile?.name  || profile?.email || "";
       const email = profile?.email || "";
       if (name) { setGristUser({ name, email }); return; }
-      console.warn("[DDT31] getUserProfile() vide :", profile);
-    } catch (e) {
-      console.warn("[DDT31] Méthode 1 (getUserProfile) échouée :", e);
-    }
-  } else {
-    console.warn("[DDT31] grist.getUserProfile n'est pas disponible");
+    } catch { /* ignore */ }
   }
 
-  // ── Méthode 2 : JWT userId → lookup _grist_Principals ────────────
-  // getAccessToken() retourne un JWT HS256 dont le payload contient
-  // un userId. On croise avec la table système _grist_Principals pour
-  // récupérer name + email. Tout passe par postMessage (fetchTable).
+  // ── Méthode 2 : JWT payload (name/email directs) ──────────────────
   if (typeof rawDocApi?.getAccessToken === "function") {
     try {
       const tokenResult = await rawDocApi.getAccessToken({ readOnly: true });
       const { token } = tokenResult ?? {};
-
       if (token) {
         const payload = tryDecodeJwtPayload(token);
-        console.info("[DDT31] JWT payload :", payload);
-
-        // Cas simple : name/email directement dans le payload
-        const directName  = payload?.name  || payload?.email || payload?.sub || "";
-        const directEmail = payload?.email || "";
-        if (directName) {
-          setGristUser({ name: directName, email: directEmail });
-          return;
-        }
-
-        // Cas Grist self-hosted : seul userId est présent
-        const userId: number | undefined =
-          payload?.userId ?? payload?.uid ?? payload?.id;
-
-        if (userId != null && typeof rawDocApi?.fetchTable === "function") {
-          try {
-            const principals = await rawDocApi.fetchTable("_grist_Principals");
-            console.info("[DDT31] _grist_Principals colonnes :", Object.keys(principals));
-            const ids = principals.userId as number[] | undefined;
-            if (ids) {
-              const idx = ids.findIndex((id: number) => id === userId);
-              if (idx >= 0) {
-                const name  = principals.name?.[idx]  || principals.email?.[idx] || "";
-                const email = principals.email?.[idx] || "";
-                if (name) { setGristUser({ name, email }); return; }
-                console.warn("[DDT31] _grist_Principals row trouvée mais name/email vides, idx=", idx, principals);
-              } else {
-                console.warn("[DDT31] userId", userId, "introuvable dans _grist_Principals ids :", ids);
-              }
-            } else {
-              console.warn("[DDT31] _grist_Principals pas de colonne userId :", Object.keys(principals));
-            }
-          } catch (e) {
-            console.warn("[DDT31] fetchTable _grist_Principals échouée :", e);
-          }
-        } else {
-          console.warn("[DDT31] JWT payload sans userId reconnu :", payload);
-        }
-      } else {
-        console.warn("[DDT31] getAccessToken a retourné :", tokenResult);
+        const name  = payload?.name  || payload?.email || payload?.sub || "";
+        const email = payload?.email || "";
+        if (name) { setGristUser({ name, email }); return; }
+        // JWT sans name/email → on abandonne silencieusement cette méthode
       }
-    } catch (e) {
-      console.warn("[DDT31] Méthode 2 (JWT + Principals) échouée :", e);
-    }
-  } else {
-    console.warn("[DDT31] grist.docApi.getAccessToken n'est pas disponible");
+    } catch { /* ignore */ }
   }
 
-  // ── Méthode 3 : getUserTeams → owner de l'org personnelle ────────
-  if (typeof gristRaw?.getUserTeams === "function") {
-    try {
-      const teams = await gristRaw.getUserTeams();
-      const orgs: any[] = Array.isArray(teams) ? teams : (teams?.orgs ?? []);
-      for (const org of orgs) {
-        if (org?.owner?.name) {
-          setGristUser({ name: org.owner.name, email: org.owner.email || "" });
-          return;
-        }
-      }
-      console.warn("[DDT31] getUserTeams : aucun owner.name trouvé :", orgs);
-    } catch (e) {
-      console.warn("[DDT31] Méthode 3 (getUserTeams) échouée :", e);
-    }
-  } else {
-    console.warn("[DDT31] grist.getUserTeams n'est pas disponible");
-  }
+  // ── Méthode 3 : localStorage (saisie manuelle précédente) ─────────
+  const local = getLocalUser();
+  if (local?.name) { setGristUser(local); return; }
 
-  console.warn("[DDT31] Impossible de récupérer l'utilisateur Grist (toutes méthodes échouées)");
+  // → null : le composant UserBadge proposera la saisie manuelle
 }
 
 /* ─────────────────────────────────────────────────────────────────
    useGristInit
-   Charge grist-plugin-api.js et initialise la connexion Grist.
 ───────────────────────────────────────────────────────────────── */
 export function useGristInit(opts?: { requiredAccess?: "read table" | "full" }) {
   const [mode, setMode]           = useState<"boot" | "grist" | "mock" | "rest" | "none">("boot");
   const [docApi, setDocApi]       = useState<GristDocAPI | null>(null);
   const [gristUser, setGristUser] = useState<GristUser | null>(null);
+
+  /** Enregistre un nom saisi manuellement (localStorage + state). */
+  const setLocalUser = useCallback((name: string) => {
+    const u: GristUser = { name, email: "" };
+    saveLocalUser(u);
+    setGristUser(u);
+  }, []);
 
   useEffect(() => {
     (async () => {
@@ -163,9 +117,12 @@ export function useGristInit(opts?: { requiredAccess?: "read table" | "full" }) 
         setMode(result.mode);
         setDocApi(result.docApi);
 
-        // Récupération utilisateur (mode iframe uniquement)
         if (result.mode === "grist") {
           fetchGristUser(setGristUser, result.docApi);
+        } else {
+          // Hors iframe Grist : tente quand même le localStorage
+          const local = getLocalUser();
+          if (local?.name) setGristUser(local);
         }
       } catch {
         setMode("none");
@@ -173,5 +130,5 @@ export function useGristInit(opts?: { requiredAccess?: "read table" | "full" }) 
     })();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  return { mode, docApi, gristUser };
+  return { mode, docApi, gristUser, setLocalUser };
 }

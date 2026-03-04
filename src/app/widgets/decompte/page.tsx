@@ -62,7 +62,7 @@ type Toast = { id: string; kind: "success" | "error" | "info" | "warning"; title
 type VueType = "mois" | "trimestre" | "annee";
 type TabType = "saisie" | "dashboard";
 type DashScope = "commune" | "all";
-type DashSubTab = "croise" | "detail" | "chart";
+type DashSubTab = "croise" | "chart";
 
 /* ══════════════════════════════════════
    HELPERS PURES
@@ -141,6 +141,7 @@ export default function DecomptePage() {
   const [dashScope,     setDashScope]     = useState<DashScope>("all");
   const [dashSubTab,    setDashSubTab]    = useState<DashSubTab>("croise");
   const [dashSort,      setDashSort]      = useState<"alpha" | "total">("alpha");
+  const [dashArr,       setDashArr]       = useState<string | null>(null);
   const [logs,          setLogs]          = useState<LogEntry[]>([]);
   const [logCount,      setLogCount]      = useState(0);
   const [sidebarOpen,   setSidebarOpen]   = useState(false);
@@ -858,12 +859,22 @@ export default function DecomptePage() {
   }
 
   function DashAll() {
-    const communeList = buildCommuneList();
-    if (communeList.length === 0) return <div className="chart-empty">Aucune donnée pour cette période.</div>;
+    const allCommuneList = buildCommuneList();
+    const allArrs = [...new Set(communes.map(c => c.arr).filter(Boolean))].sort((a, b) => a.localeCompare(b, "fr", { numeric: true }));
+    const communeList = dashArr ? allCommuneList.filter(c => communesById.get(c.id)?.arr === dashArr) : allCommuneList;
+    if (allCommuneList.length === 0) return <div className="chart-empty">Aucune donnée pour cette période.</div>;
     return (
       <div style={{ background: "#fff", border: "1px solid #ddd", borderRadius: ".5rem", overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,.05)" }}>
+        {allArrs.length > 1 && (
+          <div className="arr-filter-bar">
+            <button className={`arr-filter-btn${dashArr === null ? " active" : ""}`} type="button" onClick={() => setDashArr(null)}>Tous</button>
+            {allArrs.map(arr => (
+              <button key={arr} className={`arr-filter-btn${dashArr === arr ? " active" : ""}`} type="button" onClick={() => setDashArr(arr)}>{arr}</button>
+            ))}
+          </div>
+        )}
         <div className="sub-tabs">
-          {([["croise","fa-table","Tableau croisé"],["detail","fa-layer-group","Par arrondissement"],["chart","fa-chart-bar","Graphique"]] as const).map(([key, icon, label]) => (
+          {([["croise","fa-table","Tableau croisé"],["chart","fa-chart-bar","Graphique"]] as const).map(([key, icon, label]) => (
             <button key={key} className={`sub-tab${dashSubTab === key ? " active" : ""}`} type="button" onClick={() => setDashSubTab(key)}>
               <i className={`fa-solid ${icon}`} />{label}
             </button>
@@ -874,9 +885,8 @@ export default function DecomptePage() {
           </button>
         </div>
         <div style={{ padding: ".75rem 1rem 1rem" }}>
-          {dashSubTab === "croise"  && <CroiseTable communeList={communeList} />}
-          {dashSubTab === "detail"  && <DetailTable communeList={communeList} />}
-          {dashSubTab === "chart"   && <ChartSvg    communeList={communeList} />}
+          {dashSubTab === "croise" && <CroiseTable communeList={communeList} />}
+          {dashSubTab === "chart"  && <ChartSvg    communeList={communeList} />}
         </div>
       </div>
     );
@@ -914,6 +924,15 @@ export default function DecomptePage() {
     combinedFiltered.forEach(c => DOC_TYPES.forEach(dt => { combinedCounters[dt.key] += c.counters[dt.key]; }));
     const combinedTotal = combinedFiltered.reduce((s, c) => s + c.total, 0);
 
+    // Total sans Fixe+Rotation+Ciblée
+    const noTagFiltered = communeList.filter(c => {
+      const sels = vue === "annee" && c.statutsAnnee?.length ? c.statutsAnnee[0].sels : (c.statut || []);
+      return !sels.some(s => s === "Fixe" || s === "Rotation" || s === "Ciblée");
+    });
+    const noTagCounters = Object.fromEntries(DOC_TYPES.map(dt => [dt.key, 0]));
+    noTagFiltered.forEach(c => DOC_TYPES.forEach(dt => { noTagCounters[dt.key] += c.counters[dt.key]; }));
+    const noTagTotal = noTagFiltered.reduce((s, c) => s + c.total, 0);
+
     // Total Papier
     const papierFiltered = communeList.filter(c => communesById.get(c.id)?.papier === true);
     const papierCounters = Object.fromEntries(DOC_TYPES.map(dt => [dt.key, 0]));
@@ -923,7 +942,7 @@ export default function DecomptePage() {
     return (
       <div className="croise-wrap">
         <table className="croise-table">
-          <thead><tr><th>Commune</th>{DOC_TYPES.map(dt => <th key={dt.key} className={`col-num${dt.highlight ? " col-highlight" : ""}`} title={dt.label}>{dt.code}</th>)}<th className="col-num col-total">Total</th></tr></thead>
+          <thead><tr><th>Commune</th><th className="col-arr">Arr.</th>{DOC_TYPES.map(dt => <th key={dt.key} className={`col-num${dt.highlight ? " col-highlight" : ""}`} title={dt.label}>{dt.code}</th>)}<th className="col-num col-total">Total</th></tr></thead>
           <tbody>
             {communeList.map(c => {
               const statuts = vue === "annee" && c.statutsAnnee?.length ? c.statutsAnnee[0].sels : (c.statut || []);
@@ -932,6 +951,7 @@ export default function DecomptePage() {
                 <tr key={c.id} className="croise-row-commune" style={{ cursor: "pointer" }} title={`Voir le détail de ${c.nom}`}
                   onClick={() => { const comm = communesById.get(c.id); if (comm) handleSelectCommune(comm); }}>
                   <td>{c.nom}<StatutChips sel={statuts} /></td>
+                  <td className="col-arr">{communesById.get(c.id)?.arr || ""}</td>
                   {DOC_TYPES.map(dt => <NumCell key={dt.key} v={c.counters[dt.key] || 0} hl={dt.highlight || (dt.key === "DP" && isCiblee)} />)}
                   <td className="col-num col-total" style={{ fontWeight: 700 }}>{c.total}</td>
                 </tr>
@@ -939,12 +959,14 @@ export default function DecomptePage() {
             })}
             <tr className="total-row">
               <td><strong>TOTAL</strong></td>
+              <td />
               {DOC_TYPES.map(dt => <NumCell key={dt.key} v={totals[dt.key] || 0} hl={dt.highlight} />)}
               <td className="col-num col-total"><strong>{grandTotal}</strong></td>
             </tr>
             {tagTotals.map(tt => (
               <tr key={tt!.tag} className={`tag-total-row ${tt!.cls}`}>
                 <td><strong>Total {tt!.tag}</strong></td>
+                <td />
                 {DOC_TYPES.map(dt => <NumCell key={dt.key} v={tt!.counters[dt.key] || 0} hl={dt.highlight} />)}
                 <td className="col-num col-total"><strong>{tt!.total}</strong></td>
               </tr>
@@ -952,13 +974,23 @@ export default function DecomptePage() {
             {combinedFiltered.length > 0 && (
               <tr className="combined-total-row">
                 <td><strong>Total Fixe+Rotation+Ciblée</strong></td>
+                <td />
                 {DOC_TYPES.map(dt => <NumCell key={dt.key} v={combinedCounters[dt.key] || 0} hl={dt.highlight} />)}
                 <td className="col-num col-total"><strong>{combinedTotal}</strong></td>
+              </tr>
+            )}
+            {noTagFiltered.length > 0 && (
+              <tr className="no-tag-total-row">
+                <td><strong>Total sans Fixe+Rotation+Ciblée</strong></td>
+                <td />
+                {DOC_TYPES.map(dt => <NumCell key={dt.key} v={noTagCounters[dt.key] || 0} hl={dt.highlight} />)}
+                <td className="col-num col-total"><strong>{noTagTotal}</strong></td>
               </tr>
             )}
             {papierFiltered.length > 0 && (
               <tr className="papier-total-row">
                 <td><strong>Total Papier</strong></td>
+                <td />
                 {DOC_TYPES.map(dt => <NumCell key={dt.key} v={papierCounters[dt.key] || 0} hl={dt.highlight} />)}
                 <td className="col-num col-total"><strong>{papierTotal}</strong></td>
               </tr>

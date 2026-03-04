@@ -658,6 +658,33 @@ body {
 .scope-btn.active { background: #000091; border-color: #000091; color: #fff; }
 .scope-btn.active:hover { background: #1c1cae !important; border-color: #1c1cae; color: #fff; }
 
+/* ── Filtre arrondissement ── */
+.arr-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0.55rem 1rem 0;
+  border-bottom: 1px solid #e5e5e5;
+  padding-bottom: 0.55rem;
+}
+.arr-filter-btn {
+  padding: 0.25rem 0.75rem;
+  border-radius: 0.375rem;
+  border: 1.5px solid #ddd;
+  background: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+  white-space: nowrap;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.arr-filter-btn:hover:not(.active) { border-color: #000091; color: #000091; background: #f0f4ff; }
+.arr-filter-btn.active { background: #000091; border-color: #000091; color: #fff; }
+.arr-filter-btn.active:hover { background: #1c1cae; border-color: #1c1cae; }
+
 .sub-tabs {
   display: flex;
   gap: 0;
@@ -795,6 +822,21 @@ body {
 .croise-table tr.croise-row-commune:hover td { background: #eef0fb; }
 .croise-table tr.croise-row-commune:hover td:first-child { background: #e4e7f7; color: #000091; }
 
+/* Colonne Arrondissement */
+.croise-table .col-arr {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #666;
+  white-space: nowrap;
+  background: #fafafa;
+  text-align: left;
+}
+.croise-table tr.total-row .col-arr,
+.croise-table tr.tag-total-row .col-arr,
+.croise-table tr.combined-total-row .col-arr,
+.croise-table tr.no-tag-total-row .col-arr,
+.croise-table tr.papier-total-row .col-arr { background: inherit; }
+
 /* Colonnes en surbrillance : PD, PC, PCM, PA, PAM, ZA */
 .croise-table th.col-highlight,
 .recap-table th.col-highlight {
@@ -848,6 +890,12 @@ body {
 .croise-table tr.combined-total-row td.col-highlight { background: #d4d0ea; }
 .croise-table tr.combined-total-row td.col-num       { color: #222; }
 .croise-table tr.combined-total-row td.col-total     { background: #c4c4c4; color: #111; }
+
+/* Ligne Total sans Fixe+Rotation+Ciblée */
+.croise-table tr.no-tag-total-row td               { font-weight: 700; background: #f0f4f0; color: #2d4a2d; }
+.croise-table tr.no-tag-total-row td.col-highlight { background: #d8e8d8; }
+.croise-table tr.no-tag-total-row td.col-num       { color: #2d4a2d; }
+.croise-table tr.no-tag-total-row td.col-total     { background: #c8dcc8; color: #1a3a1a; }
 
 /* Ligne Total Papier (couleur normale) */
 .croise-table tr.papier-total-row td               { font-weight: 700; background: #f5f5fe; color: #000091; }

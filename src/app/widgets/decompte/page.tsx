@@ -840,6 +840,25 @@ export default function DecomptePage() {
     const totals = Object.fromEntries(DOC_TYPES.map(dt => [dt.key, 0]));
     communeList.forEach(c => DOC_TYPES.forEach(dt => { totals[dt.key] += c.counters[dt.key]; }));
     const grandTotal = communeList.reduce((s, c) => s + c.total, 0);
+
+    // Totaux par tag (seulement si au moins une commune avec ce tag)
+    const TAG_DEFS = [
+      { tag: "Rotation", cls: "tag-total-row--rotation" },
+      { tag: "Fixe",     cls: "tag-total-row--fixe"     },
+      { tag: "Ciblée",   cls: "tag-total-row--ciblee"   },
+    ];
+    const tagTotals = TAG_DEFS.map(({ tag, cls }) => {
+      const filtered = communeList.filter(c => {
+        const sels = vue === "annee" && c.statutsAnnee?.length ? c.statutsAnnee[0].sels : (c.statut || []);
+        return sels.some(s => s === tag);
+      });
+      if (filtered.length === 0) return null;
+      const counters = Object.fromEntries(DOC_TYPES.map(dt => [dt.key, 0]));
+      filtered.forEach(c => DOC_TYPES.forEach(dt => { counters[dt.key] += c.counters[dt.key]; }));
+      const total = filtered.reduce((s, c) => s + c.total, 0);
+      return { tag, cls, counters, total };
+    }).filter(Boolean);
+
     return (
       <div className="croise-wrap">
         <table className="croise-table">
@@ -862,6 +881,13 @@ export default function DecomptePage() {
               {DOC_TYPES.map(dt => <NumCell key={dt.key} v={totals[dt.key] || 0} hl={dt.highlight} />)}
               <td className="col-num col-total"><strong>{grandTotal}</strong></td>
             </tr>
+            {tagTotals.map(tt => (
+              <tr key={tt!.tag} className={`tag-total-row ${tt!.cls}`}>
+                <td><strong>Total {tt!.tag}</strong></td>
+                {DOC_TYPES.map(dt => <NumCell key={dt.key} v={tt!.counters[dt.key] || 0} hl={dt.highlight} />)}
+                <td className="col-num col-total"><strong>{tt!.total}</strong></td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>

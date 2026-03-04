@@ -765,6 +765,24 @@ body {
 .croise-table tr:hover td.col-total { background: #d8d8f0; }
 .croise-table tr.croise-row-commune:hover td.col-total { background: #d0d0ec; }
 
+/* Lignes Total par tag (après le total général) */
+.croise-table tr.tag-total-row td { font-weight: 700; }
+.croise-table tr.tag-total-row--rotation td     { background: #ffedd5; color: #9a3412; }
+.croise-table tr.tag-total-row--fixe td         { background: #fef9c3; color: #713f12; }
+.croise-table tr.tag-total-row--ciblee td       { background: #ffe4e4; color: #b91c1c; }
+/* col-highlight dans les lignes tag */
+.croise-table tr.tag-total-row--rotation td.col-highlight { background: #fdc995; }
+.croise-table tr.tag-total-row--fixe td.col-highlight     { background: #fce47a; }
+.croise-table tr.tag-total-row--ciblee td.col-highlight   { background: #ffa5a5; }
+/* col-num color override (sinon #000091 de col-num s'applique) */
+.croise-table tr.tag-total-row--rotation td.col-num { color: #9a3412; }
+.croise-table tr.tag-total-row--fixe td.col-num     { color: #713f12; }
+.croise-table tr.tag-total-row--ciblee td.col-num   { color: #b91c1c; }
+/* col-total dans les lignes tag */
+.croise-table tr.tag-total-row--rotation td.col-total { background: #fdc995; color: #7c2d12; }
+.croise-table tr.tag-total-row--fixe td.col-total     { background: #fce47a; color: #713f12; }
+.croise-table tr.tag-total-row--ciblee td.col-total   { background: #ffa5a5; color: #991b1b; }
+
 .commune-detail-list { display: flex; flex-direction: column; gap: 0.5rem; }
 .commune-detail-item {
   background: #fff;

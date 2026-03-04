@@ -141,7 +141,7 @@ export default function DecomptePage() {
   const [dashScope,     setDashScope]     = useState<DashScope>("all");
   const [dashSubTab,    setDashSubTab]    = useState<DashSubTab>("croise");
   const [dashSort,      setDashSort]      = useState<"alpha" | "total">("alpha");
-  const [dashArr,       setDashArr]       = useState<string | null>(null);
+  const [dashArr,       setDashArr]       = useState<Set<string>>(new Set());
   const [logs,          setLogs]          = useState<LogEntry[]>([]);
   const [logCount,      setLogCount]      = useState(0);
   const [sidebarOpen,   setSidebarOpen]   = useState(false);
@@ -860,16 +860,18 @@ export default function DecomptePage() {
 
   function DashAll() {
     const allCommuneList = buildCommuneList();
-    const allArrs = [...new Set(communes.map(c => c.arr).filter(Boolean))].sort((a, b) => a.localeCompare(b, "fr", { numeric: true }));
-    const communeList = dashArr ? allCommuneList.filter(c => communesById.get(c.id)?.arr === dashArr) : allCommuneList;
+    const ARR_ORDER = ["Toulouse", "Muret", "Saint-Gaudens"];
+    const availableArrs = new Set(communes.map(c => c.arr).filter(Boolean));
+    const allArrs = ARR_ORDER.filter(a => availableArrs.has(a));
+    const communeList = dashArr.size > 0 ? allCommuneList.filter(c => dashArr.has(communesById.get(c.id)?.arr ?? "")) : allCommuneList;
     if (allCommuneList.length === 0) return <div className="chart-empty">Aucune donnée pour cette période.</div>;
     return (
       <div style={{ background: "#fff", border: "1px solid #ddd", borderRadius: ".5rem", overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,.05)" }}>
         {allArrs.length > 1 && (
           <div className="arr-filter-bar">
-            <button className={`arr-filter-btn${dashArr === null ? " active" : ""}`} type="button" onClick={() => setDashArr(null)}>Tous</button>
+            <button className={`arr-filter-btn${dashArr.size === 0 ? " active" : ""}`} type="button" onClick={() => setDashArr(new Set())}>Tous</button>
             {allArrs.map(arr => (
-              <button key={arr} className={`arr-filter-btn${dashArr === arr ? " active" : ""}`} type="button" onClick={() => setDashArr(arr)}>{arr}</button>
+              <button key={arr} className={`arr-filter-btn${dashArr.has(arr) ? " active" : ""}`} type="button" onClick={() => setDashArr(prev => { const next = new Set(prev); if (next.has(arr)) { next.delete(arr); } else { next.add(arr); } return next; })}>{arr}</button>
             ))}
           </div>
         )}

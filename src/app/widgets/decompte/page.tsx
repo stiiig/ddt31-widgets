@@ -847,11 +847,12 @@ export default function DecomptePage() {
           <tbody>
             {communeList.map(c => {
               const statuts = vue === "annee" && c.statutsAnnee?.length ? c.statutsAnnee[0].sels : (c.statut || []);
+              const isCiblee = statuts.some(s => s === "Ciblée");
               return (
                 <tr key={c.id} className="croise-row-commune" style={{ cursor: "pointer" }} title={`Voir le détail de ${c.nom}`}
                   onClick={() => { const comm = communesById.get(c.id); if (comm) handleSelectCommune(comm); }}>
                   <td>{c.nom}<StatutChips sel={statuts} /></td>
-                  {DOC_TYPES.map(dt => <NumCell key={dt.key} v={c.counters[dt.key] || 0} hl={dt.highlight} />)}
+                  {DOC_TYPES.map(dt => <NumCell key={dt.key} v={c.counters[dt.key] || 0} hl={dt.highlight || (dt.key === "DP" && isCiblee)} />)}
                   <td className="col-num col-total" style={{ fontWeight: 700 }}>{c.total}</td>
                 </tr>
               );

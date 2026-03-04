@@ -239,9 +239,9 @@ body {
   border: 1px solid transparent;
 }
 .sel-badge.visible { display: inline-flex; }
-.sel-badge--fixe     { background: #EFE0FF; border-color: #D8B4FE; color: #6B21A8; }
-.sel-badge--ciblee   { background: #FFF0D9; border-color: #FDE68A; color: #92400E; }
-.sel-badge--rotation { background: #FFF0F6; border-color: #FBCFE8; color: #9D174D; }
+.sel-badge--fixe     { background: #fef9c3; border-color: #fde047; color: #713f12; }
+.sel-badge--ciblee   { background: #ffe4e4; border-color: #ff9898; color: #b91c1c; }
+.sel-badge--rotation { background: #ffedd5; border-color: #fdba74; color: #9a3412; }
 
 /* ── Mini-chip statut inline ── */
 .statut-chip {
@@ -252,9 +252,9 @@ body {
   white-space: nowrap; border: 1px solid transparent;
   vertical-align: middle; margin-left: 0.4rem;
 }
-.statut-chip--fixe     { background: #EFE0FF; border-color: #D8B4FE; color: #6B21A8; }
-.statut-chip--ciblee   { background: #FFF0D9; border-color: #FDE68A; color: #92400E; }
-.statut-chip--rotation { background: #FFF0F6; border-color: #FBCFE8; color: #9D174D; }
+.statut-chip--fixe     { background: #fef9c3; border-color: #fde047; color: #713f12; }
+.statut-chip--ciblee   { background: #ffe4e4; border-color: #ff9898; color: #b91c1c; }
+.statut-chip--rotation { background: #ffedd5; border-color: #fdba74; color: #9a3412; }
 
 /* ── Badge arrondissement ── */
 .arr-badge {
@@ -735,19 +735,19 @@ body {
 .croise-table tr.croise-row-commune:hover td { background: #eef0fb; }
 .croise-table tr.croise-row-commune:hover td:first-child { background: #e4e7f7; color: #000091; }
 
-/* Colonnes en surbrillance : PD, PC, Pcm, PA, Pam, ZA */
+/* Colonnes en surbrillance : PD, PC, PCM, PA, PAM, ZA */
 .croise-table th.col-highlight,
 .recap-table th.col-highlight {
-  background: #fef08a;
-  color: #713f12;
+  background: #7c3aed;
+  color: #fff;
 }
 .croise-table td.col-highlight,
 .recap-table td.col-highlight {
-  background: #fefce8;
+  background: #f5f3ff;
 }
-.croise-table tr.total-row td.col-highlight { background: #fef9c3 !important; }
-.croise-table tr:hover td.col-highlight { background: #fef3c7; }
-.croise-table tr.croise-row-commune:hover td.col-highlight { background: #fde68a; }
+.croise-table tr.total-row td.col-highlight { background: #ede9fe !important; }
+.croise-table tr:hover td.col-highlight { background: #e9d5ff; }
+.croise-table tr.croise-row-commune:hover td.col-highlight { background: #ddd6fe; }
 
 /* Colonne Total : surbrillance bleue */
 .croise-table th.col-total,

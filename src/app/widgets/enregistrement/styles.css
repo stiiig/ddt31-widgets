@@ -313,9 +313,9 @@
       border-color: #D8B4FE;
       color: #6B21A8;
     }
-    .commune-arr-badge--sel.sel-fixe    { background: #EFE0FF; border-color: #D8B4FE; color: #6B21A8; }
-    .commune-arr-badge--sel.sel-ciblee  { background: #FFF0D9; border-color: #FDE68A; color: #92400E; }
-    .commune-arr-badge--sel.sel-rotation{ background: #FDE8FC; border-color: #F0ABFC; color: #86198F; }
+    .commune-arr-badge--sel.sel-fixe    { background: #fef9c3; border-color: #fde047; color: #713f12; }
+    .commune-arr-badge--sel.sel-ciblee  { background: #ffe4e4; border-color: #ff9898; color: #b91c1c; }
+    .commune-arr-badge--sel.sel-rotation{ background: #ffedd5; border-color: #fdba74; color: #9a3412; }
 
     .commune-arr-badge--enjeu {
       background: #FEE2E2;
@@ -2220,9 +2220,9 @@ input[type="date"].is-empty::-webkit-datetime-edit-year-field{
   color: #6B21A8;
 }
 .commune-arr-badge--sel.is-visible { display: inline-flex; }
-.commune-arr-badge--sel.sel-fixe    { background: #EFE0FF; border-color: #D8B4FE; color: #6B21A8; }
-.commune-arr-badge--sel.sel-ciblee  { background: #FFF0D9; border-color: #FDE68A; color: #92400E; }
-.commune-arr-badge--sel.sel-rotation { background: #FDE8FC; border-color: #F0ABFC; color: #86198F; }
+.commune-arr-badge--sel.sel-fixe    { background: #fef9c3; border-color: #fde047; color: #713f12; }
+.commune-arr-badge--sel.sel-ciblee  { background: #ffe4e4; border-color: #ff9898; color: #b91c1c; }
+.commune-arr-badge--sel.sel-rotation { background: #ffedd5; border-color: #fdba74; color: #9a3412; }
 
 /* Badge enjeu */
 .commune-arr-badge--enjeu {

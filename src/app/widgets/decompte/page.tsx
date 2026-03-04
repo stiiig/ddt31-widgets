@@ -876,7 +876,7 @@ export default function DecomptePage() {
           </div>
         )}
         <div className="sub-tabs">
-          {([["croise","fa-table","Tableau croisé"],["chart","fa-chart-bar","Graphique"]] as const).map(([key, icon, label]) => (
+          {([["croise","fa-table","Tableau"],["chart","fa-chart-bar","Graphique"]] as const).map(([key, icon, label]) => (
             <button key={key} className={`sub-tab${dashSubTab === key ? " active" : ""}`} type="button" onClick={() => setDashSubTab(key)}>
               <i className={`fa-solid ${icon}`} />{label}
             </button>
@@ -895,6 +895,9 @@ export default function DecomptePage() {
   }
 
   function CroiseTable({ communeList }: { communeList: CommuneAgg[] }) {
+    // Colonnes visibles : au moins une commune avec une valeur > 0
+    const visibleTypes = DOC_TYPES.filter(dt => communeList.some(c => (c.counters[dt.key] || 0) > 0));
+
     const totals = Object.fromEntries(DOC_TYPES.map(dt => [dt.key, 0]));
     communeList.forEach(c => DOC_TYPES.forEach(dt => { totals[dt.key] += c.counters[dt.key]; }));
     const grandTotal = communeList.reduce((s, c) => s + c.total, 0);
@@ -944,7 +947,7 @@ export default function DecomptePage() {
     return (
       <div className="croise-wrap">
         <table className="croise-table">
-          <thead><tr><th>Commune</th><th className="col-arr">Arr.</th>{DOC_TYPES.map(dt => <th key={dt.key} className={`col-num${dt.highlight ? " col-highlight" : ""}`} title={dt.label}>{dt.code}</th>)}<th className="col-num col-total">Total</th></tr></thead>
+          <thead><tr><th>Commune</th><th className="col-arr">Arr.</th>{visibleTypes.map(dt => <th key={dt.key} className={`col-num${dt.highlight ? " col-highlight" : ""}`} title={dt.label}>{dt.code}</th>)}<th className="col-num col-total">Total</th></tr></thead>
           <tbody>
             {communeList.map(c => {
               const statuts = vue === "annee" && c.statutsAnnee?.length ? c.statutsAnnee[0].sels : (c.statut || []);
@@ -954,7 +957,7 @@ export default function DecomptePage() {
                   onClick={() => { const comm = communesById.get(c.id); if (comm) handleSelectCommune(comm); }}>
                   <td>{c.nom}<StatutChips sel={statuts} /></td>
                   <td className="col-arr">{communesById.get(c.id)?.arr || ""}</td>
-                  {DOC_TYPES.map(dt => <NumCell key={dt.key} v={c.counters[dt.key] || 0} hl={dt.highlight || (dt.key === "DP" && isCiblee)} />)}
+                  {visibleTypes.map(dt => <NumCell key={dt.key} v={c.counters[dt.key] || 0} hl={dt.highlight || (dt.key === "DP" && isCiblee)} />)}
                   <td className="col-num col-total" style={{ fontWeight: 700 }}>{c.total}</td>
                 </tr>
               );
@@ -962,14 +965,14 @@ export default function DecomptePage() {
             <tr className="total-row">
               <td><strong>TOTAL</strong></td>
               <td />
-              {DOC_TYPES.map(dt => <NumCell key={dt.key} v={totals[dt.key] || 0} hl={dt.highlight} />)}
+              {visibleTypes.map(dt => <NumCell key={dt.key} v={totals[dt.key] || 0} hl={dt.highlight} />)}
               <td className="col-num col-total"><strong>{grandTotal}</strong></td>
             </tr>
             {tagTotals.map(tt => (
               <tr key={tt!.tag} className={`tag-total-row ${tt!.cls}`}>
                 <td><strong>Total {tt!.tag}</strong></td>
                 <td />
-                {DOC_TYPES.map(dt => <NumCell key={dt.key} v={tt!.counters[dt.key] || 0} hl={dt.highlight} />)}
+                {visibleTypes.map(dt => <NumCell key={dt.key} v={tt!.counters[dt.key] || 0} hl={dt.highlight} />)}
                 <td className="col-num col-total"><strong>{tt!.total}</strong></td>
               </tr>
             ))}
@@ -977,7 +980,7 @@ export default function DecomptePage() {
               <tr className="combined-total-row">
                 <td><strong>Total Fixe+Rotation+Ciblée</strong></td>
                 <td />
-                {DOC_TYPES.map(dt => <NumCell key={dt.key} v={combinedCounters[dt.key] || 0} hl={dt.highlight} />)}
+                {visibleTypes.map(dt => <NumCell key={dt.key} v={combinedCounters[dt.key] || 0} hl={dt.highlight} />)}
                 <td className="col-num col-total"><strong>{combinedTotal}</strong></td>
               </tr>
             )}
@@ -985,7 +988,7 @@ export default function DecomptePage() {
               <tr className="no-tag-total-row">
                 <td><strong>Total sans Fixe+Rotation+Ciblée</strong></td>
                 <td />
-                {DOC_TYPES.map(dt => <NumCell key={dt.key} v={noTagCounters[dt.key] || 0} hl={dt.highlight} />)}
+                {visibleTypes.map(dt => <NumCell key={dt.key} v={noTagCounters[dt.key] || 0} hl={dt.highlight} />)}
                 <td className="col-num col-total"><strong>{noTagTotal}</strong></td>
               </tr>
             )}
@@ -993,7 +996,7 @@ export default function DecomptePage() {
               <tr className="papier-total-row">
                 <td><strong>Total Papier</strong></td>
                 <td />
-                {DOC_TYPES.map(dt => <NumCell key={dt.key} v={papierCounters[dt.key] || 0} hl={dt.highlight} />)}
+                {visibleTypes.map(dt => <NumCell key={dt.key} v={papierCounters[dt.key] || 0} hl={dt.highlight} />)}
                 <td className="col-num col-total"><strong>{papierTotal}</strong></td>
               </tr>
             )}

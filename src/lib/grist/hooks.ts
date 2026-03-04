@@ -8,49 +8,40 @@ import type { GristDocAPI } from "./meta";
 export type GristUser = { name: string; email: string };
 
 /* ─────────────────────────────────────────────────────────────────
-   tryDecodeJwt
-   Si le token Grist est un JWT, on peut décoder le payload (base64url)
-   sans aucun appel réseau ni CORS.
+   tryDecodeJwtPayload
+   Décode le payload d'un JWT (base64url) sans vérification de sig.
 ───────────────────────────────────────────────────────────────── */
-function tryDecodeJwt(token: string): GristUser | null {
+function tryDecodeJwtPayload(token: string): Record<string, any> | null {
   try {
     const parts = token.split(".");
     if (parts.length !== 3) return null;
-    // base64url → base64 standard
     const b64  = parts[1].replace(/-/g, "+").replace(/_/g, "/");
-    const json = atob(b64);
-    const payload = JSON.parse(json);
-    const name  = payload.name  || payload.email || payload.sub || "";
-    const email = payload.email || "";
-    if (name) return { name, email };
+    return JSON.parse(atob(b64));
   } catch {
-    // pas un JWT valide
+    return null;
   }
-  return null;
 }
 
 /* ─────────────────────────────────────────────────────────────────
    fetchGristUser
    Tente plusieurs méthodes pour récupérer l'utilisateur courant.
-   Tout est client-side (postMessage ou décodage JWT) — pas de fetch
-   cross-origin. L'app est un export statique GitHub Pages : les
-   routes API Next.js ne sont pas disponibles.
+   Tout est client-side (postMessage / fetchTable) — pas de fetch
+   cross-origin. L'app est un export statique GitHub Pages.
 ───────────────────────────────────────────────────────────────── */
-async function fetchGristUser(setGristUser: (u: GristUser) => void) {
+async function fetchGristUser(
+  setGristUser: (u: GristUser) => void,
+  docApi: GristDocAPI | null,
+) {
   const gristRaw = (window as any).grist;
-  const rawDocApi = gristRaw?.docApi;
+  const rawDocApi = gristRaw?.docApi ?? docApi;
 
   // ── Méthode 1 : grist.getUserProfile() — postMessage vers Grist ──
-  // Disponible dans les versions récentes du plugin API Grist.
   if (typeof gristRaw?.getUserProfile === "function") {
     try {
       const profile = await gristRaw.getUserProfile();
       const name  = profile?.name  || profile?.email || "";
       const email = profile?.email || "";
-      if (name) {
-        setGristUser({ name, email });
-        return;
-      }
+      if (name) { setGristUser({ name, email }); return; }
       console.warn("[DDT31] getUserProfile() vide :", profile);
     } catch (e) {
       console.warn("[DDT31] Méthode 1 (getUserProfile) échouée :", e);
@@ -59,25 +50,60 @@ async function fetchGristUser(setGristUser: (u: GristUser) => void) {
     console.warn("[DDT31] grist.getUserProfile n'est pas disponible");
   }
 
-  // ── Méthode 2 : getAccessToken → décodage JWT (zéro réseau) ──────
-  // Le token retourné est souvent un JWT signé dont le payload contient
-  // name / email sans qu'on ait besoin d'appeler l'API REST.
+  // ── Méthode 2 : JWT userId → lookup _grist_Principals ────────────
+  // getAccessToken() retourne un JWT HS256 dont le payload contient
+  // un userId. On croise avec la table système _grist_Principals pour
+  // récupérer name + email. Tout passe par postMessage (fetchTable).
   if (typeof rawDocApi?.getAccessToken === "function") {
     try {
       const tokenResult = await rawDocApi.getAccessToken({ readOnly: true });
       const { token } = tokenResult ?? {};
+
       if (token) {
-        const user = tryDecodeJwt(token);
-        if (user) {
-          setGristUser(user);
+        const payload = tryDecodeJwtPayload(token);
+        console.info("[DDT31] JWT payload :", payload);
+
+        // Cas simple : name/email directement dans le payload
+        const directName  = payload?.name  || payload?.email || payload?.sub || "";
+        const directEmail = payload?.email || "";
+        if (directName) {
+          setGristUser({ name: directName, email: directEmail });
           return;
         }
-        console.warn("[DDT31] JWT décodé mais sans name/email :", token.slice(0, 40) + "...");
+
+        // Cas Grist self-hosted : seul userId est présent
+        const userId: number | undefined =
+          payload?.userId ?? payload?.uid ?? payload?.id;
+
+        if (userId != null && typeof rawDocApi?.fetchTable === "function") {
+          try {
+            const principals = await rawDocApi.fetchTable("_grist_Principals");
+            console.info("[DDT31] _grist_Principals colonnes :", Object.keys(principals));
+            const ids = principals.userId as number[] | undefined;
+            if (ids) {
+              const idx = ids.findIndex((id: number) => id === userId);
+              if (idx >= 0) {
+                const name  = principals.name?.[idx]  || principals.email?.[idx] || "";
+                const email = principals.email?.[idx] || "";
+                if (name) { setGristUser({ name, email }); return; }
+                console.warn("[DDT31] _grist_Principals row trouvée mais name/email vides, idx=", idx, principals);
+              } else {
+                console.warn("[DDT31] userId", userId, "introuvable dans _grist_Principals ids :", ids);
+              }
+            } else {
+              console.warn("[DDT31] _grist_Principals pas de colonne userId :", Object.keys(principals));
+            }
+          } catch (e) {
+            console.warn("[DDT31] fetchTable _grist_Principals échouée :", e);
+          }
+        } else {
+          console.warn("[DDT31] JWT payload sans userId reconnu :", payload);
+        }
       } else {
         console.warn("[DDT31] getAccessToken a retourné :", tokenResult);
       }
     } catch (e) {
-      console.warn("[DDT31] Méthode 2 (JWT decode) échouée :", e);
+      console.warn("[DDT31] Méthode 2 (JWT + Principals) échouée :", e);
     }
   } else {
     console.warn("[DDT31] grist.docApi.getAccessToken n'est pas disponible");
@@ -139,7 +165,7 @@ export function useGristInit(opts?: { requiredAccess?: "read table" | "full" }) 
 
         // Récupération utilisateur (mode iframe uniquement)
         if (result.mode === "grist") {
-          fetchGristUser(setGristUser);
+          fetchGristUser(setGristUser, result.docApi);
         }
       } catch {
         setMode("none");

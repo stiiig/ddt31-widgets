@@ -8,12 +8,84 @@ import type { GristDocAPI } from "./meta";
 export type GristUser = { name: string; email: string };
 
 /* ─────────────────────────────────────────────────────────────────
+   fetchGristUser
+   Tente plusieurs méthodes pour récupérer l'utilisateur courant.
+   Les console.warn permettent de diagnostiquer en cas d'échec.
+───────────────────────────────────────────────────────────────── */
+async function fetchGristUser(setGristUser: (u: GristUser) => void) {
+  const gristRaw = (window as any).grist;
+  const rawDocApi = gristRaw?.docApi;
+
+  // ── Méthode 1 : getAccessToken → REST /api/profile ──────────────
+  if (typeof rawDocApi?.getAccessToken === "function") {
+    try {
+      const tokenResult = await rawDocApi.getAccessToken({ readOnly: true });
+      const { token, baseUrl } = tokenResult ?? {};
+
+      if (token && baseUrl) {
+        // Bearer header
+        let resp = await fetch(`${baseUrl}/api/profile`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        // Fallback : query param
+        if (!resp.ok) {
+          resp = await fetch(`${baseUrl}/api/profile?auth=${token}`);
+        }
+        if (resp.ok) {
+          const p = await resp.json();
+          const name = p.name || p.email || "";
+          if (name) {
+            setGristUser({ name, email: p.email || "" });
+            return;
+          }
+          console.warn("[DDT31] /api/profile OK mais name/email vides :", p);
+        } else {
+          console.warn("[DDT31] /api/profile status :", resp.status, "baseUrl :", baseUrl);
+        }
+      } else {
+        console.warn("[DDT31] getAccessToken a retourné :", tokenResult);
+      }
+    } catch (e) {
+      console.warn("[DDT31] Méthode 1 (getAccessToken) échouée :", e);
+    }
+  } else {
+    console.warn("[DDT31] grist.docApi.getAccessToken n'est pas disponible");
+  }
+
+  // ── Méthode 2 : getUserTeams → owner de l'org personnelle ───────
+  if (typeof gristRaw?.getUserTeams === "function") {
+    try {
+      const teams = await gristRaw.getUserTeams();
+      // getUserTeams retourne un tableau d'orgs ; l'org personnelle est
+      // celle dont l'utilisateur courant est propriétaire.
+      const orgs: any[] = Array.isArray(teams) ? teams : (teams?.orgs ?? []);
+      for (const org of orgs) {
+        if (org?.owner?.name) {
+          setGristUser({
+            name:  org.owner.name,
+            email: org.owner.email || "",
+          });
+          return;
+        }
+      }
+      console.warn("[DDT31] getUserTeams : aucun owner.name trouvé :", orgs);
+    } catch (e) {
+      console.warn("[DDT31] Méthode 2 (getUserTeams) échouée :", e);
+    }
+  } else {
+    console.warn("[DDT31] grist.getUserTeams n'est pas disponible");
+  }
+
+  console.warn("[DDT31] Impossible de récupérer l'utilisateur Grist (toutes méthodes échouées)");
+}
+
+/* ─────────────────────────────────────────────────────────────────
    useGristInit
    Charge grist-plugin-api.js et initialise la connexion Grist.
 ───────────────────────────────────────────────────────────────── */
 export function useGristInit(opts?: { requiredAccess?: "read table" | "full" }) {
-  const [mode, setMode]         = useState<"boot" | "grist" | "mock" | "rest" | "none">("boot");
-  const [docApi, setDocApi]     = useState<GristDocAPI | null>(null);
+  const [mode, setMode]           = useState<"boot" | "grist" | "mock" | "rest" | "none">("boot");
+  const [docApi, setDocApi]       = useState<GristDocAPI | null>(null);
   const [gristUser, setGristUser] = useState<GristUser | null>(null);
 
   useEffect(() => {
@@ -39,26 +111,9 @@ export function useGristInit(opts?: { requiredAccess?: "read table" | "full" }) 
         setMode(result.mode);
         setDocApi(result.docApi);
 
-        // Récupération de l'utilisateur Grist courant (mode iframe uniquement)
+        // Récupération utilisateur (mode iframe uniquement)
         if (result.mode === "grist") {
-          try {
-            const rawDocApi = (window as any).grist?.docApi;
-            if (typeof rawDocApi?.getAccessToken === "function") {
-              const { token, baseUrl } = await rawDocApi.getAccessToken({ readOnly: true });
-              const resp = await fetch(`${baseUrl}/api/profile`, {
-                headers: { Authorization: `Bearer ${token}` },
-              });
-              if (resp.ok) {
-                const profile = await resp.json();
-                setGristUser({
-                  name:  profile.name  || profile.email || "",
-                  email: profile.email || "",
-                });
-              }
-            }
-          } catch {
-            // info utilisateur optionnelle, on ignore silencieusement
-          }
+          fetchGristUser(setGristUser);
         }
       } catch {
         setMode("none");

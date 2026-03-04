@@ -122,7 +122,7 @@ function debounce<T extends (...args: never[]) => void>(fn: T, delay: number): T
    COMPOSANT PRINCIPAL
 ══════════════════════════════════════ */
 export default function DecomptePage() {
-  const { docApi } = useGristInit({ requiredAccess: "full" });
+  const { docApi, gristUser } = useGristInit({ requiredAccess: "full" });
   const docApiRef = useRef<GristDocAPI | null>(null);
 
   // ── State ──
@@ -1144,6 +1144,12 @@ export default function DecomptePage() {
               <i className="fa-solid fa-chart-column" />Tableau de bord
             </button>
           </nav>
+          {gristUser && (
+            <div className="app-header__user" title={gristUser.email}>
+              <i className="fa-solid fa-circle-user" />
+              <span>{gristUser.name}</span>
+            </div>
+          )}
           <button className="btn-log-toggle" type="button" aria-label="Journal" onClick={() => setSidebarOpen(o => !o)}>
             <i className="fa-solid fa-clock-rotate-left" />Journal
             <span className={`log-badge${logCount > 0 ? " visible" : ""}`}>{logCount}</span>

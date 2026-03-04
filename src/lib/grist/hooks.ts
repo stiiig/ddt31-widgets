@@ -16,21 +16,19 @@ async function fetchGristUser(setGristUser: (u: GristUser) => void) {
   const gristRaw = (window as any).grist;
   const rawDocApi = gristRaw?.docApi;
 
-  // ── Méthode 1 : getAccessToken → REST /api/profile ──────────────
+  // ── Méthode 1 : getAccessToken → proxy Next.js → REST /api/profile ──
+  // On passe par /api/grist-profile (même domaine) pour éviter le CORS.
   if (typeof rawDocApi?.getAccessToken === "function") {
     try {
       const tokenResult = await rawDocApi.getAccessToken({ readOnly: true });
       const { token, baseUrl } = tokenResult ?? {};
 
       if (token && baseUrl) {
-        // Bearer header
-        let resp = await fetch(`${baseUrl}/api/profile`, {
-          headers: { Authorization: `Bearer ${token}` },
+        const resp = await fetch("/api/grist-profile", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token, baseUrl }),
         });
-        // Fallback : query param
-        if (!resp.ok) {
-          resp = await fetch(`${baseUrl}/api/profile?auth=${token}`);
-        }
         if (resp.ok) {
           const p = await resp.json();
           const name = p.name || p.email || "";
@@ -38,15 +36,15 @@ async function fetchGristUser(setGristUser: (u: GristUser) => void) {
             setGristUser({ name, email: p.email || "" });
             return;
           }
-          console.warn("[DDT31] /api/profile OK mais name/email vides :", p);
+          console.warn("[DDT31] /api/grist-profile OK mais name/email vides :", p);
         } else {
-          console.warn("[DDT31] /api/profile status :", resp.status, "baseUrl :", baseUrl);
+          console.warn("[DDT31] /api/grist-profile status :", resp.status);
         }
       } else {
         console.warn("[DDT31] getAccessToken a retourné :", tokenResult);
       }
     } catch (e) {
-      console.warn("[DDT31] Méthode 1 (getAccessToken) échouée :", e);
+      console.warn("[DDT31] Méthode 1 (proxy grist-profile) échouée :", e);
     }
   } else {
     console.warn("[DDT31] grist.docApi.getAccessToken n'est pas disponible");

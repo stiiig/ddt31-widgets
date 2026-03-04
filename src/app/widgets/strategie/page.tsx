@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useGristInit } from "@/lib/grist/hooks";
-import { UserBadge } from "@/components/UserBadge";
 import type { GristDocAPI } from "@/lib/grist/meta";
 
 /* ══════════════════════════════════════
@@ -120,7 +119,7 @@ function periodLabel(vue: VueType, year: number, month: number): string {
    COMPOSANT PRINCIPAL
 ══════════════════════════════════════ */
 export default function StrategiePage() {
-  const { docApi, gristUser, setLocalUser } = useGristInit({ requiredAccess: "read table" });
+  const { docApi, gristUser } = useGristInit({ requiredAccess: "read table" });
   const docApiRef  = useRef<GristDocAPI | null>(null);
 
   // ── State ──
@@ -328,7 +327,12 @@ export default function StrategiePage() {
             <i className="fa-solid fa-landmark" />DDT 31
           </div>
           <div className="app-header__title">Stratégie</div>
-          <UserBadge user={gristUser} onSetName={setLocalUser} />
+          {gristUser && (
+            <div className="app-header__user" title={gristUser.email}>
+              <i className="fa-solid fa-circle-user" />
+              <span>{gristUser.name}</span>
+            </div>
+          )}
         </header>
 
         {/* ── Content ── */}

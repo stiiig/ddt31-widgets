@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useGristInit } from "@/lib/grist/hooks";
-import { UserBadge } from "@/components/UserBadge";
 
 // ═══════════════════════════════════════════════════════════
 // CONSTANTES
@@ -499,7 +498,7 @@ function ToastContainer({ toasts, onClose }: ToastContainerProps) {
 let toastCounter = 0;
 
 export default function EnregistrementPage() {
-  const { docApi, gristUser, setLocalUser } = useGristInit({ requiredAccess: "full" });
+  const { docApi, gristUser } = useGristInit({ requiredAccess: "full" });
 
   // — Mode & form —
   const [mode, setModeState] = useState<"create" | "edit">("create");
@@ -1460,7 +1459,12 @@ export default function EnregistrementPage() {
               <i className="fa-solid fa-chart-column" aria-hidden="true" /> Tableau de bord
             </button>
           </nav>
-          <UserBadge user={gristUser} onSetName={setLocalUser} />
+          {gristUser && (
+            <div className="app-header__user" title={gristUser.email}>
+              <i className="fa-solid fa-circle-user" />
+              <span>{gristUser.name}</span>
+            </div>
+          )}
         </header>
 
         <main className="app-content" role="main">

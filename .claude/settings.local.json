@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add src/app/widgets/enregistrement/page.tsx src/app/widgets/enregistrement/styles.css)",
+      "Bash(git commit:*)",
+      "Bash(git push)",
+      "Bash(git add src/app/widgets/enregistrement/styles.css)",
+      "Bash(git add src/app/widgets/enregistrement/page.tsx)",
+      "Bash(git add src/app/widgets/decompte/page.tsx src/app/widgets/decompte/styles.css)",
+      "Bash(git add src/app/widgets/enregistrement/page.tsx src/app/widgets/enregistrement/styles.css src/app/widgets/decompte/page.tsx)",
+      "Bash(git add src/app/widgets/decompte/page.tsx)",
+      "Bash(git add src/app/widgets/decompte/page.tsx src/app/widgets/decompte/styles.css src/app/widgets/enregistrement/styles.css)",
+      "Bash(npx tsc --noEmit)",
+      "Bash(git add src/app/widgets/strategie/)",
+      "Bash(git add src/app/widgets/strategie/page.tsx src/app/widgets/strategie/styles.css)",
+      "Bash(git add src/app/widgets/strategie/styles.css)",
+      "Bash(git add src/app/widgets/decompte/page.tsx src/app/widgets/decompte/styles.css src/app/widgets/strategie/page.tsx)",
+      "Bash(git push -u origin master)",
+      "Bash(gh pr:*)",
+      "Bash(brew list gh)",
+      "Bash(git remote get-url origin)",
+      "Bash(git add src/lib/grist/hooks.ts src/app/widgets/decompte/page.tsx src/app/widgets/decompte/styles.css src/app/widgets/strategie/page.tsx src/app/widgets/strategie/styles.css src/app/widgets/enregistrement/page.tsx src/app/widgets/enregistrement/styles.css)",
+      "Bash(git add src/lib/grist/hooks.ts)",
+      "Bash(git add src/app/api/grist-profile/route.ts src/lib/grist/hooks.ts)",
+      "Bash(git add src/lib/grist/hooks.ts src/components/UserBadge.tsx src/app/widgets/decompte/page.tsx src/app/widgets/strategie/page.tsx src/app/widgets/enregistrement/page.tsx src/app/widgets/decompte/styles.css src/app/widgets/strategie/styles.css src/app/widgets/enregistrement/styles.css)",
+      "Bash(git add -A)"
+    ]
+  }
+}

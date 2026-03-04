@@ -72,14 +72,6 @@ body {
 }
 .app-header__user span { overflow: hidden; text-overflow: ellipsis; }
 .app-header__user i { font-size: .95rem; flex-shrink: 0; }
-button.app-header__user { background: none; border: none; cursor: pointer; }
-button.app-header__user--unknown { opacity: .55; }
-button.app-header__user--unknown:hover { opacity: .9; }
-.app-header__user-input {
-  background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.4);
-  border-radius: 4px; color: #fff; font-size: 0.78rem; padding: 1px 6px;
-  width: 110px; outline: none;
-}
 
 /* ── Onglets principaux ── */
 .app-tabs {

@@ -340,6 +340,66 @@ body {
 .period-badge--prev     { background: #ede9fe; border-color: #ddd6fe; color: #6d28d9; }
 .period-badge--readonly { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
 
+/* ── Mode Papier (Saisie) ── */
+.papier-mode-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 0.375rem;
+  border: 1.5px solid #ddd;
+  background: #fff;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #555;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+  flex-shrink: 0;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.papier-mode-btn:hover:not(.active) { border-color: #b34000; color: #b34000; background: #fff7ed; }
+.papier-mode-btn.active { background: #b34000; border-color: #b34000; color: #fff; }
+.papier-mode-btn.active:hover { background: #92310a; border-color: #92310a; }
+
+.saisie-papier-count {
+  font-size: 0.75rem;
+  color: #b34000;
+  font-weight: 700;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.papier-mode-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  border-radius: 0.5rem;
+  padding: 0.55rem 1rem;
+  font-size: 0.8rem;
+  color: #9a3412;
+  font-weight: 600;
+}
+.papier-mode-banner i { color: #b34000; flex-shrink: 0; }
+.papier-mode-banner span { flex: 1; }
+.papier-mode-banner__close {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #b34000;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+  padding: 0.1rem;
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+.papier-mode-banner__close:hover { color: #92310a; }
+
 .tiles-readonly-notice {
   background: #fff7ed;
   border: 1px solid #fed7aa;

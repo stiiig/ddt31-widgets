@@ -21,6 +21,7 @@ const DECOMPTE_COLS = {
   Trans_Proro: "Trans_Proro", Retraits_Rejets: "Retraits_Rejets", Refus_Sursis: "Refus_Sursis",
   PD: "PD", CU: "CU", DP: "DP", DP_Division: "DP_Division",
   PC: "PC", Pcm: "Pcm", PA: "PA", Pam: "Pam", Permis_ZA: "Permis_ZA",
+  Papier: "Papier",
 };
 
 const LOG_COLS = {
@@ -150,9 +151,11 @@ export default function DecomptePage() {
   const [pulseTile,     setPulseTile]     = useState<string | null>(null);
   const [flashTile,     setFlashTile]     = useState<string | null>(null);
   const [loading,       setLoading]       = useState(true);
+  const [paperMode,     setPaperMode]     = useState(false);
 
   // Refs for async callbacks (avoid stale closures)
   const busyRef          = useRef(false);
+  const paperModeRef     = useRef(false);
   const saisieMonthRef   = useRef(saisieMonth);
   const saisieYearRef    = useRef(saisieYear);
   const selectedRef      = useRef<Commune | null>(null);
@@ -174,6 +177,7 @@ export default function DecomptePage() {
   useEffect(() => { communesRef.current = communes; }, [communes]);
   useEffect(() => { logsRef.current = logs; }, [logs]);
   useEffect(() => { logCountRef.current = logCount; }, [logCount]);
+  useEffect(() => { paperModeRef.current = paperMode; }, [paperMode]);
 
   const now = new Date();
   const nowMois = now.getMonth() + 1;
@@ -291,6 +295,7 @@ export default function DecomptePage() {
       if (!communeId || isNaN(communeId)) return;
       const row: DecompteRowAll = { id, communeId, annee: parseInt((annees[i] ?? 0) as string, 10), mois: parseInt((moisArr[i] ?? 0) as string, 10) };
       DOC_TYPES.forEach(dt => { row[dt.key] = parseInt(((tbl[dt.key] as unknown[])?.[i] ?? 0) as string, 10) || 0; });
+      row[DECOMPTE_COLS.Papier] = parseInt(((tbl[DECOMPTE_COLS.Papier] as unknown[])?.[i] ?? 0) as string, 10) || 0;
       rows.push(row);
     });
     setAllRows(rows);
@@ -347,6 +352,7 @@ export default function DecomptePage() {
       if (parseInt(cRef as string, 10) !== communeId) return;
       const row: DecompteRow = { id, annee: parseInt((annees[i] ?? 0) as string, 10), mois: parseInt((moisArr[i] ?? 0) as string, 10) };
       DOC_TYPES.forEach(dt => { row[dt.key] = parseInt(((tbl[dt.key] as unknown[])?.[i] ?? 0) as string, 10) || 0; });
+      row[DECOMPTE_COLS.Papier] = parseInt(((tbl[DECOMPTE_COLS.Papier] as unknown[])?.[i] ?? 0) as string, 10) || 0;
       rows.push(row);
     });
     return rows;
@@ -489,9 +495,10 @@ export default function DecomptePage() {
       if (!row) {
         const newFields: Record<string, unknown> = { [DECOMPTE_COLS.Commune]: commune.id, [DECOMPTE_COLS.Annee]: a, [DECOMPTE_COLS.Mois]: m, [DECOMPTE_COLS.Trimestre]: trimestre };
         DOC_TYPES.forEach(dt => { newFields[dt.key] = 0; });
+        newFields[DECOMPTE_COLS.Papier] = 0;
         const res = await api.applyUserActions([["AddRecord", TABLE_DECOMPTE, null, newFields]]);
         const rowId = res?.retValues?.[0] ?? null;
-        row = { id: rowId, annee: a, mois: m, ...Object.fromEntries(DOC_TYPES.map(dt => [dt.key, 0])) };
+        row = { id: rowId, annee: a, mois: m, ...Object.fromEntries(DOC_TYPES.map(dt => [dt.key, 0])), [DECOMPTE_COLS.Papier]: 0 };
         rows = [...rows, row];
         setDecompteRows(rows);
         decompteRowsRef.current = rows;
@@ -506,6 +513,16 @@ export default function DecomptePage() {
       setDecompteRows(updatedRows);
       decompteRowsRef.current = updatedRows;
       setAllRows(prev => { const next = prev.map(r => r.id === row!.id ? { ...r, [docKey]: newVal } : r); allRowsRef.current = next; return next; });
+      // Mode Papier : incrémenter aussi le compteur Papier
+      if (paperModeRef.current && delta > 0 && docKey !== DECOMPTE_COLS.Papier) {
+        const papierOld = decompteRowsRef.current.find(r => r.id === row!.id)?.[DECOMPTE_COLS.Papier] || 0;
+        const papierNew = papierOld + 1;
+        await api.applyUserActions([["UpdateRecord", TABLE_DECOMPTE, row!.id, { [DECOMPTE_COLS.Papier]: papierNew }]]);
+        const rowsP = decompteRowsRef.current.map(r => r.id === row!.id ? { ...r, [DECOMPTE_COLS.Papier]: papierNew } : r);
+        setDecompteRows(rowsP);
+        decompteRowsRef.current = rowsP;
+        setAllRows(prev => { const next = prev.map(r => r.id === row!.id ? { ...r, [DECOMPTE_COLS.Papier]: papierNew } : r); allRowsRef.current = next; return next; });
+      }
       // Log
       const logFields = { [LOG_COLS.Commune]: commune.id, [LOG_COLS.DecompteId]: row.id, [LOG_COLS.Type]: docKey, [LOG_COLS.Delta]: delta, [LOG_COLS.Timestamp]: isoNow(), [LOG_COLS.CommuneNom]: commune.nom, [LOG_COLS.Annee]: a, [LOG_COLS.Mois]: m };
       const logRes = await api.applyUserActions([["AddRecord", TABLE_LOGS, null, logFields]]);
@@ -572,6 +589,7 @@ export default function DecomptePage() {
     const row = decompteRows.find(r => r.annee === saisieYear && r.mois === saisieMonth) || null;
     const counters = getCounters(row);
     const total    = totalCounters(counters);
+    const papierCount = row?.[DECOMPTE_COLS.Papier] || 0;
     const heroType   = DOC_TYPES.find(dt => dt.hero);
     const otherTypes = DOC_TYPES.filter(dt => !dt.hero);
 
@@ -589,6 +607,22 @@ export default function DecomptePage() {
           {isCurrent && <span className="period-badge period-badge--current">en cours</span>}
           {isPrev    && <span className="period-badge period-badge--prev">mois précédent</span>}
           {!isCurrent && !isPrev && <span className="period-badge period-badge--readonly"><i className="fa-solid fa-lock" style={{ fontSize: ".65rem" }} /> lecture seule</span>}
+          {selected && editable && (
+            <button
+              type="button"
+              className={`papier-mode-btn${paperMode ? " active" : ""}`}
+              onClick={() => setPaperMode(p => !p)}
+              title={paperMode ? "Désactiver le mode Papier" : "Activer le mode Papier — chaque acte ajouté sera aussi comptabilisé en Papier"}
+            >
+              <i className={`fa-solid ${paperMode ? "fa-file-circle-check" : "fa-file"}`} />
+              {paperMode ? "Papier ON" : "Papier"}
+            </button>
+          )}
+          {selected && papierCount > 0 && (
+            <span className="saisie-papier-count" title={`${papierCount} acte(s) sur papier ce mois`}>
+              <i className="fa-solid fa-file" /> {papierCount}
+            </span>
+          )}
           {selected && <span className="saisie-period-bar__total">Total : <strong>{total}</strong></span>}
         </div>
 
@@ -604,6 +638,15 @@ export default function DecomptePage() {
               <div className="tiles-readonly-notice">
                 <i className="fa-solid fa-circle-info" />
                 <span><strong>{moisLabel(saisieMonth, saisieYear)}</strong> est en lecture seule. Seuls le mois courant et le mois précédent sont modifiables.</span>
+              </div>
+            )}
+            {paperMode && editable && (
+              <div className="papier-mode-banner">
+                <i className="fa-solid fa-file-circle-check" />
+                <span>Mode Papier activé — chaque acte ajouté sera aussi comptabilisé en Papier</span>
+                <button type="button" className="papier-mode-banner__close" onClick={() => setPaperMode(false)} aria-label="Désactiver">
+                  <i className="fa-solid fa-xmark" />
+                </button>
               </div>
             )}
             {heroType && (

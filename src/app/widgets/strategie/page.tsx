@@ -27,6 +27,9 @@ const MONTHS_FR = [
 
 const TAGS_FILTRES = ["Fixe", "Rotation", "Ciblée"] as const;
 
+// Ordre imposé pour l'affichage des arrondissements
+const ARR_ORDER = ["Toulouse", "Muret", "Saint-Gaudens"];
+
 /* ══════════════════════════════════════
    TYPES
 ══════════════════════════════════════ */
@@ -175,10 +178,17 @@ export default function StrategiePage() {
       });
       setCommunes(comMap);
 
-      // Calcule la liste triée des arrondissements uniques
+      // Calcule la liste triée des arrondissements uniques (ordre imposé)
       const arrSet = new Set<string>();
       comMap.forEach(c => { if (c.arr) arrSet.add(c.arr); });
-      const arrList = Array.from(arrSet).sort((a, b) => a.localeCompare(b, "fr", { numeric: true }));
+      const arrList = Array.from(arrSet).sort((a, b) => {
+        const ia = ARR_ORDER.indexOf(a);
+        const ib = ARR_ORDER.indexOf(b);
+        if (ia !== -1 && ib !== -1) return ia - ib;
+        if (ia !== -1) return -1;
+        if (ib !== -1) return 1;
+        return a.localeCompare(b, "fr", { numeric: true });
+      });
       setArrondissements(arrList);
       setArrFilters(new Set(arrList)); // tous cochés par défaut
 
@@ -296,71 +306,82 @@ export default function StrategiePage() {
 
           {/* Toolbar */}
           <div className="dashboard-toolbar">
-            <span className="dashboard-toolbar__period">Période&nbsp;:</span>
 
-            {/* Navigation */}
-            <div className="dash-nav">
-              <button className="dash-nav-btn" type="button" aria-label="Période précédente"
-                onClick={() => navigatePeriod(-1)}>
-                <i className="fa-solid fa-chevron-left" />
-              </button>
-              <span className="dash-period-label">{label}</span>
-              <button className="dash-nav-btn" type="button" aria-label="Période suivante"
-                onClick={() => navigatePeriod(1)}>
-                <i className="fa-solid fa-chevron-right" />
-              </button>
-            </div>
+            {/* Ligne 1 : période */}
+            <div className="toolbar-row">
+              <span className="dashboard-toolbar__period">Période&nbsp;:</span>
 
-            {/* Sélecteur vue */}
-            <div className="vue-selector">
-              {(["mois", "trimestre", "annee"] as VueType[]).map(v => (
-                <button key={v} type="button"
-                  className={`vue-btn${vue === v ? " active" : ""}`}
-                  onClick={() => setVue(v)}>
-                  {v === "mois" ? "Mois" : v === "trimestre" ? "Trimestre" : "Année"}
+              <div className="dash-nav">
+                <button className="dash-nav-btn" type="button" aria-label="Période précédente"
+                  onClick={() => navigatePeriod(-1)}>
+                  <i className="fa-solid fa-chevron-left" />
                 </button>
-              ))}
-            </div>
-
-            {/* Filtre tags */}
-            <div className="tag-filter-bar">
-              {TAGS_FILTRES.map(tag => (
-                <button key={tag} type="button"
-                  className={tagBtnClass(tag, tagFilters.has(tag))}
-                  onClick={() => toggleTag(tag)}>
-                  {tagFilters.has(tag)
-                    ? <i className="fa-solid fa-check" />
-                    : <i className="fa-solid fa-xmark" style={{ opacity: 0.5 }} />}
-                  {tag}
+                <span className="dash-period-label">{label}</span>
+                <button className="dash-nav-btn" type="button" aria-label="Période suivante"
+                  onClick={() => navigatePeriod(1)}>
+                  <i className="fa-solid fa-chevron-right" />
                 </button>
-              ))}
-            </div>
-
-            {/* Filtre arrondissements */}
-            {arrondissements.length > 0 && (
-              <div className="tag-filter-bar">
-                {arrondissements.map(arr => {
-                  const active = arrFilters.has(arr);
-                  return (
-                    <button key={arr} type="button"
-                      className={`tag-filter-btn arr-filter-btn${active ? " active" : ""}`}
-                      onClick={() => toggleArr(arr)}>
-                      {active
-                        ? <i className="fa-solid fa-check" />
-                        : <i className="fa-solid fa-xmark" style={{ opacity: 0.5 }} />}
-                      {arr}
-                    </button>
-                  );
-                })}
               </div>
-            )}
 
-            {/* Compteur */}
-            {!loading && (
-              <span className="strat-count">
-                <strong>{rows.length}</strong> commune{rows.length !== 1 ? "s" : ""}
-              </span>
-            )}
+              <div className="vue-selector">
+                {(["mois", "trimestre", "annee"] as VueType[]).map(v => (
+                  <button key={v} type="button"
+                    className={`vue-btn${vue === v ? " active" : ""}`}
+                    onClick={() => setVue(v)}>
+                    {v === "mois" ? "Mois" : v === "trimestre" ? "Trimestre" : "Année"}
+                  </button>
+                ))}
+              </div>
+
+              {/* Compteur */}
+              {!loading && (
+                <span className="strat-count">
+                  <strong>{rows.length}</strong> commune{rows.length !== 1 ? "s" : ""}
+                </span>
+              )}
+            </div>
+
+            {/* Ligne 2 : filtres */}
+            <div className="toolbar-row toolbar-row--filters">
+              {/* Filtre tags */}
+              <div className="tag-filter-bar">
+                {TAGS_FILTRES.map(tag => (
+                  <button key={tag} type="button"
+                    className={tagBtnClass(tag, tagFilters.has(tag))}
+                    onClick={() => toggleTag(tag)}>
+                    {tagFilters.has(tag)
+                      ? <i className="fa-solid fa-check" />
+                      : <i className="fa-solid fa-xmark" style={{ opacity: 0.5 }} />}
+                    {tag}
+                  </button>
+                ))}
+              </div>
+
+              {/* Séparateur */}
+              {arrondissements.length > 0 && (
+                <span style={{ width: 1, background: "#e0e0e0", alignSelf: "stretch", flexShrink: 0 }} />
+              )}
+
+              {/* Filtre arrondissements */}
+              {arrondissements.length > 0 && (
+                <div className="tag-filter-bar">
+                  {arrondissements.map(arr => {
+                    const active = arrFilters.has(arr);
+                    return (
+                      <button key={arr} type="button"
+                        className={`tag-filter-btn arr-filter-btn${active ? " active" : ""}`}
+                        onClick={() => toggleArr(arr)}>
+                        {active
+                          ? <i className="fa-solid fa-check" />
+                          : <i className="fa-solid fa-xmark" style={{ opacity: 0.5 }} />}
+                        {arr}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
           </div>
 
           {/* Tableau */}

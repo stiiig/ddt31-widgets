@@ -71,12 +71,21 @@ body {
   background: #fff;
   border: 1px solid #ddd;
   border-radius: 0.5rem;
-  padding: 0.6rem 1.25rem;
+  padding: 0.55rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+}
+.toolbar-row {
   display: flex;
   align-items: center;
   gap: 1rem;
   flex-wrap: wrap;
-  box-shadow: 0 1px 3px rgba(0,0,0,.06);
+}
+.toolbar-row--filters {
+  padding-top: 0.35rem;
+  border-top: 1px solid #f0f0f0;
 }
 .dashboard-toolbar__period {
   font-size: 0.8rem;
@@ -142,7 +151,6 @@ body {
   display: flex;
   gap: 0.4rem;
   align-items: center;
-  margin-left: auto;
 }
 .tag-filter-label {
   font-size: 0.75rem;

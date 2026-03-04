@@ -71,10 +71,10 @@ body {
   background: #fff;
   border: 1px solid #ddd;
   border-radius: 0.5rem;
-  padding: 0.55rem 1.25rem;
+  padding: 0.65rem 1.25rem;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.55rem;
   box-shadow: 0 1px 3px rgba(0,0,0,.06);
 }
 .toolbar-row {
@@ -84,7 +84,8 @@ body {
   flex-wrap: wrap;
 }
 .toolbar-row--filters {
-  padding-top: 0.35rem;
+  padding-top: 0.55rem;
+  padding-bottom: 0.25rem;
   border-top: 1px solid #f0f0f0;
 }
 .dashboard-toolbar__period {

@@ -115,9 +115,12 @@ interface AnpcRow {
 
 interface DashFilters {
   arr: string[];
+  selection: string[];
+  logements: string[];
+  type: string[];
+  type2: string[];
   motif: string[];
   objet: string[];
-  selection: string[];
   reglementation: string[];
 }
 
@@ -590,7 +593,7 @@ export default function EnregistrementPage() {
   const [anpcDataLoaded, setAnpcDataLoaded] = useState(false);
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
-  const [dashFilters, setDashFilters] = useState<DashFilters>({ arr: [], motif: [], objet: [], selection: [], reglementation: [] });
+  const [dashFilters, setDashFilters] = useState<DashFilters>({ arr: [], selection: [], logements: [], type: [], type2: [], motif: [], objet: [], reglementation: [] });
   const [dashFiltersOpen, setDashFiltersOpen] = useState(false);
   const [dashCommuneQuery, setDashCommuneQuery] = useState("");
   const [dashCommuneDdOpen, setDashCommuneDdOpen] = useState(false);
@@ -1326,6 +1329,13 @@ export default function EnregistrementPage() {
   function applyDashFilters(rows: AnpcRow[]): AnpcRow[] {
     return rows.filter(row => {
       if (dashFilters.arr.length > 0 && !dashFilters.arr.includes(row.arr)) return false;
+      if (dashFilters.selection.length > 0) {
+        const sels = getRowSelections(row);
+        if (!dashFilters.selection.some(s => sels.includes(s))) return false;
+      }
+      if (dashFilters.logements.length > 0 && !dashFilters.logements.includes(row.logements)) return false;
+      if (dashFilters.type.length > 0 && !dashFilters.type.includes(row.type)) return false;
+      if (dashFilters.type2.length > 0 && !dashFilters.type2.includes(row.type2)) return false;
       if (dashFilters.motif.length > 0) {
         const motifs = fromGristList(row.motif);
         if (!dashFilters.motif.some(m => motifs.includes(m))) return false;
@@ -1333,6 +1343,10 @@ export default function EnregistrementPage() {
       if (dashFilters.objet.length > 0) {
         const objets = fromGristList(row.objet);
         if (!dashFilters.objet.some(o => objets.includes(o))) return false;
+      }
+      if (dashFilters.reglementation.length > 0) {
+        const commune = communesByIdRef.current.get(row.communeId ?? 0);
+        if (!commune || !dashFilters.reglementation.includes(commune.reglementation)) return false;
       }
       if (dashScope === "commune" && dashSelectedCommune) {
         if (row.communeId !== dashSelectedCommune.id) return false;
@@ -1450,9 +1464,17 @@ export default function EnregistrementPage() {
 
   // Unique filter values
   const ARR_ORDER = ["Toulouse", "Muret", "Saint-Gaudens"];
-  const uniqueArrs = ARR_ORDER.filter(a => allAnpcRows.some(r => r.arr === a));
-  const uniqueMotifs = [...new Set(allAnpcRows.flatMap(r => fromGristList(r.motif)))].sort();
-  const uniqueObjets = [...new Set(allAnpcRows.flatMap(r => fromGristList(r.objet)))].sort();
+  const SEL_ORDER = ["Fixe", "Ciblée", "Rotation"];
+  const uniqueArrs          = ARR_ORDER.filter(a => allAnpcRows.some(r => r.arr === a));
+  const uniqueSelections    = SEL_ORDER.filter(s => allAnpcRows.some(r => getRowSelections(r).includes(s)));
+  const uniqueLogements     = [...new Set(allAnpcRows.map(r => r.logements).filter(Boolean))].sort();
+  const uniqueTypes         = [...new Set(allAnpcRows.map(r => r.type).filter(Boolean))].sort();
+  const uniqueType2s        = [...new Set(allAnpcRows.map(r => r.type2).filter(Boolean))].sort();
+  const uniqueMotifs        = [...new Set(allAnpcRows.flatMap(r => fromGristList(r.motif)))].sort();
+  const uniqueObjets        = [...new Set(allAnpcRows.flatMap(r => fromGristList(r.objet)))].sort();
+  const uniqueReglementations = [...new Set(
+    allAnpcRows.map(r => communesByIdRef.current.get(r.communeId ?? 0)?.reglementation).filter(Boolean) as string[]
+  )].sort();
 
   // ──────────────────────────────────────────
   // Render
@@ -1977,9 +1999,9 @@ export default function EnregistrementPage() {
                     style={{ marginLeft: "auto", marginRight: "0.75rem" }}
                     onClick={() => setDashFiltersOpen(v => !v)}>
                     <i className="fa-solid fa-filter" />
-                    {(dashFilters.arr.length + dashFilters.motif.length + dashFilters.objet.length) > 0 && (
+                    {Object.values(dashFilters).reduce((s, a) => s + a.length, 0) > 0 && (
                       <span style={{ display: "inline", background: "#FF6B6B", color: "white", padding: "0.1rem 0.4rem", borderRadius: "12px", fontSize: "0.75rem", fontWeight: 700, marginLeft: "0.25rem" }}>
-                        {dashFilters.arr.length + dashFilters.motif.length + dashFilters.objet.length}
+                        {Object.values(dashFilters).reduce((s, a) => s + a.length, 0)}
                       </span>
                     )}
                     {" "}Filtres
@@ -1990,31 +2012,101 @@ export default function EnregistrementPage() {
               {/* Filtres bar */}
               {dashFiltersOpen && (
                 <div id="dashFiltersBar" className="open">
-                  <button id="btnClearAllFilters" type="button"
-                    onClick={() => setDashFilters({ arr: [], motif: [], objet: [], selection: [], reglementation: [] })}>
-                    <i className="fa-solid fa-xmark" /> Réinitialiser
-                  </button>
                   <div className="filters-col">
+                    {/* 1. Arrondissement */}
                     {uniqueArrs.length > 0 && (
                       <div className="filters-group">
                         <span className="filter-label">Arrondissement :</span>
                         <div className="filter-buttons">
-                          {uniqueArrs.map(arr => (
-                            <button key={arr} type="button"
-                              className={`filter-btn${dashFilters.arr.includes(arr) ? " active" : ""}`}
+                          {uniqueArrs.map(a => (
+                            <button key={a} type="button"
+                              className={`filter-btn${dashFilters.arr.includes(a) ? " active" : ""}`}
                               onClick={() => setDashFilters(prev => ({
                                 ...prev,
-                                arr: prev.arr.includes(arr) ? prev.arr.filter(a => a !== arr) : [...prev.arr, arr],
+                                arr: prev.arr.includes(a) ? prev.arr.filter(x => x !== a) : [...prev.arr, a],
                               }))}>
-                              {arr}
+                              {a}
                             </button>
                           ))}
                         </div>
                       </div>
                     )}
+                    {/* 2. Stratégie */}
+                    {uniqueSelections.length > 0 && (
+                      <div className="filters-group">
+                        <span className="filter-label">Stratégie :</span>
+                        <div className="filter-buttons">
+                          {uniqueSelections.map(s => (
+                            <button key={s} type="button"
+                              className={`filter-btn${dashFilters.selection.includes(s) ? " active" : ""}`}
+                              onClick={() => setDashFilters(prev => ({
+                                ...prev,
+                                selection: prev.selection.includes(s) ? prev.selection.filter(x => x !== s) : [...prev.selection, s],
+                              }))}>
+                              {s}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {/* 3. Logements */}
+                    {uniqueLogements.length > 0 && (
+                      <div className="filters-group">
+                        <span className="filter-label">Logements :</span>
+                        <div className="filter-buttons">
+                          {uniqueLogements.map(l => (
+                            <button key={l} type="button"
+                              className={`filter-btn${dashFilters.logements.includes(l) ? " active" : ""}`}
+                              onClick={() => setDashFilters(prev => ({
+                                ...prev,
+                                logements: prev.logements.includes(l) ? prev.logements.filter(x => x !== l) : [...prev.logements, l],
+                              }))}>
+                              {l}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {/* 4. Acte */}
+                    {uniqueTypes.length > 0 && (
+                      <div className="filters-group">
+                        <span className="filter-label">Acte :</span>
+                        <div className="filter-buttons">
+                          {uniqueTypes.map(t => (
+                            <button key={t} type="button"
+                              className={`filter-btn${dashFilters.type.includes(t) ? " active" : ""}`}
+                              onClick={() => setDashFilters(prev => ({
+                                ...prev,
+                                type: prev.type.includes(t) ? prev.type.filter(x => x !== t) : [...prev.type, t],
+                              }))}>
+                              {t}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {/* 5. Permis */}
+                    {uniqueType2s.length > 0 && (
+                      <div className="filters-group">
+                        <span className="filter-label">Permis :</span>
+                        <div className="filter-buttons">
+                          {uniqueType2s.map(t => (
+                            <button key={t} type="button"
+                              className={`filter-btn${dashFilters.type2.includes(t) ? " active" : ""}`}
+                              onClick={() => setDashFilters(prev => ({
+                                ...prev,
+                                type2: prev.type2.includes(t) ? prev.type2.filter(x => x !== t) : [...prev.type2, t],
+                              }))}>
+                              {t}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    {/* 6. Enjeux */}
                     {uniqueMotifs.length > 0 && (
                       <div className="filters-group">
-                        <span className="filter-label">Motif :</span>
+                        <span className="filter-label">Enjeux :</span>
                         <div className="filter-buttons">
                           {uniqueMotifs.map(m => (
                             <button key={m} type="button"
@@ -2029,9 +2121,10 @@ export default function EnregistrementPage() {
                         </div>
                       </div>
                     )}
+                    {/* 7. Motifs */}
                     {uniqueObjets.length > 0 && (
                       <div className="filters-group">
-                        <span className="filter-label">Objet :</span>
+                        <span className="filter-label">Motifs :</span>
                         <div className="filter-buttons">
                           {uniqueObjets.map(o => (
                             <button key={o} type="button"
@@ -2046,7 +2139,30 @@ export default function EnregistrementPage() {
                         </div>
                       </div>
                     )}
+                    {/* 8. Réglementation */}
+                    {uniqueReglementations.length > 0 && (
+                      <div className="filters-group">
+                        <span className="filter-label">Réglementation :</span>
+                        <div className="filter-buttons">
+                          {uniqueReglementations.map(r => (
+                            <button key={r} type="button"
+                              className={`filter-btn${dashFilters.reglementation.includes(r) ? " active" : ""}`}
+                              onClick={() => setDashFilters(prev => ({
+                                ...prev,
+                                reglementation: prev.reglementation.includes(r) ? prev.reglementation.filter(x => x !== r) : [...prev.reglementation, r],
+                              }))}>
+                              {r}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
+                  {/* Réinitialiser — en dessous des groupes */}
+                  <button id="btnClearAllFilters" type="button"
+                    onClick={() => setDashFilters({ arr: [], selection: [], logements: [], type: [], type2: [], motif: [], objet: [], reglementation: [] })}>
+                    <i className="fa-solid fa-xmark" /> Réinitialiser
+                  </button>
                 </div>
               )}
 

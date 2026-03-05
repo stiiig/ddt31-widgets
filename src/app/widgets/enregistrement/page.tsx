@@ -1936,6 +1936,9 @@ export default function EnregistrementPage() {
                   </div>
                   {filteredRows.length > 0 && (
                     <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                      {Object.entries(filteredRows.reduce<Record<string, number>>((acc, r) => { if (r.type) acc[r.type] = (acc[r.type] || 0) + 1; return acc; }, {}))
+                        .map(([type, count]) => <span key={type} className="tag tag--info">{type} : {count}</span>)
+                      }
                       <span className="tag tag--light">Total : {filteredRows.length}</span>
                     </div>
                   )}
@@ -1958,7 +1961,7 @@ export default function EnregistrementPage() {
                 <div id="dashFiltersBar" className="open">
                   {uniqueArrs.length > 0 && (
                     <div className="filters-group">
-                      <span className="filter-label">Arrondissement:</span>
+                      <span className="filter-label">Arrondissement :</span>
                       <div className="filter-buttons">
                         {uniqueArrs.map(arr => (
                           <button key={arr} type="button"
@@ -1975,7 +1978,7 @@ export default function EnregistrementPage() {
                   )}
                   {uniqueMotifs.length > 0 && (
                     <div className="filters-group">
-                      <span className="filter-label">Motif:</span>
+                      <span className="filter-label">Motif :</span>
                       <div className="filter-buttons">
                         {uniqueMotifs.map(m => (
                           <button key={m} type="button"
@@ -1992,7 +1995,7 @@ export default function EnregistrementPage() {
                   )}
                   {uniqueObjets.length > 0 && (
                     <div className="filters-group">
-                      <span className="filter-label">Objet:</span>
+                      <span className="filter-label">Objet :</span>
                       <div className="filter-buttons">
                         {uniqueObjets.map(o => (
                           <button key={o} type="button"

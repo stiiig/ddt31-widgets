@@ -2129,12 +2129,12 @@ input[type="date"].is-empty::-webkit-datetime-edit-year-field{
 
 #dashFiltersBar {
   display: none;
-  flex-wrap: wrap;
-  gap: 1.5rem;
+  flex-direction: column;
+  gap: 0.75rem;
   padding: 1rem;
   background: #f9f9f9;
   border-bottom: 1px solid #ddd;
-  align-items: center;
+  align-items: flex-start;
 }
 
 #dashFiltersBar.open {

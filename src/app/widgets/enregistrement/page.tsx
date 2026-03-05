@@ -2102,30 +2102,46 @@ export default function EnregistrementPage() {
                         const commune = row.communeId ? communesByIdRef.current.get(row.communeId) : null;
                         return (
                           <tr key={row.id} className={idx % 2 === 1 ? "alt-row" : ""}>
+                            {/* majcs */}
                             <td><strong>{row.majcs}</strong></td>
+                            {/* communeName */}
                             <td><strong>{row.communeName}</strong></td>
+                            {/* nActe */}
                             <td>{row.nActe ? <span className="tag tag--info">{row.nActe}</span> : "—"}</td>
+                            {/* nomProjet */}
                             <td>{row.nomProjet}</td>
+                            {/* arr */}
                             <td>{row.arr ? <span className="tag tag--light">{row.arr}</span> : "—"}</td>
-                            <td className="col-num">{row.logements ? <span className="tag tag--light">{row.logements}</span> : "—"}</td>
-                            <td>{row.type ? <span className="tag tag--info">{row.type}</span> : "—"}</td>
-                            <td>{row.type2 ? <span className="tag tag--info">{row.type2}</span> : "—"}</td>
-                            <td className="col-nowrap">
-                              {motifList.length > 0 ? motifList.map(m => <span key={m} className="tag tag--info" style={{ marginRight: "0.25rem" }}>{m}</span>) : "—"}
-                            </td>
+                            {/* objet → Motifs ($Motifs_controle) */}
                             <td className="col-nowrap">
                               {objetList.length > 0 ? objetList.map(o => <span key={o} className="tag tag--info" style={{ marginRight: "0.25rem" }}>{o}</span>) : "—"}
                             </td>
+                            {/* selection → Acte (sélection trimestrielle) */}
                             <td className="col-nowrap">
                               {sels.length > 0 ? sels.map(s => {
                                 const cls = s === "Fixe" ? "sel-fixe" : s === "Ciblée" ? "sel-ciblee" : "sel-rotation";
                                 return <span key={s} className={`commune-arr-badge commune-arr-badge--sel ${cls}`} style={{ marginRight: "0.25rem" }}>{s}</span>;
                               }) : "—"}
                             </td>
+                            {/* logements → Acte (nombre) */}
+                            <td className="col-num">{row.logements ? <span className="tag tag--light">{row.logements}</span> : "—"}</td>
+                            {/* type → Permis ($Type) */}
+                            <td>{row.type ? <span className="tag tag--info">{row.type}</span> : "—"}</td>
+                            {/* type2 → Permis ($Type2) */}
+                            <td>{row.type2 ? <span className="tag tag--info">{row.type2}</span> : "—"}</td>
+                            {/* motif → Enjeux ($Enjeux_pre_identifies) */}
+                            <td className="col-nowrap">
+                              {motifList.length > 0 ? motifList.map(m => <span key={m} className="tag tag--info" style={{ marginRight: "0.25rem" }}>{m}</span>) : "—"}
+                            </td>
+                            {/* reglementation */}
                             <td>{commune?.reglementation ? <span className="tag tag--reglementation">{commune.reglementation}</span> : "—"}</td>
-                            <td>{formatDate(row.visaMairie)}</td>
+                            {/* receptionPref */}
                             <td>{formatDate(row.receptionPref)}</td>
+                            {/* visaMairie */}
+                            <td>{formatDate(row.visaMairie)}</td>
+                            {/* createdByName */}
                             <td>{row.createdByName}</td>
+                            {/* createdAt */}
                             <td style={{ whiteSpace: "nowrap" }}>{formatDateTime(row.createdAt)}</td>
                           </tr>
                         );

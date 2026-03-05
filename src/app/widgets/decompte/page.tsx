@@ -1171,8 +1171,10 @@ export default function DecomptePage() {
       <div className={`app-main${sidebarOpen ? " sidebar-open" : ""}`}>
         {/* Header */}
         <header className="app-header">
-          <div className="app-header__logo"><i className="fa-solid fa-landmark" />DDT 31</div>
-          <div className="app-header__title">Décompte des actes</div>
+          <div className="app-header__left">
+            <div className="app-header__logo"><i className="fa-solid fa-landmark" />DDT 31</div>
+            <div className="app-header__title">Décompte des actes</div>
+          </div>
           <nav className="app-tabs" role="tablist" aria-label="Modes">
             <button className={`app-tab${tab === "saisie" ? " active" : ""}`} data-tab="saisie" role="tab" aria-selected={tab === "saisie"} type="button"
               onClick={() => { setTab("saisie"); handleClearCommune(); }}>
@@ -1183,17 +1185,18 @@ export default function DecomptePage() {
               <i className="fa-solid fa-chart-column" />Tableau de bord
             </button>
           </nav>
-          <div className="app-header__spacer" />
-          {gristUser && (
-            <div className="app-header__user" title={gristUser.email}>
-              <i className="fa-solid fa-circle-user" />
-              <span>{gristUser.name}</span>
-            </div>
-          )}
-          <button className="btn-log-toggle" type="button" aria-label="Journal" onClick={() => setSidebarOpen(o => !o)}>
-            <i className="fa-solid fa-clock-rotate-left" />Journal
-            <span className={`log-badge${logCount > 0 ? " visible" : ""}`}>{logCount}</span>
-          </button>
+          <div className="app-header__right">
+            {gristUser && (
+              <div className="app-header__user" title={gristUser.email}>
+                <i className="fa-solid fa-circle-user" />
+                <span>{gristUser.name}</span>
+              </div>
+            )}
+            <button className="btn-log-toggle" type="button" aria-label="Journal" onClick={() => setSidebarOpen(o => !o)}>
+              <i className="fa-solid fa-clock-rotate-left" />Journal
+              <span className={`log-badge${logCount > 0 ? " visible" : ""}`}>{logCount}</span>
+            </button>
+          </div>
         </header>
 
         {/* Content */}

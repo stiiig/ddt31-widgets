@@ -59,6 +59,8 @@ body {
   align-items: center;
 }
 .app-header__spacer { flex: 1; }
+.app-header__left  { flex: 1; display: flex; align-items: center; }
+.app-header__right { flex: 1; display: flex; align-items: center; justify-content: flex-end; gap: 0.5rem; }
 .app-header__user {
   display: flex;
   align-items: center;

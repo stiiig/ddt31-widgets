@@ -1438,12 +1438,14 @@ export default function EnregistrementPage() {
       <div className="app-main">
         {/* Header */}
         <header className="app-header" role="banner">
-          <div className="app-header__logo">
-            <i className="fa-solid fa-landmark" aria-hidden="true" />
-            DDT 31
-          </div>
-          <div className="app-header__title">
-            Enregistrement
+          <div className="app-header__left">
+            <div className="app-header__logo">
+              <i className="fa-solid fa-landmark" aria-hidden="true" />
+              DDT 31
+            </div>
+            <div className="app-header__title">
+              Enregistrement
+            </div>
           </div>
           <nav className="app-tabs" role="tablist" aria-label="Modes">
             <button
@@ -1461,13 +1463,14 @@ export default function EnregistrementPage() {
               <i className="fa-solid fa-chart-column" aria-hidden="true" /> Tableau de bord
             </button>
           </nav>
-          <div className="app-header__spacer" />
-          {gristUser && (
-            <div className="app-header__user" title={gristUser.email}>
-              <i className="fa-solid fa-circle-user" />
-              <span>{gristUser.name}</span>
-            </div>
-          )}
+          <div className="app-header__right">
+            {gristUser && (
+              <div className="app-header__user" title={gristUser.email}>
+                <i className="fa-solid fa-circle-user" />
+                <span>{gristUser.name}</span>
+              </div>
+            )}
+          </div>
         </header>
 
         <main className="app-content" role="main">

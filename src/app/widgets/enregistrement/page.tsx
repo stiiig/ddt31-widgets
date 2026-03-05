@@ -41,8 +41,8 @@ const COLS = {
   TailleLogements: "Taille_logements",
 } as const;
 
-const ALL_MOTIFS = ["ZI", "RT", "ZA", "ZN", "STEP", "PEB", "Site classé"] as const;
-const ALL_OBJETS = ["ERP 1/2/3", "ERP 4/5", "EE", "LLS", "Signalé", "Aléatoire", "Taille"] as const;
+const ALL_MOTIFS = ["ZI", "ZA", "ZN", "RT", "STEP", "PEB", "Site classé"] as const;
+const ALL_OBJETS = ["LLS", "ERP 1/2/3", "ERP 4/5", "EE", "Signalé", "Aléatoire", "Taille"] as const;
 
 const OBJET_TO_COL: Record<string, string> = {
   "ERP 1/2/3": "ERP123", "ERP 4/5": "ERP45", "EE": "EE",
@@ -122,6 +122,7 @@ interface DashFilters {
   motif: string[];
   objet: string[];
   reglementation: string[];
+  createdByName: string[];
 }
 
 interface Toast {
@@ -593,7 +594,7 @@ export default function EnregistrementPage() {
   const [anpcDataLoaded, setAnpcDataLoaded] = useState(false);
   const [sortField, setSortField] = useState<string | null>(null);
   const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
-  const [dashFilters, setDashFilters] = useState<DashFilters>({ arr: [], selection: [], logements: [], type: [], type2: [], motif: [], objet: [], reglementation: [] });
+  const [dashFilters, setDashFilters] = useState<DashFilters>({ arr: [], selection: [], logements: [], type: [], type2: [], motif: [], objet: [], reglementation: [], createdByName: [] });
   const [dashFiltersOpen, setDashFiltersOpen] = useState(false);
   const [dashCommuneQuery, setDashCommuneQuery] = useState("");
   const [dashCommuneDdOpen, setDashCommuneDdOpen] = useState(false);
@@ -1348,6 +1349,7 @@ export default function EnregistrementPage() {
         const commune = communesByIdRef.current.get(row.communeId ?? 0);
         if (!commune || !dashFilters.reglementation.includes(commune.reglementation)) return false;
       }
+      if (dashFilters.createdByName.length > 0 && !dashFilters.createdByName.includes(row.createdByName)) return false;
       if (dashScope === "commune" && dashSelectedCommune) {
         if (row.communeId !== dashSelectedCommune.id) return false;
       }
@@ -1462,19 +1464,24 @@ export default function EnregistrementPage() {
     };
   }, [filteredRows, sortField, sortDir]);
 
-  // Unique filter values
+  // Unique filter values — ordres fixes
   const ARR_ORDER = ["Toulouse", "Muret", "Saint-Gaudens"];
-  const SEL_ORDER = ["Fixe", "Ciblée", "Rotation"];
-  const uniqueArrs          = ARR_ORDER.filter(a => allAnpcRows.some(r => r.arr === a));
-  const uniqueSelections    = SEL_ORDER.filter(s => allAnpcRows.some(r => getRowSelections(r).includes(s)));
-  const uniqueLogements     = [...new Set(allAnpcRows.map(r => r.logements).filter(Boolean))].sort();
-  const uniqueTypes         = [...new Set(allAnpcRows.map(r => r.type).filter(Boolean))].sort();
-  const uniqueType2s        = [...new Set(allAnpcRows.map(r => r.type2).filter(Boolean))].sort();
-  const uniqueMotifs        = [...new Set(allAnpcRows.flatMap(r => fromGristList(r.motif)))].sort();
-  const uniqueObjets        = [...new Set(allAnpcRows.flatMap(r => fromGristList(r.objet)))].sort();
-  const uniqueReglementations = [...new Set(
+  const SEL_ORDER = ["Fixe", "Rotation", "Ciblée"];
+  const LOG_ORDER = ["10+", "25+", "75+", "100+"];
+  const dataLogements = new Set(allAnpcRows.map(r => r.logements).filter(Boolean));
+  const dataMotifs    = new Set(allAnpcRows.flatMap(r => fromGristList(r.motif)));
+  const dataObjets    = new Set(allAnpcRows.flatMap(r => fromGristList(r.objet)));
+  const uniqueArrs             = ARR_ORDER.filter(a => allAnpcRows.some(r => r.arr === a));
+  const uniqueSelections       = SEL_ORDER.filter(s => allAnpcRows.some(r => getRowSelections(r).includes(s)));
+  const uniqueLogements        = LOG_ORDER.filter(l => dataLogements.has(l));
+  const uniqueTypes            = [...new Set(allAnpcRows.map(r => r.type).filter(Boolean))].sort();
+  const uniqueType2s           = [...new Set(allAnpcRows.map(r => r.type2).filter(Boolean))].sort();
+  const uniqueMotifs           = (ALL_MOTIFS as readonly string[]).filter(m => dataMotifs.has(m));
+  const uniqueObjets           = (ALL_OBJETS as readonly string[]).filter(o => dataObjets.has(o));
+  const uniqueReglementations  = [...new Set(
     allAnpcRows.map(r => communesByIdRef.current.get(r.communeId ?? 0)?.reglementation).filter(Boolean) as string[]
   )].sort();
+  const uniqueCreatedByNames   = [...new Set(allAnpcRows.map(r => r.createdByName).filter(v => v && v !== "—"))].sort();
 
   // ──────────────────────────────────────────
   // Render
@@ -2157,10 +2164,28 @@ export default function EnregistrementPage() {
                         </div>
                       </div>
                     )}
+                    {/* 9. Saisi par */}
+                    {uniqueCreatedByNames.length > 0 && (
+                      <div className="filters-group">
+                        <span className="filter-label">Saisi par :</span>
+                        <div className="filter-buttons">
+                          {uniqueCreatedByNames.map(u => (
+                            <button key={u} type="button"
+                              className={`filter-btn${dashFilters.createdByName.includes(u) ? " active" : ""}`}
+                              onClick={() => setDashFilters(prev => ({
+                                ...prev,
+                                createdByName: prev.createdByName.includes(u) ? prev.createdByName.filter(x => x !== u) : [...prev.createdByName, u],
+                              }))}>
+                              {u}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
                   </div>
                   {/* Réinitialiser — en dessous des groupes */}
                   <button id="btnClearAllFilters" type="button"
-                    onClick={() => setDashFilters({ arr: [], selection: [], logements: [], type: [], type2: [], motif: [], objet: [], reglementation: [] })}>
+                    onClick={() => setDashFilters({ arr: [], selection: [], logements: [], type: [], type2: [], motif: [], objet: [], reglementation: [], createdByName: [] })}>
                     <i className="fa-solid fa-xmark" /> Réinitialiser
                   </button>
                 </div>

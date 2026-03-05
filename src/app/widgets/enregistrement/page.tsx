@@ -2186,12 +2186,12 @@ export default function EnregistrementPage() {
                           { field: "nActe", label: "N° acte" },
                           { field: "nomProjet", label: "Nom du projet", minWidth: "20rem" },
                           { field: "arr", label: "Arrondissement" },
-                          { field: "objet", label: "Motifs" },
-                          { field: "selection", label: "Sélection" },
+                          { field: "selection", label: "Stratégie" },
                           { field: "logements", label: "Logements", num: true },
                           { field: "type", label: "Acte" },
                           { field: "type2", label: "Permis" },
                           { field: "motif", label: "Enjeux" },
+                          { field: "objet", label: "Motifs" },
                           { field: "reglementation", label: "Réglementation" },
                           { field: "receptionPref", label: "Réception préf." },
                           { field: "visaMairie", label: "Visa mairie" },
@@ -2228,26 +2228,26 @@ export default function EnregistrementPage() {
                             <td>{row.nomProjet}</td>
                             {/* arr */}
                             <td>{row.arr ? <span className="tag tag--light">{row.arr}</span> : "—"}</td>
-                            {/* objet → Motifs ($Motifs_controle) */}
-                            <td className="col-nowrap">
-                              {objetList.length > 0 ? objetList.map(o => <span key={o} className="tag tag--info" style={{ marginRight: "0.25rem" }}>{o}</span>) : "—"}
-                            </td>
-                            {/* selection → Acte (sélection trimestrielle) */}
+                            {/* selection → Stratégie */}
                             <td className="col-nowrap">
                               {sels.length > 0 ? sels.map(s => {
                                 const cls = s === "Fixe" ? "sel-fixe" : s === "Ciblée" ? "sel-ciblee" : "sel-rotation";
                                 return <span key={s} className={`commune-arr-badge commune-arr-badge--sel ${cls}`} style={{ marginRight: "0.25rem" }}>{s}</span>;
                               }) : "—"}
                             </td>
-                            {/* logements → Acte (nombre) */}
+                            {/* logements → Logements */}
                             <td className="col-num">{row.logements ? <span className="tag tag--light">{row.logements}</span> : "—"}</td>
-                            {/* type → Permis ($Type) */}
+                            {/* type → Acte ($Type) */}
                             <td>{row.type ? <span className="tag tag--info">{row.type}</span> : "—"}</td>
                             {/* type2 → Permis ($Type2) */}
                             <td>{row.type2 ? <span className="tag tag--info">{row.type2}</span> : "—"}</td>
                             {/* motif → Enjeux ($Enjeux_pre_identifies) */}
                             <td className="col-nowrap">
                               {motifList.length > 0 ? motifList.map(m => <span key={m} className="tag tag--info" style={{ marginRight: "0.25rem" }}>{m}</span>) : "—"}
+                            </td>
+                            {/* objet → Motifs ($Motifs_controle) */}
+                            <td className="col-nowrap">
+                              {objetList.length > 0 ? objetList.map(o => <span key={o} className="tag tag--info" style={{ marginRight: "0.25rem" }}>{o}</span>) : "—"}
                             </td>
                             {/* reglementation */}
                             <td>{commune?.reglementation ? <span className="tag tag--reglementation">{commune.reglementation}</span> : "—"}</td>

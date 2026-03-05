@@ -1990,6 +1990,10 @@ export default function EnregistrementPage() {
               {/* Filtres bar */}
               {dashFiltersOpen && (
                 <div id="dashFiltersBar" className="open">
+                  <button id="btnClearAllFilters" type="button"
+                    onClick={() => setDashFilters({ arr: [], motif: [], objet: [], selection: [], reglementation: [] })}>
+                    <i className="fa-solid fa-xmark" /> Réinitialiser
+                  </button>
                   {uniqueArrs.length > 0 && (
                     <div className="filters-group">
                       <span className="filter-label">Arrondissement :</span>
@@ -2041,10 +2045,6 @@ export default function EnregistrementPage() {
                       </div>
                     </div>
                   )}
-                  <button id="btnClearAllFilters" type="button"
-                    onClick={() => setDashFilters({ arr: [], motif: [], objet: [], selection: [], reglementation: [] })}>
-                    <i className="fa-solid fa-xmark" /> Réinitialiser
-                  </button>
                 </div>
               )}
 
@@ -2064,20 +2064,20 @@ export default function EnregistrementPage() {
                       <tr>
                         {[
                           { field: "majcs", label: "MAJCS" },
-                          { field: "communeName", label: "Commune", minWidth: "20rem" },
+                          { field: "communeName", label: "Commune", minWidth: "10rem" },
                           { field: "nActe", label: "N° Acte" },
                           { field: "nomProjet", label: "Nom du Projet", minWidth: "20rem" },
                           { field: "arr", label: "Arrondissement" },
+                          { field: "objet", label: "Stratégie" },
                           { field: "selection", label: "Logements" },
-                          { field: "logements", label: "Actes", num: true },
+                          { field: "logements", label: "Acte", num: true },
                           { field: "type", label: "Permis" },
                           { field: "type2", label: "Motif" },
-                          { field: "motif", label: "Motif" },
-                          { field: "objet", label: "Stratégie" },
+                          { field: "motif", label: "Enjeux" },
                           { field: "reglementation", label: "Réglementation" },
                           { field: "receptionPref", label: "Réception préf." },
                           { field: "visaMairie", label: "Visa mairie" },
-                          { field: "createdByName", label: "Saisi par", minWidth: "20rem" },
+                          { field: "createdByName", label: "Saisi par", minWidth: "10rem" },
                           { field: "createdAt", label: "Saisi le" },
                         ].map(({ field, label, num, minWidth }) => (
                           <th key={field}

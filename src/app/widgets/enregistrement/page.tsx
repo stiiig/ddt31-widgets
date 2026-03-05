@@ -1418,7 +1418,8 @@ export default function EnregistrementPage() {
   const filteredRows = sortRows(applyDashFilters(periodRows));
 
   // Unique filter values
-  const uniqueArrs = [...new Set(allAnpcRows.map(r => r.arr).filter(Boolean))].sort();
+  const ARR_ORDER = ["Toulouse", "Muret", "Saint-Gaudens"];
+  const uniqueArrs = ARR_ORDER.filter(a => allAnpcRows.some(r => r.arr === a));
   const uniqueMotifs = [...new Set(allAnpcRows.flatMap(r => fromGristList(r.motif)))].sort();
   const uniqueObjets = [...new Set(allAnpcRows.flatMap(r => fromGristList(r.objet)))].sort();
 
@@ -2080,8 +2081,8 @@ export default function EnregistrementPage() {
                             </td>
                             <td className="col-nowrap">
                               {sels.length > 0 ? sels.map(s => {
-                                const cls = s === "Fixe" ? "tag--violet" : s === "Ciblée" ? "tag--orange" : "tag--rose";
-                                return <span key={s} className={`tag ${cls}`} style={{ marginRight: "0.25rem" }}>{s}</span>;
+                                const cls = s === "Fixe" ? "sel-fixe" : s === "Ciblée" ? "sel-ciblee" : "sel-rotation";
+                                return <span key={s} className={`commune-arr-badge commune-arr-badge--sel ${cls}`} style={{ marginRight: "0.25rem" }}>{s}</span>;
                               }) : "—"}
                             </td>
                             <td>{commune?.reglementation ? <span className="tag tag--reglementation">{commune.reglementation}</span> : "—"}</td>

@@ -1777,15 +1777,15 @@ input[type="date"].is-empty::-webkit-datetime-edit-year-field{
   min-width: 1000px;
   border-collapse: collapse;
   background: #fff;
-  font-size: 0.875rem;
+  font-size: 0.78rem;
 }
 
 /* Header du tableau */
 .croise-table th {
   position: sticky;
   top: 0;
-  padding: 1rem 0.75rem;
-  font-size: 0.8125rem;
+  padding: 0.45rem 0.55rem;
+  font-size: 0.73rem;
   font-weight: 700;
   color: #333; /* Texte gris foncé pour être lisible sur fond gris */
   background: #e8e8e8; /* Gris clair comme capture 2 */
@@ -1808,8 +1808,8 @@ input[type="date"].is-empty::-webkit-datetime-edit-year-field{
 
 /* Cellules du tableau */
 .croise-table td {
-  padding: 0.875rem 0.75rem;
-  font-size: 0.875rem;
+  padding: 0.35rem 0.55rem;
+  font-size: 0.78rem;
   border: none;
   border-bottom: 1px solid #f0f0f0;
   color: #333;

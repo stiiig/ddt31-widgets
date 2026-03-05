@@ -2031,7 +2031,7 @@ export default function EnregistrementPage() {
                       <tr>
                         {[
                           { field: "majcs", label: "MAJCS" },
-                          { field: "communeName", label: "Commune" },
+                          { field: "communeName", label: "Commune", minWidth: "20rem" },
                           { field: "nActe", label: "N° Acte" },
                           { field: "nomProjet", label: "Nom du Projet", minWidth: "20rem" },
                           { field: "arr", label: "Arrondissement" },
@@ -2042,9 +2042,9 @@ export default function EnregistrementPage() {
                           { field: "motif", label: "Motif" },
                           { field: "objet", label: "Stratégie" },
                           { field: "reglementation", label: "Réglementation" },
-                          { field: "visaMairie", label: "Visa Mairie" },
-                          { field: "receptionPref", label: "Date Réception" },
-                          { field: "createdByName", label: "Saisi par" },
+                          { field: "receptionPref", label: "Réception préf." },
+                          { field: "visaMairie", label: "Visa mairie" },
+                          { field: "createdByName", label: "Saisi par", minWidth: "20rem" },
                         ].map(({ field, label, num, minWidth }) => (
                           <th key={field}
                             className={`sortable${sortField === field ? " active" : ""}${num ? " col-num" : ""}`}

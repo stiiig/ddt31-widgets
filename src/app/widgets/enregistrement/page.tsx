@@ -1994,57 +1994,59 @@ export default function EnregistrementPage() {
                     onClick={() => setDashFilters({ arr: [], motif: [], objet: [], selection: [], reglementation: [] })}>
                     <i className="fa-solid fa-xmark" /> Réinitialiser
                   </button>
-                  {uniqueArrs.length > 0 && (
-                    <div className="filters-group">
-                      <span className="filter-label">Arrondissement :</span>
-                      <div className="filter-buttons">
-                        {uniqueArrs.map(arr => (
-                          <button key={arr} type="button"
-                            className={`filter-btn${dashFilters.arr.includes(arr) ? " active" : ""}`}
-                            onClick={() => setDashFilters(prev => ({
-                              ...prev,
-                              arr: prev.arr.includes(arr) ? prev.arr.filter(a => a !== arr) : [...prev.arr, arr],
-                            }))}>
-                            {arr}
-                          </button>
-                        ))}
+                  <div className="filters-col">
+                    {uniqueArrs.length > 0 && (
+                      <div className="filters-group">
+                        <span className="filter-label">Arrondissement :</span>
+                        <div className="filter-buttons">
+                          {uniqueArrs.map(arr => (
+                            <button key={arr} type="button"
+                              className={`filter-btn${dashFilters.arr.includes(arr) ? " active" : ""}`}
+                              onClick={() => setDashFilters(prev => ({
+                                ...prev,
+                                arr: prev.arr.includes(arr) ? prev.arr.filter(a => a !== arr) : [...prev.arr, arr],
+                              }))}>
+                              {arr}
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                  {uniqueMotifs.length > 0 && (
-                    <div className="filters-group">
-                      <span className="filter-label">Motif :</span>
-                      <div className="filter-buttons">
-                        {uniqueMotifs.map(m => (
-                          <button key={m} type="button"
-                            className={`filter-btn${dashFilters.motif.includes(m) ? " active" : ""}`}
-                            onClick={() => setDashFilters(prev => ({
-                              ...prev,
-                              motif: prev.motif.includes(m) ? prev.motif.filter(x => x !== m) : [...prev.motif, m],
-                            }))}>
-                            {m}
-                          </button>
-                        ))}
+                    )}
+                    {uniqueMotifs.length > 0 && (
+                      <div className="filters-group">
+                        <span className="filter-label">Motif :</span>
+                        <div className="filter-buttons">
+                          {uniqueMotifs.map(m => (
+                            <button key={m} type="button"
+                              className={`filter-btn${dashFilters.motif.includes(m) ? " active" : ""}`}
+                              onClick={() => setDashFilters(prev => ({
+                                ...prev,
+                                motif: prev.motif.includes(m) ? prev.motif.filter(x => x !== m) : [...prev.motif, m],
+                              }))}>
+                              {m}
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
-                  {uniqueObjets.length > 0 && (
-                    <div className="filters-group">
-                      <span className="filter-label">Objet :</span>
-                      <div className="filter-buttons">
-                        {uniqueObjets.map(o => (
-                          <button key={o} type="button"
-                            className={`filter-btn${dashFilters.objet.includes(o) ? " active" : ""}`}
-                            onClick={() => setDashFilters(prev => ({
-                              ...prev,
-                              objet: prev.objet.includes(o) ? prev.objet.filter(x => x !== o) : [...prev.objet, o],
-                            }))}>
-                            {o}
-                          </button>
-                        ))}
+                    )}
+                    {uniqueObjets.length > 0 && (
+                      <div className="filters-group">
+                        <span className="filter-label">Objet :</span>
+                        <div className="filter-buttons">
+                          {uniqueObjets.map(o => (
+                            <button key={o} type="button"
+                              className={`filter-btn${dashFilters.objet.includes(o) ? " active" : ""}`}
+                              onClick={() => setDashFilters(prev => ({
+                                ...prev,
+                                objet: prev.objet.includes(o) ? prev.objet.filter(x => x !== o) : [...prev.objet, o],
+                              }))}>
+                              {o}
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
+                  </div>
                 </div>
               )}
 
@@ -2065,15 +2067,15 @@ export default function EnregistrementPage() {
                         {[
                           { field: "majcs", label: "MAJCS" },
                           { field: "communeName", label: "Commune", minWidth: "10rem" },
-                          { field: "nActe", label: "N° Acte" },
-                          { field: "nomProjet", label: "Nom du Projet", minWidth: "20rem" },
+                          { field: "nActe", label: "N° acte" },
+                          { field: "nomProjet", label: "Nom du projet", minWidth: "20rem" },
                           { field: "arr", label: "Arrondissement" },
-                          { field: "objet", label: "Logements" },
+                          { field: "objet", label: "Motifs" },
                           { field: "selection", label: "Acte" },
                           { field: "logements", label: "Acte", num: true },
                           { field: "type", label: "Permis" },
-                          { field: "type2", label: "Motif" },
-                          { field: "motif", label: "Stratégie" },
+                          { field: "type2", label: "Permis" },
+                          { field: "motif", label: "Enjeux" },
                           { field: "reglementation", label: "Réglementation" },
                           { field: "receptionPref", label: "Réception préf." },
                           { field: "visaMairie", label: "Visa mairie" },
@@ -2102,7 +2104,7 @@ export default function EnregistrementPage() {
                           <tr key={row.id} className={idx % 2 === 1 ? "alt-row" : ""}>
                             <td><strong>{row.majcs}</strong></td>
                             <td><strong>{row.communeName}</strong></td>
-                            <td>{row.nActe}</td>
+                            <td>{row.nActe ? <span className="tag tag--info">{row.nActe}</span> : "—"}</td>
                             <td>{row.nomProjet}</td>
                             <td>{row.arr ? <span className="tag tag--light">{row.arr}</span> : "—"}</td>
                             <td className="col-num">{row.logements ? <span className="tag tag--light">{row.logements}</span> : "—"}</td>

@@ -1467,7 +1467,7 @@ export default function EnregistrementPage() {
   // Unique filter values — ordres fixes
   const ARR_ORDER = ["Toulouse", "Muret", "Saint-Gaudens"];
   const SEL_ORDER = ["Fixe", "Rotation", "Ciblée"];
-  const LOG_ORDER = ["10+", "25+", "75+", "100+"];
+  const LOG_ORDER = ["10+", "20+", "75+", "100+"];
   const dataLogements = new Set(allAnpcRows.map(r => r.logements).filter(Boolean));
   const dataMotifs    = new Set(allAnpcRows.flatMap(r => fromGristList(r.motif)));
   const dataObjets    = new Set(allAnpcRows.flatMap(r => fromGristList(r.objet)));

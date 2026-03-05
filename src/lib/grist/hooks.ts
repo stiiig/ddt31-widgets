@@ -79,7 +79,11 @@ async function fetchGristUser(setGristUser: (u: GristUser) => void) {
 
    Séquence d'initialisation :
    1. Si on est dans une iframe et que window.grist n'existe pas encore,
-      charge grist-plugin-api.js depuis docs.getgrist.com.
+      charge grist-plugin-api.js depuis l'origine du serveur Grist parent
+      (document.referrer), avec fallback sur docs.getgrist.com.
+      → Cela garantit que la version du plugin API correspond à l'instance
+        self-hosted, ce qui est nécessaire pour que getUserProfile() soit
+        disponible.
    2. Appelle initGristOrMock() pour détecter le mode (grist/mock/rest/none).
    3. En mode grist, tente de récupérer l'utilisateur connecté.
 
@@ -106,8 +110,19 @@ export function useGristInit(opts?: { requiredAccess?: "read table" | "full" }) 
           await new Promise<void>((resolve, reject) => {
             const existing = document.querySelector('script[data-grist-plugin-api="1"]');
             if (existing) return resolve();
+            // Charge le plugin API depuis le serveur Grist parent (détecté via
+            // document.referrer) pour s'assurer que la version correspond
+            // exactement à l'instance self-hosted — notamment pour que
+            // grist.getUserProfile() soit disponible.
+            // Fallback sur docs.getgrist.com si l'origin ne peut pas être déterminé.
+            let parentOrigin = "https://docs.getgrist.com";
+            try {
+              if (document.referrer) {
+                parentOrigin = new URL(document.referrer).origin;
+              }
+            } catch { /* referrer invalide, on garde le fallback */ }
             const s = document.createElement("script");
-            s.src = "https://docs.getgrist.com/grist-plugin-api.js";
+            s.src = `${parentOrigin}/grist-plugin-api.js`;
             s.async = true;
             s.setAttribute("data-grist-plugin-api", "1");
             s.onload  = () => resolve();

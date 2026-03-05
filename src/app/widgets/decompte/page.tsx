@@ -431,6 +431,7 @@ export default function DecomptePage() {
     selectedRef.current = commune;
     setCommuneQuery(commune.nom);
     setDdOpen(false);
+    setDashScope("commune"); // bascule automatiquement sur la vue commune
     setLoading(true);
     try {
       if (docApiRef.current) {

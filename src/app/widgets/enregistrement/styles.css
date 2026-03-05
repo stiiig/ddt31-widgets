@@ -89,6 +89,16 @@
     .app-header__user span { overflow: hidden; text-overflow: ellipsis; }
     .app-header__user i { font-size: .95rem; flex-shrink: 0; }
 
+    .app-header__title-user {
+      font-size: 0.78rem;
+      font-weight: 400;
+      color: rgba(255,255,255,.7);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 150px;
+    }
+
     .app-header__badge {
       display: inline-flex;
       align-items: center;

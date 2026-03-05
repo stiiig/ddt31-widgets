@@ -72,6 +72,16 @@ body {
 }
 .app-header__user span { overflow: hidden; text-overflow: ellipsis; }
 .app-header__user i { font-size: .95rem; flex-shrink: 0; }
+.app-header__title-user {
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: rgba(255,255,255,.7);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 150px;
+  margin-left: 0.75rem;
+}
 
 /* ── Onglets principaux ── */
 .app-tabs {
@@ -1116,6 +1126,7 @@ body {
   text-overflow: ellipsis;
 }
 .log-item__meta { font-size: 0.7rem; color: #888; margin-top: 0.1rem; }
+.log-item__user { font-size: 0.7rem; color: #aaa; margin-top: 0.05rem; font-style: italic; }
 .log-item__rollback {
   background: none;
   border: 1px solid #ddd;

@@ -1138,6 +1138,7 @@ export default function DecomptePage() {
                 <div className="log-item__body">
                   <div className="log-item__desc">{label}{log.communeNom && <> — <span style={{ fontWeight: 400, color: "#666" }}>{log.communeNom}</span></>}</div>
                   <div className="log-item__meta">{moisLabel(log.mois, log.annee)} · {formatTime(log.timestamp)}</div>
+                  {gristUser && <div className="log-item__user">Par {gristUser.name}</div>}
                 </div>
                 <button className="log-item__rollback" type="button" title="Annuler" onClick={() => rollbackLog(log)}>
                   <i className="fa-solid fa-rotate-left" /> Annuler
@@ -1153,7 +1154,10 @@ export default function DecomptePage() {
         {/* Header */}
         <header className="app-header">
           <div className="app-header__logo"><i className="fa-solid fa-landmark" />DDT 31</div>
-          <div className="app-header__title">Décompte des actes</div>
+          <div className="app-header__title">
+            Décompte des actes
+            {gristUser && <span className="app-header__title-user">{gristUser.name}</span>}
+          </div>
           <nav className="app-tabs" role="tablist" aria-label="Modes">
             <button className={`app-tab${tab === "saisie" ? " active" : ""}`} data-tab="saisie" role="tab" aria-selected={tab === "saisie"} type="button"
               onClick={() => { setTab("saisie"); handleClearCommune(); }}>
@@ -1164,12 +1168,6 @@ export default function DecomptePage() {
               <i className="fa-solid fa-chart-column" />Tableau de bord
             </button>
           </nav>
-          {gristUser && (
-            <div className="app-header__user" title={gristUser.email}>
-              <i className="fa-solid fa-circle-user" />
-              <span>{gristUser.name}</span>
-            </div>
-          )}
           <button className="btn-log-toggle" type="button" aria-label="Journal" onClick={() => setSidebarOpen(o => !o)}>
             <i className="fa-solid fa-clock-rotate-left" />Journal
             <span className={`log-badge${logCount > 0 ? " visible" : ""}`}>{logCount}</span>

@@ -1155,7 +1155,7 @@ export default function DecomptePage() {
                 <div className={`log-item__icon ${iconCls}`}>{sign}{Math.abs(log.delta)}</div>
                 <div className="log-item__body">
                   <div className="log-item__desc">{label}{log.communeNom && <> — <span style={{ fontWeight: 400, color: "#666" }}>{log.communeNom}</span></>}</div>
-                  <div className="log-item__meta">{moisLabel(log.mois, log.annee)} · {formatTime(log.timestamp)}{log.papier && <> · <i className="fa-solid fa-file" title="Acte papier" /> Papier</>}</div>
+                  <div className="log-item__meta">{log.papier && <><i className="fa-solid fa-file" title="Acte papier" /> </>}{moisLabel(log.mois, log.annee)} · {formatTime(log.timestamp)}</div>
                   {gristUser && <div className="log-item__user">Par {gristUser.name}</div>}
                 </div>
                 <button className="log-item__rollback" type="button" title="Annuler" onClick={() => rollbackLog(log)}>

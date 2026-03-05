@@ -329,10 +329,13 @@ export default function StrategiePage() {
           <div className="app-header__logo">
             <i className="fa-solid fa-landmark" />DDT 31
           </div>
-          <div className="app-header__title">
-            Stratégie
-            {gristUser && <span className="app-header__title-user">{gristUser.name}</span>}
-          </div>
+          {gristUser && (
+            <div className="app-header__user" title={gristUser.email}>
+              <i className="fa-solid fa-circle-user" />
+              <span>{gristUser.name}</span>
+            </div>
+          )}
+          <div className="app-header__title">Stratégie</div>
         </header>
 
         {/* ── Content ── */}

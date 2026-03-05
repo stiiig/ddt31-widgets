@@ -1154,10 +1154,13 @@ export default function DecomptePage() {
         {/* Header */}
         <header className="app-header">
           <div className="app-header__logo"><i className="fa-solid fa-landmark" />DDT 31</div>
-          <div className="app-header__title">
-            Décompte des actes
-            {gristUser && <span className="app-header__title-user">{gristUser.name}</span>}
-          </div>
+          {gristUser && (
+            <div className="app-header__user" title={gristUser.email}>
+              <i className="fa-solid fa-circle-user" />
+              <span>{gristUser.name}</span>
+            </div>
+          )}
+          <div className="app-header__title">Décompte des actes</div>
           <nav className="app-tabs" role="tablist" aria-label="Modes">
             <button className={`app-tab${tab === "saisie" ? " active" : ""}`} data-tab="saisie" role="tab" aria-selected={tab === "saisie"} type="button"
               onClick={() => { setTab("saisie"); handleClearCommune(); }}>

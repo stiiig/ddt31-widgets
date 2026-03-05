@@ -44,6 +44,11 @@ const COLS = {
 const ALL_MOTIFS = ["ZI", "ZA", "ZN", "RT", "STEP", "PEB", "Site classé"] as const;
 const ALL_OBJETS = ["LLS", "ERP 1/2/3", "ERP 4/5", "EE", "Signalé", "Aléatoire", "Taille"] as const;
 
+// Objets dont l'enjeu est "Oui" par défaut (pas de question Oui/Non à poser)
+const INDOLORES = new Set(["ERP 4/5", "Taille"]);
+// Stratégies de sélection trimestrielle qui déclenchent un contrôle
+const CONTROLLED_SELECTIONS: string[] = ["Fixe", "Ciblée", "Rotation"];
+
 const OBJET_TO_COL: Record<string, string> = {
   "ERP 1/2/3": "ERP123", "ERP 4/5": "ERP45", "EE": "EE",
   "LLS": "LLS", "Signalé": "Signale", "Aléatoire": "Aleatoire", "Taille": "Taille",
@@ -1031,7 +1036,7 @@ export default function EnregistrementPage() {
 
     let controle = false;
     let raison = "Sans impact";
-    if (selectionHasAny(selections, ["Ciblée", "Fixe", "Rotation"])) {
+    if (selectionHasAny(selections, CONTROLLED_SELECTIONS)) {
       controle = true; raison = "Commune aléatoire";
     } else if (enjeuZI === "Oui" && hasZI) {
       controle = true; raison = "En ZI";
@@ -1057,7 +1062,7 @@ export default function EnregistrementPage() {
       : [];
     const enjeuZI = enjeuVals["ZI"] ?? "";
     const hasZI = motifs.includes("ZI");
-    if (selectionHasAny(selections, ["Ciblée", "Fixe", "Rotation"])) return { controle: true, raison: "Commune aléatoire" };
+    if (selectionHasAny(selections, CONTROLLED_SELECTIONS)) return { controle: true, raison: "Commune aléatoire" };
     if (enjeuZI === "Oui" && hasZI) return { controle: true, raison: "En ZI" };
     if (enjeuZI === "Non" && hasZI) return { controle: false, raison: "Pas en ZI" };
     return { controle: false, raison: "Sans impact" };
@@ -1074,14 +1079,13 @@ export default function EnregistrementPage() {
     statutsByKeyMap: Map<string, Statut>,
     tailleVal: string,
   ): boolean {
-    const INDOLORES = new Set(["ERP 4/5", "Taille"]);
     if (selMotifs.length > 0) return true;
-    const objetsCibléés = selObjets.filter(o => !INDOLORES.has(o));
-    if (objetsCibléés.length > 0) return true;
+    const objetsConcernés = selObjets.filter(o => !INDOLORES.has(o));
+    if (objetsConcernés.length > 0) return true;
     if (!commune) return false;
     const trimestre = computeTrimestreFromDate(receptionPref) || DEFAULT_TRIMESTRE;
     const selections = getStatutSelection(statutsByKeyMap, commune.id, trimestre, receptionPref);
-    if (selectionHasAny(selections, ["Fixe", "Ciblée", "Rotation"])) return true;
+    if (selectionHasAny(selections, CONTROLLED_SELECTIONS)) return true;
     if (selObjets.includes("Taille")) {
       const tv = parseInt(tailleVal, 10);
       const seuil = getSeuilLogements(commune);
@@ -1094,7 +1098,6 @@ export default function EnregistrementPage() {
   // Build payload
   // ──────────────────────────────────────────
   function buildPayload(): Record<string, unknown> {
-    const INDOLORES = new Set(["ERP 4/5", "Taille"]);
     const allItems = [...selectedMotifs, ...selectedObjets];
     const enjeuCols = Object.fromEntries(
       [...ALL_MOTIFS, ...ALL_OBJETS].map(item => {
@@ -1144,13 +1147,12 @@ export default function EnregistrementPage() {
     if (!selectedCommuneRef.current) errs.commune = "Veuillez sélectionner une commune";
     if (!formOrigine) errs.origine = "Veuillez sélectionner une origine";
 
-    // Enjeux validation (if project is concerned)
-    const INDOLORES_VALID = new Set(["ERP 4/5", "Taille"]);
+    // Validation enjeux (si le projet est concerné par un contrôle)
     const concerned = isProjetConcerne(selectedMotifs, selectedObjets, selectedCommuneRef.current, formReceptionPref, statutsByKeyRef.current, tailleLogements);
     if (concerned) {
       const allItems = [...selectedMotifs, ...selectedObjets];
       for (const item of allItems) {
-        if (INDOLORES_VALID.has(item)) continue;
+        if (INDOLORES.has(item)) continue; // ERP 4/5 et Taille → Oui par défaut, pas de validation nécessaire
         if (!enjeuValues[item]) errs[`enjeu_${item}`] = "Veuillez choisir Oui ou Non";
       }
     }

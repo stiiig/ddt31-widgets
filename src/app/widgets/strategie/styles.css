@@ -53,8 +53,8 @@ body {
   color: #fff;
   display: flex;
   align-items: center;
-  flex: 1;
 }
+.app-header__spacer { flex: 1; }
 .app-header__user {
   display: flex;
   align-items: center;

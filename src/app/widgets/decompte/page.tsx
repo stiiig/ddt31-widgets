@@ -27,6 +27,7 @@ const DECOMPTE_COLS = {
 const LOG_COLS = {
   Commune: "Commune", DecompteId: "DecompteId", Type: "Type", Delta: "Delta",
   Timestamp: "Timestamp", CommuneNom: "CommuneNom", Annee: "Annee", Mois: "Mois",
+  Papier: "Papier",
 };
 
 const DOC_TYPES: DocType[] = [
@@ -57,7 +58,7 @@ type Commune = { id: number; nom: string; insee: string; arr: string; papier: bo
 type DecompteRow = { id: number; annee: number; mois: number; [key: string]: number; };
 type DecompteRowAll = DecompteRow & { communeId: number; };
 type Statut = { selection: string[]; debut: Date | null; fin: Date | null; };
-type LogEntry = { id: number | null; communeId: number; communeNom: string; type: string; delta: number; timestamp: string; annee: number; mois: number; decompteId: number | null; };
+type LogEntry = { id: number | null; communeId: number; communeNom: string; type: string; delta: number; timestamp: string; annee: number; mois: number; decompteId: number | null; papier?: boolean; };
 type Toast = { id: string; kind: "success" | "error" | "info" | "warning"; title: string; desc?: string; closing?: boolean; };
 type VueType = "mois" | "trimestre" | "annee";
 type TabType = "saisie" | "dashboard";
@@ -323,6 +324,7 @@ export default function DecomptePage() {
       const moisArr = (tbl[LOG_COLS.Mois]       as unknown[]) || [];
       const decIds  = (tbl[LOG_COLS.DecompteId] as unknown[]) || [];
       const comNoms = (tbl[LOG_COLS.CommuneNom] as unknown[]) || [];
+      const papiers = (tbl[LOG_COLS.Papier]     as unknown[]) || [];
       const entries: LogEntry[] = [];
       ids.forEach((id, i) => {
         const cid = comms[i];
@@ -336,6 +338,7 @@ export default function DecomptePage() {
           annee: parseInt((annees[i] ?? 0) as string, 10),
           mois:  parseInt((moisArr[i] ?? 0) as string, 10),
           decompteId: Array.isArray(decIds[i]) ? decIds[i][1] : decIds[i] as number,
+          papier: Boolean(papiers[i]),
         });
       });
       entries.sort((a, b) => (b.timestamp || "").localeCompare(a.timestamp || ""));
@@ -534,10 +537,11 @@ export default function DecomptePage() {
         setAllRows(prev => { const next = prev.map(r => r.id === row!.id ? { ...r, [DECOMPTE_COLS.Papier]: papierNew } : r); allRowsRef.current = next; return next; });
       }
       // Log
-      const logFields = { [LOG_COLS.Commune]: commune.id, [LOG_COLS.DecompteId]: row.id, [LOG_COLS.Type]: docKey, [LOG_COLS.Delta]: delta, [LOG_COLS.Timestamp]: isoNow(), [LOG_COLS.CommuneNom]: commune.nom, [LOG_COLS.Annee]: a, [LOG_COLS.Mois]: m };
+      const isPapier = paperModeRef.current && delta > 0;
+      const logFields = { [LOG_COLS.Commune]: commune.id, [LOG_COLS.DecompteId]: row.id, [LOG_COLS.Type]: docKey, [LOG_COLS.Delta]: delta, [LOG_COLS.Timestamp]: isoNow(), [LOG_COLS.CommuneNom]: commune.nom, [LOG_COLS.Annee]: a, [LOG_COLS.Mois]: m, [LOG_COLS.Papier]: isPapier };
       const logRes = await api.applyUserActions([["AddRecord", TABLE_LOGS, null, logFields]]);
       const logId = logRes?.retValues?.[0] ?? null;
-      const logEntry: LogEntry = { id: logId, communeId: commune.id, communeNom: commune.nom, type: docKey, delta, timestamp: logFields[LOG_COLS.Timestamp] as string, annee: a, mois: m, decompteId: row.id };
+      const logEntry: LogEntry = { id: logId, communeId: commune.id, communeNom: commune.nom, type: docKey, delta, timestamp: logFields[LOG_COLS.Timestamp] as string, annee: a, mois: m, decompteId: row.id, papier: isPapier };
       setLogs(prev => { const next = [logEntry, ...prev]; logsRef.current = next; return next; });
       const newCount = logCountRef.current + 1;
       setLogCount(newCount);
@@ -844,7 +848,7 @@ export default function DecomptePage() {
     return rows.filter(r => r.annee === a);
   }
 
-  type CommuneAgg = { id: number; nom: string; counters: Record<string, number>; total: number; createdByName?: string; statut?: string[]; statutsAnnee?: { t: number; sels: string[] }[]; };
+  type CommuneAgg = { id: number; nom: string; counters: Record<string, number>; total: number; papierCount: number; createdByName?: string; statut?: string[]; statutsAnnee?: { t: number; sels: string[] }[]; };
 
   function buildCommuneList(): CommuneAgg[] {
     const rows = getRowsForPeriod(allRows);
@@ -852,9 +856,10 @@ export default function DecomptePage() {
     rows.forEach(row => {
       const commune = communesById.get(row.communeId);
       if (!commune) return;
-      if (!byCommune.has(row.communeId)) byCommune.set(row.communeId, { id: row.communeId, nom: commune.nom, counters: Object.fromEntries(DOC_TYPES.map(dt => [dt.key, 0])), total: 0 });
+      if (!byCommune.has(row.communeId)) byCommune.set(row.communeId, { id: row.communeId, nom: commune.nom, counters: Object.fromEntries(DOC_TYPES.map(dt => [dt.key, 0])), total: 0, papierCount: 0 });
       const entry = byCommune.get(row.communeId)!;
       DOC_TYPES.forEach(dt => { entry.counters[dt.key] += row[dt.key] || 0; });
+      entry.papierCount += row[DECOMPTE_COLS.Papier] || 0;
       // Garde le nom du créateur (premier trouvé pour cette commune sur la période)
       if (!entry.createdByName) entry.createdByName = createdByNameMapRef.current.get(row.id) || "";
     });
@@ -950,11 +955,14 @@ export default function DecomptePage() {
     noTagFiltered.forEach(c => DOC_TYPES.forEach(dt => { noTagCounters[dt.key] += c.counters[dt.key]; }));
     const noTagTotal = noTagFiltered.reduce((s, c) => s + c.total, 0);
 
-    // Total Papier
+    // Total Papier (communes avec flag Papier=true dans Communes)
     const papierFiltered = communeList.filter(c => communesById.get(c.id)?.papier === true);
     const papierCounters = Object.fromEntries(DOC_TYPES.map(dt => [dt.key, 0]));
     papierFiltered.forEach(c => DOC_TYPES.forEach(dt => { papierCounters[dt.key] += c.counters[dt.key]; }));
     const papierTotal = papierFiltered.reduce((s, c) => s + c.total, 0);
+
+    // Total actes saisis en mode Papier (depuis DECOMPTE.Papier)
+    const totalPapierActes = communeList.reduce((s, c) => s + (c.papierCount || 0), 0);
 
     return (
       <div className="croise-wrap">
@@ -1015,6 +1023,15 @@ export default function DecomptePage() {
                 <td />
                 {visibleTypes.map(dt => <NumCell key={dt.key} v={papierCounters[dt.key] || 0} hl={dt.highlight} />)}
                 <td className="col-num col-total"><strong>{papierTotal}</strong></td>
+                <td />
+              </tr>
+            )}
+            {totalPapierActes > 0 && (
+              <tr className="papier-acts-row">
+                <td><i className="fa-solid fa-file" /> <strong>Total actes papier</strong></td>
+                <td />
+                {visibleTypes.map(dt => <td key={dt.key} className="col-num" style={{ color: "#bbb" }}>—</td>)}
+                <td className="col-num col-total"><strong>{totalPapierActes}</strong></td>
                 <td />
               </tr>
             )}
@@ -1138,7 +1155,7 @@ export default function DecomptePage() {
                 <div className={`log-item__icon ${iconCls}`}>{sign}{Math.abs(log.delta)}</div>
                 <div className="log-item__body">
                   <div className="log-item__desc">{label}{log.communeNom && <> — <span style={{ fontWeight: 400, color: "#666" }}>{log.communeNom}</span></>}</div>
-                  <div className="log-item__meta">{moisLabel(log.mois, log.annee)} · {formatTime(log.timestamp)}</div>
+                  <div className="log-item__meta">{moisLabel(log.mois, log.annee)} · {formatTime(log.timestamp)}{log.papier && <> · <i className="fa-solid fa-file" title="Acte papier" /> Papier</>}</div>
                   {gristUser && <div className="log-item__user">Par {gristUser.name}</div>}
                 </div>
                 <button className="log-item__rollback" type="button" title="Annuler" onClick={() => rollbackLog(log)}>
@@ -1155,12 +1172,6 @@ export default function DecomptePage() {
         {/* Header */}
         <header className="app-header">
           <div className="app-header__logo"><i className="fa-solid fa-landmark" />DDT 31</div>
-          {gristUser && (
-            <div className="app-header__user" title={gristUser.email}>
-              <i className="fa-solid fa-circle-user" />
-              <span>{gristUser.name}</span>
-            </div>
-          )}
           <div className="app-header__title">Décompte des actes</div>
           <nav className="app-tabs" role="tablist" aria-label="Modes">
             <button className={`app-tab${tab === "saisie" ? " active" : ""}`} data-tab="saisie" role="tab" aria-selected={tab === "saisie"} type="button"
@@ -1172,6 +1183,13 @@ export default function DecomptePage() {
               <i className="fa-solid fa-chart-column" />Tableau de bord
             </button>
           </nav>
+          <div className="app-header__spacer" />
+          {gristUser && (
+            <div className="app-header__user" title={gristUser.email}>
+              <i className="fa-solid fa-circle-user" />
+              <span>{gristUser.name}</span>
+            </div>
+          )}
           <button className="btn-log-toggle" type="button" aria-label="Journal" onClick={() => setSidebarOpen(o => !o)}>
             <i className="fa-solid fa-clock-rotate-left" />Journal
             <span className={`log-badge${logCount > 0 ? " visible" : ""}`}>{logCount}</span>

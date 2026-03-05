@@ -1442,12 +1442,6 @@ export default function EnregistrementPage() {
             <i className="fa-solid fa-landmark" aria-hidden="true" />
             DDT 31
           </div>
-          {gristUser && (
-            <div className="app-header__user" title={gristUser.email}>
-              <i className="fa-solid fa-circle-user" />
-              <span>{gristUser.name}</span>
-            </div>
-          )}
           <div className="app-header__title">
             Enregistrement
           </div>
@@ -1467,6 +1461,13 @@ export default function EnregistrementPage() {
               <i className="fa-solid fa-chart-column" aria-hidden="true" /> Tableau de bord
             </button>
           </nav>
+          <div className="app-header__spacer" />
+          {gristUser && (
+            <div className="app-header__user" title={gristUser.email}>
+              <i className="fa-solid fa-circle-user" />
+              <span>{gristUser.name}</span>
+            </div>
+          )}
         </header>
 
         <main className="app-content" role="main">

@@ -1936,14 +1936,11 @@ export default function EnregistrementPage() {
                   </div>
                   {filteredRows.length > 0 && (
                     <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                      {Object.entries(filteredRows.reduce<Record<string, number>>((acc, r) => { if (r.type) acc[r.type] = (acc[r.type] || 0) + 1; return acc; }, {}))
-                        .map(([type, count]) => <span key={type} className="tag tag--info">{type} : {count}</span>)
-                      }
                       <span className="tag tag--light">Total : {filteredRows.length}</span>
                     </div>
                   )}
                   <button type="button" id="btnToggleFilters" className={dashFiltersOpen ? "open" : ""}
-                    style={{ marginLeft: "auto" }}
+                    style={{ marginLeft: "auto", marginRight: "0.75rem" }}
                     onClick={() => setDashFiltersOpen(v => !v)}>
                     <i className="fa-solid fa-filter" />
                     {(dashFilters.arr.length + dashFilters.motif.length + dashFilters.objet.length) > 0 && (
@@ -2033,21 +2030,22 @@ export default function EnregistrementPage() {
                           { field: "majcs", label: "MAJCS" },
                           { field: "communeName", label: "Commune" },
                           { field: "nActe", label: "N° Acte" },
-                          { field: "nomProjet", label: "Nom du Projet" },
+                          { field: "nomProjet", label: "Nom du Projet", minWidth: "20rem" },
                           { field: "arr", label: "Arrondissement" },
+                          { field: "selection", label: "Stratégie" },
                           { field: "logements", label: "Logements", num: true },
-                          { field: "type", label: "Type" },
-                          { field: "type2", label: "Type2" },
+                          { field: "type", label: "Acte" },
+                          { field: "type2", label: "Permis" },
                           { field: "motif", label: "Motif" },
                           { field: "objet", label: "Objet" },
-                          { field: "selection", label: "Sélection" },
                           { field: "reglementation", label: "Réglementation" },
                           { field: "visaMairie", label: "Visa Mairie" },
                           { field: "receptionPref", label: "Date Réception" },
                           { field: "createdByName", label: "Saisi par" },
-                        ].map(({ field, label, num }) => (
+                        ].map(({ field, label, num, minWidth }) => (
                           <th key={field}
                             className={`sortable${sortField === field ? " active" : ""}${num ? " col-num" : ""}`}
+                            style={minWidth ? { minWidth } : undefined}
                             onClick={() => {
                               if (sortField === field) setSortDir(d => d === "asc" ? "desc" : "asc");
                               else { setSortField(field); setSortDir("asc"); }

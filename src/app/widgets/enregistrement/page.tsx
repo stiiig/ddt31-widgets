@@ -110,6 +110,7 @@ interface AnpcRow {
   visaMairie: Date | null;
   receptionPref: Date | null;
   createdByName: string;
+  createdAt: Date | null;
 }
 
 interface DashFilters {
@@ -339,6 +340,15 @@ function formatDate(d: Date | null): string {
   if (!d) return "—";
   return `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
 }
+function formatDateTime(d: Date | null): string {
+  if (!d) return "—";
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const yy = String(d.getFullYear()).slice(-2);
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mn = String(d.getMinutes()).padStart(2, "0");
+  return `${dd}/${mm}/${yy} ${hh}:${mn}`;
+}
 
 function getDashPeriodLabel(dashVue: string, dashMonth: number, dashYear: number): string {
   const months = ["Jan", "Fév", "Mar", "Avr", "Mai", "Jun", "Jul", "Aoû", "Sep", "Oct", "Nov", "Déc"];
@@ -513,6 +523,8 @@ export default function EnregistrementPage() {
   const [communes, setCommunes] = useState<Commune[]>([]);
   const communesRef       = useRef<Commune[]>([]);
   const communesByIdRef   = useRef<Map<number, Commune>>(new Map());
+  const topScrollRef      = useRef<HTMLDivElement>(null);
+  const tableWrapRef      = useRef<HTMLDivElement>(null);
   const communesByNomRef  = useRef<Map<string, Commune>>(new Map());
   const communesByInseeRef = useRef<Map<string, Commune>>(new Map());
 
@@ -1248,6 +1260,7 @@ export default function EnregistrementPage() {
       const colNActe       = pickCol(r, ["N_ACTE", "N_Acte"]);
       const colNomProjet   = pickCol(r, ["Nom_du_projet", "Nom_projet"]);
       const colCreatedBy   = pickCol(r, ["CreatedByName"]);
+      const colCreatedAt   = pickCol(r, ["manualCreatedAt", "CreatedAt"]);
 
       const rows: AnpcRow[] = (r.id as number[]).map((id, i) => {
         const majcsRaw   = colMajcs ? (r[colMajcs] as unknown[])[i] : id;
@@ -1274,6 +1287,7 @@ export default function EnregistrementPage() {
           visaMairie,
           receptionPref,
           createdByName: cleanStr(colCreatedBy ? (r[colCreatedBy] as unknown[])[i] : "") || "—",
+          createdAt: colCreatedAt ? parseDate((r[colCreatedAt] as unknown[])[i]) : null,
         };
       }).filter(row => row.communeId !== null);
 
@@ -1416,6 +1430,23 @@ export default function EnregistrementPage() {
   // ──────────────────────────────────────────
   const periodRows  = getRowsForPeriod(allAnpcRows);
   const filteredRows = sortRows(applyDashFilters(periodRows));
+
+  // Sync scrollbar du dessus avec le tableau
+  useEffect(() => {
+    const top  = topScrollRef.current;
+    const wrap = tableWrapRef.current;
+    if (!top || !wrap) return;
+    const spacer = top.firstElementChild as HTMLDivElement;
+    if (spacer) spacer.style.width = wrap.scrollWidth + "px";
+    const onTop  = () => { wrap.scrollLeft = top.scrollLeft; };
+    const onWrap = () => { top.scrollLeft  = wrap.scrollLeft; };
+    top.addEventListener("scroll",  onTop,  { passive: true });
+    wrap.addEventListener("scroll", onWrap, { passive: true });
+    return () => {
+      top.removeEventListener("scroll",  onTop);
+      wrap.removeEventListener("scroll", onWrap);
+    };
+  }, [filteredRows, sortField, sortDir]);
 
   // Unique filter values
   const ARR_ORDER = ["Toulouse", "Muret", "Saint-Gaudens"];
@@ -2025,7 +2056,9 @@ export default function EnregistrementPage() {
                   Aucune donnée pour cette période.
                 </div>
               ) : (
-                <div className="croise-wrap">
+                <>
+                <div className="croise-scroll-top" ref={topScrollRef}><div /></div>
+                <div className="croise-wrap" ref={tableWrapRef}>
                   <table className="croise-table">
                     <thead>
                       <tr>
@@ -2045,6 +2078,7 @@ export default function EnregistrementPage() {
                           { field: "receptionPref", label: "Réception préf." },
                           { field: "visaMairie", label: "Visa mairie" },
                           { field: "createdByName", label: "Saisi par", minWidth: "20rem" },
+                          { field: "createdAt", label: "Saisi le" },
                         ].map(({ field, label, num, minWidth }) => (
                           <th key={field}
                             className={`sortable${sortField === field ? " active" : ""}${num ? " col-num" : ""}`}
@@ -2090,12 +2124,14 @@ export default function EnregistrementPage() {
                             <td>{formatDate(row.visaMairie)}</td>
                             <td>{formatDate(row.receptionPref)}</td>
                             <td>{row.createdByName}</td>
+                            <td style={{ whiteSpace: "nowrap" }}>{formatDateTime(row.createdAt)}</td>
                           </tr>
                         );
                       })}
                     </tbody>
                   </table>
                 </div>
+                </>
               )}
             </div>
           )}

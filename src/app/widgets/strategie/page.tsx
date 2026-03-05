@@ -41,6 +41,7 @@ type StatutRow = {
   debut: Date | null;
   fin: Date | null;
   explications: string;
+  createdByName: string;
 };
 type VueType = "mois" | "trimestre" | "annee";
 type Toast   = { id: string; kind: "success"|"error"|"info"|"warning"; title: string; desc?: string; closing?: boolean; };
@@ -199,7 +200,8 @@ export default function StrategiePage() {
       const selCol  = pickCol(statTable as Record<string, unknown>, [STAT_COLS.Selection, "Selection", "selection"]);
       const debCol  = pickCol(statTable as Record<string, unknown>, [STAT_COLS.Debut, "Debut", "debut"]);
       const finCol  = pickCol(statTable as Record<string, unknown>, [STAT_COLS.Fin, "Fin", "fin"]);
-      const expCol  = pickCol(statTable as Record<string, unknown>, [STAT_COLS.Explications, "Explications", "explications"]);
+      const expCol       = pickCol(statTable as Record<string, unknown>, [STAT_COLS.Explications, "Explications", "explications"]);
+      const createdByCol = pickCol(statTable as Record<string, unknown>, ["CreatedByName"]);
 
       const sIds = (statTable as Record<string, number[]>).id || [];
       const rows: StatutRow[] = sIds.map((id: number, i: number) => ({
@@ -209,6 +211,7 @@ export default function StrategiePage() {
         debut:        debCol  ? parseDate((statTable as Record<string, unknown[]>)[debCol][i])         : null,
         fin:          finCol  ? parseDate((statTable as Record<string, unknown[]>)[finCol][i])         : null,
         explications: expCol  ? String((statTable as Record<string, unknown[]>)[expCol][i] ?? "")     : "",
+        createdByName: createdByCol ? String((statTable as Record<string, unknown[]>)[createdByCol][i] ?? "") : "",
       }));
       setStatuts(rows);
     } catch (e) {
@@ -458,6 +461,7 @@ export default function StrategiePage() {
                         style={{ fontSize: "0.6rem", opacity: 0.55, marginLeft: "0.15rem" }} />
                     </th>
                     <th>Explications</th>
+                    <th>Saisi par</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -490,6 +494,7 @@ export default function StrategiePage() {
                             : <span style={{ color: "#bbb" }}>—</span>}
                         </td>
                         <td className="strat-td-expl">{row.explications || ""}</td>
+                        <td className="strat-td-created">{row.createdByName || "—"}</td>
                       </tr>
                     );
                   })}

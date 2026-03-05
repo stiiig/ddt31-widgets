@@ -109,6 +109,7 @@ interface AnpcRow {
   objet: unknown;
   visaMairie: Date | null;
   receptionPref: Date | null;
+  createdByName: string;
 }
 
 interface DashFilters {
@@ -1246,6 +1247,7 @@ export default function EnregistrementPage() {
       const colReception   = pickCol(r, ["Reception_Pref"]);
       const colNActe       = pickCol(r, ["N_ACTE", "N_Acte"]);
       const colNomProjet   = pickCol(r, ["Nom_du_projet", "Nom_projet"]);
+      const colCreatedBy   = pickCol(r, ["CreatedByName"]);
 
       const rows: AnpcRow[] = (r.id as number[]).map((id, i) => {
         const majcsRaw   = colMajcs ? (r[colMajcs] as unknown[])[i] : id;
@@ -1271,6 +1273,7 @@ export default function EnregistrementPage() {
           objet: colObjet ? (r[colObjet] as unknown[])[i] : null,
           visaMairie,
           receptionPref,
+          createdByName: cleanStr(colCreatedBy ? (r[colCreatedBy] as unknown[])[i] : "") || "—",
         };
       }).filter(row => row.communeId !== null);
 
@@ -2037,6 +2040,7 @@ export default function EnregistrementPage() {
                           { field: "reglementation", label: "Réglementation" },
                           { field: "visaMairie", label: "Visa Mairie" },
                           { field: "receptionPref", label: "Date Réception" },
+                          { field: "createdByName", label: "Saisi par" },
                         ].map(({ field, label, num }) => (
                           <th key={field}
                             className={`sortable${sortField === field ? " active" : ""}${num ? " col-num" : ""}`}
@@ -2080,6 +2084,7 @@ export default function EnregistrementPage() {
                             <td>{commune?.reglementation ? <span className="tag tag--reglementation">{commune.reglementation}</span> : "—"}</td>
                             <td>{formatDate(row.visaMairie)}</td>
                             <td>{formatDate(row.receptionPref)}</td>
+                            <td>{row.createdByName}</td>
                           </tr>
                         );
                       })}

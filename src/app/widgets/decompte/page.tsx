@@ -135,6 +135,7 @@ export default function DecomptePage() {
   const [saisieYear,    setSaisieYear]    = useState(() => new Date().getFullYear());
   const [decompteRows,  setDecompteRows]  = useState<DecompteRow[]>([]);
   const [allRows,       setAllRows]       = useState<DecompteRowAll[]>([]);
+  const [createdByNameMap, setCreatedByNameMap] = useState<Map<number, string>>(new Map());
   const [vue,           setVue]           = useState<VueType>("mois");
   const [dashMonth,     setDashMonth]     = useState(() => new Date().getMonth() + 1);
   const [dashYear,      setDashYear]      = useState(() => new Date().getFullYear());
@@ -161,7 +162,8 @@ export default function DecomptePage() {
   const saisieYearRef    = useRef(saisieYear);
   const selectedRef      = useRef<Commune | null>(null);
   const decompteRowsRef  = useRef<DecompteRow[]>([]);
-  const allRowsRef       = useRef<DecompteRowAll[]>([]);
+  const allRowsRef           = useRef<DecompteRowAll[]>([]);
+  const createdByNameMapRef  = useRef<Map<number, string>>(new Map());
   const communesByIdRef  = useRef<Map<number, Commune>>(new Map());
   const communesRef      = useRef<Commune[]>([]);
   const logsRef          = useRef<LogEntry[]>([]);
@@ -174,6 +176,7 @@ export default function DecomptePage() {
   useEffect(() => { selectedRef.current = selected; }, [selected]);
   useEffect(() => { decompteRowsRef.current = decompteRows; }, [decompteRows]);
   useEffect(() => { allRowsRef.current = allRows; }, [allRows]);
+  useEffect(() => { createdByNameMapRef.current = createdByNameMap; }, [createdByNameMap]);
   useEffect(() => { communesByIdRef.current = communesById; }, [communesById]);
   useEffect(() => { communesRef.current = communes; }, [communes]);
   useEffect(() => { logsRef.current = logs; }, [logs]);
@@ -285,10 +288,12 @@ export default function DecomptePage() {
 
   async function loadAllDecompte(api: GristDocAPI) {
     const tbl = await api.fetchTable(TABLE_DECOMPTE);
-    const ids      = (tbl.id as number[]) || [];
-    const communes = (tbl[DECOMPTE_COLS.Commune] as unknown[]) || [];
-    const annees   = (tbl[DECOMPTE_COLS.Annee]   as unknown[]) || [];
-    const moisArr  = (tbl[DECOMPTE_COLS.Mois]    as unknown[]) || [];
+    const ids           = (tbl.id as number[]) || [];
+    const communes      = (tbl[DECOMPTE_COLS.Commune] as unknown[]) || [];
+    const annees        = (tbl[DECOMPTE_COLS.Annee]   as unknown[]) || [];
+    const moisArr       = (tbl[DECOMPTE_COLS.Mois]    as unknown[]) || [];
+    const createdByArr  = (tbl["CreatedByName"] as (string | null)[]) || [];
+    const newCreatedByMap = new Map<number, string>();
     const rows: DecompteRowAll[] = [];
     ids.forEach((id, i) => {
       const cid = communes[i];
@@ -297,10 +302,13 @@ export default function DecomptePage() {
       const row: DecompteRowAll = { id, communeId, annee: parseInt((annees[i] ?? 0) as string, 10), mois: parseInt((moisArr[i] ?? 0) as string, 10) };
       DOC_TYPES.forEach(dt => { row[dt.key] = parseInt(((tbl[dt.key] as unknown[])?.[i] ?? 0) as string, 10) || 0; });
       row[DECOMPTE_COLS.Papier] = parseInt(((tbl[DECOMPTE_COLS.Papier] as unknown[])?.[i] ?? 0) as string, 10) || 0;
+      newCreatedByMap.set(id, String(createdByArr[i] || ""));
       rows.push(row);
     });
     setAllRows(rows);
     allRowsRef.current = rows;
+    setCreatedByNameMap(newCreatedByMap);
+    createdByNameMapRef.current = newCreatedByMap;
   }
 
   async function loadAllLogs(api: GristDocAPI) {
@@ -758,12 +766,13 @@ export default function DecomptePage() {
           </div>
           <div className="recap-table-wrap">
             <table className="recap-table">
-              <thead><tr><th>Période</th>{colHeaders}<th className="col-num col-total">Total</th></tr></thead>
+              <thead><tr><th>Période</th>{colHeaders}<th className="col-num col-total">Total</th><th>Saisi par</th></tr></thead>
               <tbody>
                 <tr>
                   <td><strong>{moisLabel(m, a)}</strong>{isCurrent && <span style={{ color: "#000091", fontSize: ".65rem" }}> ◀ en cours</span>}</td>
                   {DOC_TYPES.map(dt => <NumCell key={dt.key} v={counters[dt.key] || 0} hl={dt.highlight} />)}
                   <td className="col-num col-total">{total || <span style={{ color: "#ccc" }}>0</span>}</td>
+                  <td className="col-created">{row ? (createdByNameMap.get(row.id) || "—") : "—"}</td>
                 </tr>
               </tbody>
             </table>
@@ -834,7 +843,7 @@ export default function DecomptePage() {
     return rows.filter(r => r.annee === a);
   }
 
-  type CommuneAgg = { id: number; nom: string; counters: Record<string, number>; total: number; statut?: string[]; statutsAnnee?: { t: number; sels: string[] }[]; };
+  type CommuneAgg = { id: number; nom: string; counters: Record<string, number>; total: number; createdByName?: string; statut?: string[]; statutsAnnee?: { t: number; sels: string[] }[]; };
 
   function buildCommuneList(): CommuneAgg[] {
     const rows = getRowsForPeriod(allRows);
@@ -845,6 +854,8 @@ export default function DecomptePage() {
       if (!byCommune.has(row.communeId)) byCommune.set(row.communeId, { id: row.communeId, nom: commune.nom, counters: Object.fromEntries(DOC_TYPES.map(dt => [dt.key, 0])), total: 0 });
       const entry = byCommune.get(row.communeId)!;
       DOC_TYPES.forEach(dt => { entry.counters[dt.key] += row[dt.key] || 0; });
+      // Garde le nom du créateur (premier trouvé pour cette commune sur la période)
+      if (!entry.createdByName) entry.createdByName = createdByNameMapRef.current.get(row.id) || "";
     });
     const da = dashYear; const dm = dashMonth;
     byCommune.forEach((entry, communeId) => {
@@ -947,7 +958,7 @@ export default function DecomptePage() {
     return (
       <div className="croise-wrap">
         <table className="croise-table">
-          <thead><tr><th>Commune</th><th className="col-arr">Arr.</th>{visibleTypes.map(dt => <th key={dt.key} className={`col-num${dt.highlight ? " col-highlight" : ""}`} title={dt.label}>{dt.code}</th>)}<th className="col-num col-total">Total</th></tr></thead>
+          <thead><tr><th>Commune</th><th className="col-arr">Arr.</th>{visibleTypes.map(dt => <th key={dt.key} className={`col-num${dt.highlight ? " col-highlight" : ""}`} title={dt.label}>{dt.code}</th>)}<th className="col-num col-total">Total</th><th>Saisi par</th></tr></thead>
           <tbody>
             {communeList.map(c => {
               const statuts = vue === "annee" && c.statutsAnnee?.length ? c.statutsAnnee[0].sels : (c.statut || []);
@@ -959,6 +970,7 @@ export default function DecomptePage() {
                   <td className="col-arr">{communesById.get(c.id)?.arr || ""}</td>
                   {visibleTypes.map(dt => <NumCell key={dt.key} v={c.counters[dt.key] || 0} hl={dt.highlight || (dt.key === "DP" && isCiblee)} />)}
                   <td className="col-num col-total" style={{ fontWeight: 700 }}>{c.total}</td>
+                  <td className="col-created">{c.createdByName || "—"}</td>
                 </tr>
               );
             })}
@@ -967,6 +979,7 @@ export default function DecomptePage() {
               <td />
               {visibleTypes.map(dt => <NumCell key={dt.key} v={totals[dt.key] || 0} hl={dt.highlight} />)}
               <td className="col-num col-total"><strong>{grandTotal}</strong></td>
+              <td />
             </tr>
             {tagTotals.map(tt => (
               <tr key={tt!.tag} className={`tag-total-row ${tt!.cls}`}>
@@ -974,6 +987,7 @@ export default function DecomptePage() {
                 <td />
                 {visibleTypes.map(dt => <NumCell key={dt.key} v={tt!.counters[dt.key] || 0} hl={dt.highlight} />)}
                 <td className="col-num col-total"><strong>{tt!.total}</strong></td>
+                <td />
               </tr>
             ))}
             {combinedFiltered.length > 0 && (
@@ -982,6 +996,7 @@ export default function DecomptePage() {
                 <td />
                 {visibleTypes.map(dt => <NumCell key={dt.key} v={combinedCounters[dt.key] || 0} hl={dt.highlight} />)}
                 <td className="col-num col-total"><strong>{combinedTotal}</strong></td>
+                <td />
               </tr>
             )}
             {noTagFiltered.length > 0 && (
@@ -990,6 +1005,7 @@ export default function DecomptePage() {
                 <td />
                 {visibleTypes.map(dt => <NumCell key={dt.key} v={noTagCounters[dt.key] || 0} hl={dt.highlight} />)}
                 <td className="col-num col-total"><strong>{noTagTotal}</strong></td>
+                <td />
               </tr>
             )}
             {papierFiltered.length > 0 && (
@@ -998,6 +1014,7 @@ export default function DecomptePage() {
                 <td />
                 {visibleTypes.map(dt => <NumCell key={dt.key} v={papierCounters[dt.key] || 0} hl={dt.highlight} />)}
                 <td className="col-num col-total"><strong>{papierTotal}</strong></td>
+                <td />
               </tr>
             )}
           </tbody>

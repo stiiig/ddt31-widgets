@@ -23,7 +23,9 @@
       "Bash(git add src/lib/grist/hooks.ts)",
       "Bash(git add src/app/api/grist-profile/route.ts src/lib/grist/hooks.ts)",
       "Bash(git add src/lib/grist/hooks.ts src/components/UserBadge.tsx src/app/widgets/decompte/page.tsx src/app/widgets/strategie/page.tsx src/app/widgets/enregistrement/page.tsx src/app/widgets/decompte/styles.css src/app/widgets/strategie/styles.css src/app/widgets/enregistrement/styles.css)",
-      "Bash(git add -A)"
+      "Bash(git add -A)",
+      "Bash(git add src/lib/grist/hooks.ts .github/workflows/deploy.yml)",
+      "Bash(ls /Users/benjamin/Source-Code/ddt31/*.md)"
     ]
   }
 }

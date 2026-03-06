@@ -1502,10 +1502,11 @@ input[type="date"].is-empty::-webkit-datetime-edit-year-field{
 
 .toast__close {
   flex-shrink: 0;
-  background: none;
-  border: none;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
   cursor: pointer;
-  color: white;
+  color: white !important;
   opacity: 0.65;
   padding: 0.25rem;
   width: 1.5rem;
@@ -1517,9 +1518,13 @@ input[type="date"].is-empty::-webkit-datetime-edit-year-field{
   transition: opacity 0.15s;
 }
 
-.toast__close:hover {
+.toast__close:hover,
+.toast__close:focus,
+.toast__close:active {
   opacity: 1;
-  background: none;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: white !important;
 }
 
 @media (max-width: 768px) {

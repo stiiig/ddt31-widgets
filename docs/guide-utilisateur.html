@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guide utilisateur — DDT 31 Grist</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 10.5pt;
+    color: #1a1a2e;
+    line-height: 1.55;
+    background: #fff;
+  }
+
+  @media print {
+    .page-break { page-break-before: always; }
+    .no-break    { page-break-inside: avoid; }
+    body         { font-size: 9.5pt; }
+    .cover       { page-break-after: always; }
+  }
+
+  .page { max-width: 800px; margin: 0 auto; padding: 2rem 2.5rem; }
+
+  /* Cover */
+  .cover {
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: flex-start;
+    min-height: 100vh;
+    background: linear-gradient(145deg, #0a0a6e 0%, #1a1aaa 60%, #2626c8 100%);
+    color: white; padding: 4rem 5rem;
+  }
+  .cover-logo { font-size: 13pt; font-weight: 700; letter-spacing: 1px; opacity: .75; margin-bottom: 3rem; text-transform: uppercase; }
+  .cover-title { font-size: 34pt; font-weight: 800; line-height: 1.1; margin-bottom: 1rem; }
+  .cover-sub { font-size: 14pt; opacity: .8; margin-bottom: 3rem; }
+  .cover-meta { font-size: 10pt; opacity: .6; border-top: 1px solid rgba(255,255,255,.3); padding-top: 1rem; margin-top: auto; }
+  .cover-widgets { display: flex; gap: 1rem; margin-top: 2.5rem; }
+  .cover-badge { background: rgba(255,255,255,.15); border: 1px solid rgba(255,255,255,.3); border-radius: 8px; padding: .5rem 1.2rem; font-size: 10.5pt; font-weight: 600; }
+
+  /* TOC */
+  .toc { padding: 3rem 2.5rem; max-width: 800px; margin: 0 auto; }
+  .toc h2 { font-size: 18pt; color: #0a0a6e; margin-bottom: 1.5rem; border-bottom: 2px solid #0a0a6e; padding-bottom: .5rem; }
+  .toc ol { list-style: none; counter-reset: toc; }
+  .toc > ol > li { counter-increment: toc; font-weight: 700; font-size: 11pt; margin-bottom: .75rem; color: #0a0a6e; }
+  .toc > ol > li::before { content: counter(toc) ". "; }
+  .toc ul { list-style: none; margin-left: 1.5rem; margin-top: .35rem; }
+  .toc ul li { font-weight: 400; font-size: 10pt; color: #444; margin-bottom: .25rem; }
+  .toc ul li::before { content: "→ "; color: #aaa; }
+
+  /* Widget header */
+  .widget-header {
+    background: linear-gradient(135deg, #0a0a6e, #2626c8);
+    color: white; border-radius: 10px 10px 0 0;
+    padding: 1.5rem 2rem;
+    display: flex; align-items: center; gap: 1rem;
+    margin-top: 2rem;
+  }
+  .widget-header-icon { width: 42px; height: 42px; border-radius: 10px; background: rgba(255,255,255,.2); display: flex; align-items: center; justify-content: center; font-size: 18pt; }
+  .widget-header h1 { font-size: 17pt; font-weight: 800; }
+  .widget-header p  { font-size: 9.5pt; opacity: .75; margin-top: .15rem; }
+
+  /* Section */
+  .section { border: 1px solid #e0e0e0; border-top: none; padding: 1.5rem 2rem; background: #fff; }
+  .section:last-of-type { border-radius: 0 0 10px 10px; }
+  .section + .section { border-top: 1px solid #f0f0f0; }
+
+  h2.section-title { font-size: 13pt; font-weight: 700; color: #0a0a6e; margin-bottom: 1rem; display: flex; align-items: center; gap: .5rem; }
+  h2.section-title::before { content: ""; display: inline-block; width: 4px; height: 18px; background: #2626c8; border-radius: 2px; }
+  h3.sub-title { font-size: 10.5pt; font-weight: 700; color: #333; margin: 1rem 0 .5rem; }
+  p { margin-bottom: .6rem; color: #333; }
+
+  ul.doc-list { list-style: none; padding: 0; margin: .5rem 0 1rem; }
+  ul.doc-list li { padding: .3rem 0 .3rem 1.2rem; position: relative; color: #333; font-size: 10pt; border-bottom: 1px solid #f5f5f5; }
+  ul.doc-list li::before { content: "▸"; position: absolute; left: 0; color: #2626c8; font-size: 8pt; top: .45rem; }
+  ul.doc-list li strong { color: #1a1a2e; }
+
+  /* UI elements */
+  .ui-row { display: flex; flex-wrap: wrap; gap: .6rem; margin: .75rem 0; }
+  .chip { display: inline-flex; align-items: center; gap: .3rem; padding: .2rem .7rem; border-radius: 20px; font-size: 9pt; font-weight: 600; white-space: nowrap; }
+  .chip-blue   { background: #e8eeff; color: #0a0a6e; border: 1px solid #b0baff; }
+  .chip-green  { background: #e6f9ec; color: #1a6e3a; border: 1px solid #9dd4b0; }
+  .chip-yellow { background: #fff8e0; color: #7a5900; border: 1px solid #f0d080; }
+  .chip-orange { background: #fff0e0; color: #8a4000; border: 1px solid #f0b080; }
+  .chip-red    { background: #ffe8e8; color: #8a0000; border: 1px solid #f0a0a0; }
+  .chip-gray   { background: #f0f0f0; color: #555;    border: 1px solid #ddd; }
+  .chip-purple { background: #f0e8ff; color: #5a0a8a; border: 1px solid #c8a0f0; }
+
+  /* Info boxes */
+  .info-box { border-left: 4px solid #2626c8; background: #f0f2ff; padding: .75rem 1rem; border-radius: 0 6px 6px 0; margin: .75rem 0; font-size: 9.5pt; }
+  .info-box.warn { border-left-color: #e07000; background: #fff8ee; }
+  .info-box.tip  { border-left-color: #1a6e3a; background: #eefaf2; }
+  .info-box.err  { border-left-color: #cc0000; background: #fff0f0; }
+  .info-box strong { display: block; margin-bottom: .25rem; }
+
+  /* Tables */
+  .doc-table { width: 100%; border-collapse: collapse; margin: .75rem 0; font-size: 9pt; }
+  .doc-table th { background: #0a0a6e; color: white; padding: .5rem .75rem; text-align: left; font-weight: 600; }
+  .doc-table td { padding: .45rem .75rem; border-bottom: 1px solid #eee; vertical-align: top; }
+  .doc-table tr:nth-child(even) td { background: #f8f9ff; }
+  .doc-table tr:last-child td { border-bottom: none; }
+
+  /* Steps */
+  .steps { counter-reset: step; margin: .75rem 0; }
+  .step { display: flex; gap: 1rem; align-items: flex-start; margin-bottom: .75rem; padding: .6rem; background: #fafbff; border-radius: 8px; border: 1px solid #e8eeff; }
+  .step-num { counter-increment: step; min-width: 26px; height: 26px; background: #0a0a6e; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9pt; font-weight: 700; flex-shrink: 0; }
+  .step-num::before { content: counter(step); }
+  .step-content { flex: 1; font-size: 10pt; }
+  .step-content strong { color: #0a0a6e; }
+
+  /* Acte cards */
+  .acte-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .5rem; margin: .75rem 0; }
+  .acte-card { border: 1px solid #e0e0e0; border-radius: 8px; padding: .6rem; text-align: center; background: #fafafa; }
+  .acte-code { font-weight: 800; font-size: 11pt; color: #0a0a6e; }
+  .acte-code.red    { color: #cc2200; }
+  .acte-code.orange { color: #cc6600; }
+  .acte-code.green  { color: #006622; }
+  .acte-code.teal   { color: #006688; }
+  .acte-card .acte-label { font-size: 8pt; color: #666; margin-top: .2rem; }
+
+  .divider { border: none; border-top: 1px solid #e8eeff; margin: 1.25rem 0; }
+
+  /* Nav mock */
+  .nav-mock { background: #0a0a6e; border-radius: 8px; padding: .6rem 1rem; display: flex; align-items: center; gap: 1.5rem; margin-bottom: 1rem; }
+  .nav-mock .brand { color: white; font-weight: 700; font-size: 10pt; opacity: .9; }
+  .nav-mock .tab { color: rgba(255,255,255,.6); font-size: 9.5pt; padding: .25rem .6rem; border-radius: 4px; }
+  .nav-mock .tab.active { background: rgba(255,255,255,.2); color: white; font-weight: 600; }
+  .nav-mock .spacer { flex: 1; }
+  .nav-mock .user { color: rgba(255,255,255,.7); font-size: 9pt; }
+
+  /* Enjeu example */
+  .enjeu-row { display: flex; align-items: center; gap: .75rem; padding: .5rem .75rem; border: 1px solid #e0e0e0; border-radius: 6px; margin-bottom: .4rem; background: #fafafa; font-size: 9.5pt; }
+  .enjeu-row.checked { background: #f0f2ff; border-color: #b0baff; }
+  .enjeu-row.error   { background: #fff0f0; border-color: #f0a0a0; }
+  .enjeu-checkbox { width: 14px; height: 14px; border: 2px solid #aaa; border-radius: 3px; flex-shrink: 0; }
+  .enjeu-checkbox.on { background: #0a0a6e; border-color: #0a0a6e; }
+  .enjeu-label { flex: 1; }
+  .enjeu-btns { display: flex; gap: .3rem; }
+  .btn-oui { background: #ffdddd; border: 1px solid #ffaaaa; color: #990000; border-radius: 12px; padding: .1rem .5rem; font-size: 8.5pt; font-weight: 600; }
+  .btn-oui.active { background: #ffaaaa; }
+  .btn-non { background: #f0f0f0; border: 1px solid #ccc; color: #555; border-radius: 12px; padding: .1rem .5rem; font-size: 8.5pt; font-weight: 600; }
+  .btn-non.active { background: #d0ffd0; border-color: #80cc80; color: #006600; }
+
+  .doc-footer { text-align: center; font-size: 8.5pt; color: #aaa; padding: 2rem; margin-top: 3rem; border-top: 1px solid #eee; }
+</style>
+</head>
+<body>
+
+<!-- COUVERTURE -->
+<div class="cover">
+  <div class="cover-logo">DDT 31 — Direction Départementale des Territoires</div>
+  <div class="cover-title">Guide<br>Utilisateur</div>
+  <div class="cover-sub">Plateforme de suivi du contrôle de légalité des actes d'urbanisme</div>
+  <div class="cover-widgets">
+    <div class="cover-badge">📊 Décompte des actes</div>
+    <div class="cover-badge">📝 Enregistrement</div>
+    <div class="cover-badge">🗺️ Stratégie</div>
+  </div>
+  <div class="cover-meta">Version 2026 &nbsp;·&nbsp; Usage interne DDT 31 &nbsp;·&nbsp; Confidentiel</div>
+</div>
+
+<!-- SOMMAIRE -->
+<div class="toc page-break">
+  <h2>Sommaire</h2>
+  <ol>
+    <li>Introduction
+      <ul>
+        <li>Présentation de la plateforme</li>
+        <li>Navigation générale</li>
+        <li>Codes couleur et badges</li>
+      </ul>
+    </li>
+    <li>Widget — Décompte des actes
+      <ul>
+        <li>Sélection de la commune et de la période</li>
+        <li>Saisie des actes</li>
+        <li>Mode Papier</li>
+        <li>Journal des modifications</li>
+        <li>Tableau de bord — vue globale</li>
+        <li>Tableau de bord — vue par arrondissement</li>
+        <li>Tableau de bord — vue annuelle par commune</li>
+      </ul>
+    </li>
+    <li>Widget — Enregistrement
+      <ul>
+        <li>Onglet Saisie — Informations générales</li>
+        <li>Onglet Saisie — Contrôle de légalité</li>
+        <li>Enjeux : répondre Oui / Non</li>
+        <li>Validation et messages d'erreur</li>
+        <li>Onglet Tableau de bord</li>
+        <li>Utiliser les filtres</li>
+      </ul>
+    </li>
+    <li>Widget — Stratégie
+      <ul>
+        <li>Présentation</li>
+        <li>Filtres et navigation</li>
+        <li>Lecture du tableau</li>
+      </ul>
+    </li>
+    <li>Référence rapide — Codes actes et enjeux</li>
+  </ol>
+</div>
+
+<!-- INTRODUCTION -->
+<div class="page page-break">
+  <div class="widget-header" style="background: linear-gradient(135deg, #1a1a4e, #3a3a9e); margin-top: 0;">
+    <div class="widget-header-icon">📋</div>
+    <div><h1>Introduction</h1><p>Présentation générale de la plateforme</p></div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Présentation de la plateforme</h2>
+    <p>La plateforme DDT 31 est un outil interne de gestion et de suivi du <strong>contrôle de légalité des actes d'urbanisme</strong> reçus par la Direction Départementale des Territoires de la Haute-Garonne.</p>
+    <p>Elle est composée de <strong>trois widgets Grist</strong> complémentaires :</p>
+    <ul class="doc-list">
+      <li><strong>Décompte des actes</strong> — Comptage mensuel des actes reçus par commune (DP, PC, PA, etc.)</li>
+      <li><strong>Enregistrement</strong> — Saisie détaillée d'un acte avec analyse des enjeux et décision de contrôle de légalité</li>
+      <li><strong>Stratégie</strong> — Consultation et pilotage de la stratégie de sélection des communes par trimestre</li>
+    </ul>
+    <div class="info-box tip">
+      <strong>💡 Ordre d'utilisation recommandé</strong>
+      1. Consulter la <strong>Stratégie</strong> pour connaître les communes ciblées ce trimestre.<br>
+      2. Utiliser le <strong>Décompte</strong> pour saisir les volumes mensuels par commune.<br>
+      3. Utiliser l'<strong>Enregistrement</strong> pour créer les fiches détaillées acte par acte.
+    </div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Navigation générale</h2>
+    <p>Chaque widget partage la même barre de navigation en haut de l'écran :</p>
+    <div class="nav-mock">
+      <span class="brand">🏛 DDT 31 &nbsp; Nom du widget</span>
+      <span class="tab active">✏️ Saisie</span>
+      <span class="tab">📊 Tableau de bord</span>
+      <span class="spacer"></span>
+      <span class="user">👤 Prénom Nom</span>
+    </div>
+    <ul class="doc-list">
+      <li><strong>Onglet Saisie</strong> — Formulaire de saisie ou de comptage</li>
+      <li><strong>Onglet Tableau de bord</strong> — Vue d'ensemble et consultation des données enregistrées</li>
+      <li><strong>Nom d'utilisateur</strong> (en haut à droite) — Identifiant automatiquement associé aux saisies</li>
+      <li><strong>Bouton Journal</strong> (widget Décompte uniquement) — Historique des modifications avec bouton Annuler</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Codes couleur et badges</h2>
+    <table class="doc-table">
+      <thead><tr><th>Badge</th><th>Signification</th></tr></thead>
+      <tbody>
+        <tr><td><span class="chip chip-yellow">Fixe</span></td><td>Commune en sélection fixe ce trimestre</td></tr>
+        <tr><td><span class="chip chip-orange">Rotation</span></td><td>Commune en sélection par rotation</td></tr>
+        <tr><td><span class="chip chip-red">Ciblée</span></td><td>Commune ciblée ponctuellement</td></tr>
+        <tr><td><span class="chip chip-blue">PC</span> <span class="chip chip-blue">PD</span> <span class="chip chip-blue">I</span></td><td>Type d'acte ou type de permis</td></tr>
+        <tr><td><span class="chip chip-blue">ZI</span> <span class="chip chip-blue">RT</span> <span class="chip chip-blue">ZA</span></td><td>Codes d'enjeux (commune ou projet)</td></tr>
+        <tr><td><span class="chip chip-gray">Toulouse</span> <span class="chip chip-gray">75+</span></td><td>Arrondissement ou seuil logements</td></tr>
+        <tr><td><span class="chip chip-green">→ Oui, concernée</span></td><td>Indicateur automatique de contrôle</td></tr>
+        <tr><td><span class="chip" style="background:#ddeeff;color:#004488;border:1px solid #88bbdd;">T1 2026</span></td><td>Période (trimestre) dans le widget Stratégie</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- WIDGET 1 — DÉCOMPTE -->
+<div class="page page-break">
+  <div class="widget-header" style="margin-top: 0;">
+    <div class="widget-header-icon">📊</div>
+    <div><h1>Widget — Décompte des actes</h1><p>Comptage mensuel des actes reçus par commune</p></div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Rôle du widget</h2>
+    <p>Le widget <strong>Décompte des actes</strong> permet de saisir, commune par commune et mois par mois, le nombre d'actes d'urbanisme reçus. Il distingue les actes transmis <strong>numériquement</strong> (flux @CTES) des actes reçus en <strong>format papier</strong>.</p>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Sélection de la commune</h2>
+    <div class="steps">
+      <div class="step"><div class="step-num"></div><div class="step-content">Cliquer sur le champ <strong>COMMUNE</strong> et taper le nom de la commune.</div></div>
+      <div class="step"><div class="step-num"></div><div class="step-content">Sélectionner la commune dans la liste déroulante qui apparaît.</div></div>
+      <div class="step"><div class="step-num"></div><div class="step-content">Les badges de <strong>stratégie</strong> (Fixe / Rotation / Ciblée) et d'<strong>arrondissement</strong> apparaissent automatiquement à droite du champ.</div></div>
+    </div>
+    <p>La barre de période permet de naviguer mois par mois avec les boutons <strong>&lt;</strong> et <strong>&gt;</strong>. Le badge <span class="chip chip-blue">en cours</span> indique le mois actuel. Le <strong>Total</strong> affiche le cumul des actes saisis pour le mois affiché.</p>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Saisie des actes</h2>
+    <p>L'acte principal affiché en grand au centre est le <strong>DP (Déclaration Préalable)</strong>. Les autres types figurent en dessous dans la section <strong>AUTRES ACTES</strong>. Pour chaque type, deux boutons ajustent le compteur :</p>
+    <div class="ui-row">
+      <span class="chip chip-gray">— &nbsp;diminuer de 1</span>
+      <span class="chip chip-blue">+ &nbsp;augmenter de 1</span>
+    </div>
+
+    <h3 class="sub-title">Types d'actes disponibles</h3>
+    <div class="acte-grid">
+      <div class="acte-card"><div class="acte-code">DP</div><div class="acte-label">Déclaration Préalable</div></div>
+      <div class="acte-card"><div class="acte-code red">PD</div><div class="acte-label">Permis de Démolir</div></div>
+      <div class="acte-card"><div class="acte-code">PC</div><div class="acte-label">Permis de Construire</div></div>
+      <div class="acte-card"><div class="acte-code">PCM</div><div class="acte-label">PC modificatif</div></div>
+      <div class="acte-card"><div class="acte-code teal">PA</div><div class="acte-label">Permis d'Aménager</div></div>
+      <div class="acte-card"><div class="acte-code teal">PAM</div><div class="acte-label">PA modificatif</div></div>
+      <div class="acte-card"><div class="acte-code green">ZA</div><div class="acte-label">Permis Zone Agricole</div></div>
+      <div class="acte-card"><div class="acte-code">DP Div.</div><div class="acte-label">DP Division</div></div>
+      <div class="acte-card"><div class="acte-code">Trans/Proro</div><div class="acte-label">Transmissions &amp; Prorogations</div></div>
+      <div class="acte-card"><div class="acte-code red">Ret./Rej.</div><div class="acte-label">Retraits &amp; Rejets</div></div>
+      <div class="acte-card"><div class="acte-code orange">Ref./Sursis</div><div class="acte-label">Refus &amp; Sursis</div></div>
+      <div class="acte-card"><div class="acte-code green">CU</div><div class="acte-label">Certificat d'Urbanisme</div></div>
+    </div>
+  </div>
+
+  <div class="section no-break">
+    <h2 class="section-title">Mode Papier</h2>
+    <p>Le bouton <strong>Papier</strong> bascule entre saisie numérique et saisie papier.</p>
+    <ul class="doc-list">
+      <li>Mode <strong>normal</strong> (par défaut) : actes comptabilisés comme transmis via @CTES</li>
+      <li>Mode <strong>Papier ON</strong> <span class="chip chip-orange">Papier ON</span> : actes comptabilisés séparément en tant qu'actes papier. Un bandeau orange d'avertissement s'affiche en permanence.</li>
+    </ul>
+    <div class="info-box warn">
+      <strong>⚠️ Attention</strong>
+      Bien vérifier le mode actif avant de saisir. Un acte saisi en mode Papier ne peut pas être automatiquement reconverti. Utiliser le Journal pour annuler si nécessaire.
+    </div>
+  </div>
+
+  <div class="section no-break">
+    <h2 class="section-title">Journal des modifications</h2>
+    <p>Le bouton <span class="chip chip-blue">🕐 Journal N</span> (en haut à droite) ouvre le panneau historique. Le badge rouge indique le nombre d'opérations de la session.</p>
+    <p>Chaque ligne du Journal affiche : type d'acte + commune, date/heure, auteur, et un bouton <span class="chip chip-gray">↺ Annuler</span>.</p>
+    <div class="info-box tip">
+      <strong>💡 Correction rapide</strong>
+      En cas d'erreur (mauvaise commune, mauvais type), ouvrir le Journal et cliquer "Annuler" plutôt que de décrémenter manuellement.
+    </div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Tableau de bord — vue globale</h2>
+    <p>L'onglet <strong>Tableau de bord</strong> liste toutes les communes avec le détail des actes par type pour la période sélectionnée.</p>
+    <ul class="doc-list">
+      <li><strong>Arrondissement</strong> — onglets Tous / Toulouse / Muret / Saint-Gaudens pour filtrer par territoire</li>
+      <li><strong>Vue Tableau / Graphique</strong> — bascule entre les deux représentations</li>
+      <li><strong>Par total</strong> — tri décroissant par nombre total d'actes</li>
+      <li><strong>Commune sélectionnée / Toutes les communes</strong> — périmètre géographique</li>
+    </ul>
+    <p>Les lignes de synthèse en bas du tableau regroupent :</p>
+    <ul class="doc-list">
+      <li><strong>TOTAL</strong> — cumul de toutes les communes affichées</li>
+      <li><strong>Total Fixe</strong> <span class="chip chip-yellow">Fixe</span> — communes en sélection fixe uniquement</li>
+      <li><strong>Total Rotation</strong> <span class="chip chip-orange">Rotation</span> — communes en rotation uniquement</li>
+      <li><strong>Total Fixe+Rotation+Ciblée</strong> — toutes les communes ciblées ce trimestre</li>
+      <li><strong>Total sans Fixe+Rotation+Ciblée</strong> — communes non ciblées</li>
+    </ul>
+    <div class="info-box">
+      <strong>ℹ️ Lien vers le détail</strong>
+      Un survol du nom d'une commune affiche "Voir le détail de [commune]". Un clic ouvre automatiquement cette commune dans le widget Enregistrement.
+    </div>
+  </div>
+
+  <div class="section no-break">
+    <h2 class="section-title">Tableau de bord — vue par arrondissement</h2>
+    <p>En cliquant sur un onglet d'arrondissement (ex. <strong>Muret</strong>), le tableau n'affiche que les communes de ce territoire. Les colonnes s'adaptent aux types d'actes présents (les colonnes vides sont masquées). Les lignes de synthèse sont recalculées sur le périmètre filtré.</p>
+  </div>
+
+  <div class="section no-break">
+    <h2 class="section-title">Tableau de bord — vue annuelle par commune</h2>
+    <p>Lorsqu'une commune est sélectionnée <strong>et</strong> que la granularité est réglée sur <strong>Année</strong>, le tableau affiche le récapitulatif trimestriel pour cette commune uniquement.</p>
+    <p>Le titre indique : <em>"Vue Année 2026 — [Commune]"</em>. Chaque ligne correspond à un trimestre (T1 à T4) avec le badge de stratégie associé. La ligne <strong>TOTAL ANNUEL</strong> cumule les 4 trimestres.</p>
+    <div class="info-box tip">
+      <strong>💡 Lecture de la vue annuelle</strong>
+      Le badge <span class="chip chip-blue">en cours</span> identifie le trimestre actuel. Les trimestres futurs affichent des zéros (pas encore saisis). Le badge <span class="chip chip-yellow">Fixe</span> ou <span class="chip chip-orange">Rotation</span> à côté du trimestre indique la stratégie prévue pour ce trimestre.
+    </div>
+  </div>
+</div>
+
+<!-- WIDGET 2 — ENREGISTREMENT -->
+<div class="page page-break">
+  <div class="widget-header" style="margin-top: 0;">
+    <div class="widget-header-icon">📝</div>
+    <div><h1>Widget — Enregistrement</h1><p>Saisie détaillée des actes et tableau de bord analytique</p></div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Rôle du widget</h2>
+    <p>Le widget <strong>Enregistrement</strong> permet de créer une fiche détaillée pour chaque acte d'urbanisme : informations administratives, commune concernée, enjeux liés à la commune et au projet. Il détermine automatiquement si un contrôle de légalité est nécessaire.</p>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Onglet Saisie — Informations générales</h2>
+    <p>Les champs marqués d'un <strong style="color:#cc0000;">*</strong> sont obligatoires. Le formulaire ne peut pas être soumis s'ils sont vides.</p>
+    <table class="doc-table">
+      <thead><tr><th>Champ</th><th>Obligatoire</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Réception préf.</strong></td><td style="text-align:center;color:#cc0000;">✱</td><td>Date de réception par la préfecture (format jj/mm/aaaa)</td></tr>
+        <tr><td><strong>Visa mairie</strong></td><td style="text-align:center;color:#cc0000;">✱</td><td>Date du visa mairie</td></tr>
+        <tr><td><strong>Type d'acte</strong></td><td style="text-align:center;color:#cc0000;">✱</td><td>PC / PD / PA / DP (liste déroulante)</td></tr>
+        <tr><td><strong>Type de permis</strong></td><td style="text-align:center;color:#cc0000;">✱</td><td>Permis initial / modificatif / Transfert / Prorogation</td></tr>
+        <tr><td><strong>Origine</strong></td><td style="text-align:center;color:#cc0000;">✱</td><td>Source de transmission (@CTES par défaut)</td></tr>
+        <tr><td><strong>Nom du projet</strong></td><td style="text-align:center;color:#888;">—</td><td>Intitulé libre du projet</td></tr>
+        <tr><td><strong>N° de l'acte</strong></td><td style="text-align:center;color:#888;">—</td><td>Numéro officiel de l'acte</td></tr>
+        <tr><td><strong>N° de la parcelle</strong></td><td style="text-align:center;color:#888;">—</td><td>Référence cadastrale ou adresse du projet</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Onglet Saisie — Contrôle de légalité</h2>
+
+    <h3 class="sub-title">1. Sélectionner une commune</h3>
+    <p>Taper le nom dans le champ de recherche. Une fois sélectionnée, le champ affiche automatiquement :</p>
+    <div class="ui-row">
+      <span class="chip chip-gray">Toulouse</span>
+      <span class="chip chip-blue" style="font-weight:800;">Aigrefeuille</span>
+      <span class="chip chip-orange">Rotation</span>
+      <span class="chip chip-gray">75+</span>
+    </div>
+    <ul class="doc-list">
+      <li>L'<strong>arrondissement</strong> (badge gris, à gauche)</li>
+      <li>Le <strong>nom de la commune</strong> sélectionnée (encadré bleu)</li>
+      <li>La <strong>stratégie de sélection</strong> du trimestre en cours</li>
+      <li>Le <strong>seuil logements</strong> de la commune (10+, 75+, 100+…)</li>
+    </ul>
+
+    <h3 class="sub-title">2. Enjeux liés à la commune</h3>
+    <p>Ces enjeux sont <strong>pré-remplis automatiquement</strong> en fonction des caractéristiques de la commune dans Grist. Cocher uniquement les enjeux pertinents pour cet acte spécifique.</p>
+    <table class="doc-table">
+      <thead><tr><th>Code</th><th>Libellé</th></tr></thead>
+      <tbody>
+        <tr><td><span class="chip chip-blue">ZI</span></td><td>Zone risque naturel</td></tr>
+        <tr><td><span class="chip chip-blue">RT</span></td><td>Risques technologiques</td></tr>
+        <tr><td><span class="chip chip-blue">STEP</span></td><td>Station d'épuration</td></tr>
+        <tr><td><span class="chip chip-blue">PEB</span></td><td>Plan d'exposition au bruit</td></tr>
+        <tr><td><span class="chip chip-blue">LLS</span></td><td>Mixité sociale — logements</td></tr>
+      </tbody>
+    </table>
+
+    <h3 class="sub-title">3. Enjeux liés au projet</h3>
+    <table class="doc-table">
+      <thead><tr><th>Code</th><th>Libellé</th><th>Note</th></tr></thead>
+      <tbody>
+        <tr><td><span class="chip chip-blue">ZN</span></td><td>Zone naturelle</td><td></td></tr>
+        <tr><td><span class="chip chip-blue">ZA</span></td><td>Zone agricole</td><td></td></tr>
+        <tr><td><span class="chip chip-blue">EE</span></td><td>Évaluation environnementale</td><td></td></tr>
+        <tr><td><span class="chip chip-blue">Site classé</span></td><td>Dans le périmètre d'un site classé</td><td></td></tr>
+        <tr><td><span class="chip chip-blue">Taille</span></td><td>Taille du projet</td><td>Le seuil (≥ N logements) s'affiche automatiquement selon la commune</td></tr>
+        <tr><td><span class="chip chip-blue">ERP 1/2/3</span></td><td>ERP catégories 1 à 3</td><td></td></tr>
+        <tr><td><span class="chip chip-blue">ERP 4/5</span></td><td>ERP catégories 4 et 5</td><td>Enjeu "Oui" automatique, pas de question Oui/Non</td></tr>
+        <tr><td><span class="chip chip-blue">Signalé</span></td><td>Acte signalé</td><td></td></tr>
+        <tr><td><span class="chip chip-blue">Aléatoire</span></td><td>Sélection aléatoire</td><td></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section no-break">
+    <h2 class="section-title">Enjeux : répondre Oui / Non</h2>
+    <p>Lorsqu'un enjeu est coché, deux boutons apparaissent à droite de la ligne pour indiquer si la commune ou le projet est effectivement concerné :</p>
+
+    <div class="enjeu-row checked">
+      <div class="enjeu-checkbox on"></div>
+      <span class="chip chip-blue" style="font-size:8pt;">ZI</span>
+      <span class="enjeu-label">Zone risque naturel</span>
+      <div class="enjeu-btns"><span class="btn-non">Non</span><span class="btn-oui active">Oui</span></div>
+    </div>
+    <div class="enjeu-row checked">
+      <div class="enjeu-checkbox on"></div>
+      <span class="chip chip-blue" style="font-size:8pt;">RT</span>
+      <span class="enjeu-label">Risques technologiques</span>
+      <div class="enjeu-btns"><span class="btn-non active">Non</span><span class="btn-oui">Oui</span></div>
+    </div>
+    <div class="enjeu-row error">
+      <div class="enjeu-checkbox on"></div>
+      <span class="chip chip-blue" style="font-size:8pt;">ZA</span>
+      <span class="enjeu-label">Zone agricole</span>
+      <div class="enjeu-btns"><span class="btn-non">Non</span><span class="btn-oui">Oui</span></div>
+    </div>
+
+    <p style="margin-top:.75rem;">La troisième ligne (fond rose) illustre un enjeu coché mais <strong>sans réponse Oui/Non</strong> : c'est ce qui déclenche l'erreur de validation.</p>
+    <div class="info-box">
+      <strong>ℹ️ ERP 4/5 et Taille</strong>
+      Ces deux enjeux ont leur valeur fixée à "Oui" automatiquement lorsqu'ils sont cochés. Les boutons Oui/Non n'apparaissent pas.
+    </div>
+
+    <h3 class="sub-title">Indicateurs de contrôle automatiques</h3>
+    <p>En haut à droite de chaque section, un badge s'affiche en temps réel :</p>
+    <ul class="doc-list">
+      <li><span class="chip chip-red" style="background:#ffe8e8;color:#880000;border-color:#f0a0a0;">→ Oui, la commune est concernée</span> — au moins un enjeu commune déclenche un contrôle</li>
+      <li><span class="chip chip-green">→ Non, le projet n'est pas concerné</span> — aucun enjeu projet ne déclenche de contrôle</li>
+    </ul>
+    <div class="info-box">
+      Ces indicateurs sont calculés automatiquement selon la stratégie de sélection, les enjeux de la commune et les réponses Oui/Non saisies. Ils ne sont pas à remplir manuellement.
+    </div>
+  </div>
+
+  <div class="section no-break">
+    <h2 class="section-title">Validation et messages d'erreur</h2>
+    <p>Un clic sur <strong>✓ Créer</strong> déclenche la validation du formulaire. Si des champs obligatoires sont manquants :</p>
+    <ul class="doc-list">
+      <li>Un message d'erreur rouge s'affiche en bas de l'écran : <em>"Formulaire incomplet — Merci de corriger les champs indiqués."</em></li>
+      <li>Les champs ou enjeux manquants sont <strong>encadrés en rouge</strong> pour les identifier rapidement</li>
+    </ul>
+    <div class="info-box err">
+      <strong>❌ Causes fréquentes d'erreur</strong>
+      – Un ou plusieurs champs obligatoires (Réception préf., Visa mairie, Type d'acte, Type de permis, Origine) non remplis<br>
+      – Un enjeu coché sans réponse Oui / Non associée<br>
+      – Aucune commune sélectionnée
+    </div>
+    <p>Le bouton <strong>↺ Réinitialiser</strong> efface tous les champs sans confirmation. À utiliser uniquement pour recommencer une saisie depuis zéro.</p>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Onglet Tableau de bord</h2>
+
+    <h3 class="sub-title">Navigation</h3>
+    <ul class="doc-list">
+      <li><strong>Barre de recherche commune</strong> — filtre le tableau sur une commune</li>
+      <li><strong>Période</strong> (Mois / Trim. / Année) avec navigation &lt; &gt;</li>
+      <li><strong>Commune sélectionnée / Toutes les communes</strong> — périmètre géographique</li>
+      <li>Compteurs en haut à droite : <span class="chip chip-blue">PC : 14</span> <span class="chip chip-blue">PD : 1</span> <span class="chip chip-gray">Total : 15</span></li>
+    </ul>
+
+    <h3 class="sub-title">Colonnes du tableau</h3>
+    <table class="doc-table">
+      <thead><tr><th>Colonne</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><strong>MAJCS</strong></td><td>Identifiant MAJCS de l'acte</td></tr>
+        <tr><td><strong>Commune</strong></td><td>Nom de la commune</td></tr>
+        <tr><td><strong>N° acte</strong></td><td>Numéro officiel de l'acte</td></tr>
+        <tr><td><strong>Nom du projet</strong></td><td>Intitulé du projet</td></tr>
+        <tr><td><strong>Arrondissement</strong></td><td>Arrondissement de la commune</td></tr>
+        <tr><td><strong>Stratégie</strong></td><td><span class="chip chip-yellow">Fixe</span> <span class="chip chip-orange">Rotation</span> <span class="chip chip-red">Ciblée</span></td></tr>
+        <tr><td><strong>Logements</strong></td><td>Seuil logements de la commune</td></tr>
+        <tr><td><strong>Acte</strong></td><td>Type d'acte (PC, PD, PA, DP)</td></tr>
+        <tr><td><strong>Permis</strong></td><td>Type de permis (I = initial, M = modificatif…)</td></tr>
+        <tr><td><strong>Enjeux</strong></td><td>Enjeux liés à la commune (ZI, RT, PEB…)</td></tr>
+        <tr><td><strong>Motifs</strong></td><td>Enjeux liés au projet (ERP, LLS, Signalé…)</td></tr>
+        <tr><td><strong>Réglementation</strong></td><td>Réglementation applicable à la commune</td></tr>
+        <tr><td><strong>Réception préf.</strong></td><td>Date de réception préfecture</td></tr>
+        <tr><td><strong>Visa mairie</strong></td><td>Date du visa mairie</td></tr>
+        <tr><td><strong>Saisi par</strong></td><td>Nom de l'agent ayant créé l'enregistrement</td></tr>
+        <tr><td><strong>Saisi le</strong></td><td>Date et heure de la saisie</td></tr>
+      </tbody>
+    </table>
+    <div class="info-box">
+      <strong>ℹ️ Tri des colonnes</strong>
+      Un clic sur l'en-tête d'une colonne la trie par ordre croissant. Un second clic inverse le tri. L'icône de flèche indique la colonne et le sens actifs.
+    </div>
+  </div>
+
+  <div class="section no-break">
+    <h2 class="section-title">Utiliser les filtres</h2>
+    <p>Le bouton <strong>Filtres</strong> ouvre le panneau de filtres. Un badge rouge indique le nombre de filtres actifs. Plusieurs valeurs peuvent être sélectionnées par filtre (logique OU). Le bouton <strong>Réinitialiser</strong> en bas efface tous les filtres.</p>
+    <table class="doc-table">
+      <thead><tr><th>Filtre</th><th>Valeurs</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Arrondissement</strong></td><td>Toulouse / Muret / Saint-Gaudens</td></tr>
+        <tr><td><strong>Stratégie</strong></td><td>Fixe / Rotation / Ciblée</td></tr>
+        <tr><td><strong>Logements</strong></td><td>10+ / 20+ / 75+ / 100+</td></tr>
+        <tr><td><strong>Acte</strong></td><td>PC / PD / PA / DP</td></tr>
+        <tr><td><strong>Permis</strong></td><td>I / M / T / P</td></tr>
+        <tr><td><strong>Enjeux</strong></td><td>ZI / ZA / ZN / RT / STEP / PEB / Site classé</td></tr>
+        <tr><td><strong>Motifs</strong></td><td>LLS / ERP 1/2/3 / ERP 4/5 / EE / Signalé / Aléatoire / Taille</td></tr>
+        <tr><td><strong>Réglementation</strong></td><td>Valeurs présentes dans les données</td></tr>
+        <tr><td><strong>Saisi par</strong></td><td>Noms des agents</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- WIDGET 3 — STRATÉGIE -->
+<div class="page page-break">
+  <div class="widget-header" style="background: linear-gradient(135deg, #006644, #009966); margin-top: 0;">
+    <div class="widget-header-icon">🗺️</div>
+    <div><h1>Widget — Stratégie</h1><p>Consultation de la stratégie de contrôle par commune et trimestre</p></div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Rôle du widget</h2>
+    <p>Le widget <strong>Stratégie</strong> liste toutes les communes de la Haute-Garonne avec leur <strong>statut de sélection</strong> (Fixe / Rotation / Ciblée) pour chaque période. Il permet de savoir quelles communes doivent faire l'objet d'un contrôle ce trimestre.</p>
+    <p>Ce widget est en <strong>lecture seule</strong> pour la grande majorité des utilisateurs. Les données sont alimentées par le référent stratégie de la DDT 31.</p>
+    <div class="info-box tip">
+      <strong>💡 Utilisation recommandée</strong>
+      Consulter la Stratégie en début de trimestre pour identifier les communes à cibler, avant de procéder aux saisies dans les widgets Décompte et Enregistrement.
+    </div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Navigation — Période</h2>
+    <p>La barre de période en haut permet de naviguer entre les trimestres :</p>
+    <ul class="doc-list">
+      <li>Les boutons <strong>&lt;</strong> et <strong>&gt;</strong> changent de période</li>
+      <li>Les boutons <strong>Mois / Trimestre / Année</strong> changent la granularité</li>
+      <li>Le compteur en haut à droite (ex. <strong>195 communes</strong>) indique le nombre de communes correspondant aux filtres actifs</li>
+    </ul>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Filtres du widget Stratégie</h2>
+    <p>Deux groupes de filtres à cocher / décocher sont disponibles :</p>
+
+    <h3 class="sub-title">Filtre par type de sélection</h3>
+    <div class="ui-row">
+      <span class="chip chip-yellow">✓ Fixe</span>
+      <span class="chip chip-orange">✓ Rotation</span>
+      <span class="chip chip-red">✓ Ciblée</span>
+    </div>
+    <p>Par défaut, les trois types sont affichés. Décocher un type le masque du tableau. Par exemple : activer uniquement <span class="chip chip-orange">Rotation</span> et <span class="chip chip-red">Ciblée</span> pour ne voir que les communes ciblées hors Fixe.</p>
+
+    <h3 class="sub-title">Filtre par arrondissement</h3>
+    <div class="ui-row">
+      <span class="chip chip-blue">✓ Toulouse</span>
+      <span class="chip chip-blue">✓ Muret</span>
+      <span class="chip chip-blue">✓ Saint-Gaudens</span>
+    </div>
+    <p>Par défaut, les trois arrondissements sont affichés. Activer un seul arrondissement (ex. <strong>Muret</strong>) pour ne voir que ses communes.</p>
+
+    <div class="info-box">
+      <strong>ℹ️ Combinaison des filtres</strong>
+      Les deux groupes de filtres se combinent. Exemple : <span class="chip chip-orange">Rotation</span> <span class="chip chip-red">Ciblée</span> + <span class="chip chip-blue">Muret</span> affiche uniquement les communes de Muret en Rotation ou Ciblée (11 communes dans l'exemple).
+    </div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Lecture du tableau</h2>
+    <table class="doc-table">
+      <thead><tr><th>Colonne</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Commune</strong></td><td>Nom de la commune. Un clic sur l'en-tête trie alphabétiquement.</td></tr>
+        <tr><td><strong>Arrondissement</strong></td><td>Toulouse / Muret / Saint-Gaudens</td></tr>
+        <tr><td><strong>Sélection</strong></td><td>Stratégie de contrôle : <span class="chip chip-yellow">Fixe</span> <span class="chip chip-orange">Rotation</span> <span class="chip chip-red">Ciblée</span>. Une commune peut avoir plusieurs badges (ex. Ciblée + Fixe).</td></tr>
+        <tr><td><strong>Début / Fin</strong></td><td>Dates de début et de fin de la période de sélection</td></tr>
+        <tr><td><strong>Période</strong></td><td>Trimestre concerné, ex. <span class="chip" style="background:#ddeeff;color:#004488;border:1px solid #88bbdd;">T1 2026</span></td></tr>
+        <tr><td><strong>Explications</strong></td><td>Commentaire libre justifiant la sélection (optionnel)</td></tr>
+        <tr><td><strong>Saisi par</strong></td><td>Agent ayant créé ou modifié la ligne</td></tr>
+      </tbody>
+    </table>
+    <div class="info-box">
+      <strong>ℹ️ Communes avec plusieurs badges</strong>
+      Une commune peut être simultanément <span class="chip chip-red">Ciblée</span> et <span class="chip chip-yellow">Fixe</span> si elle apparaît dans plusieurs critères de sélection pour le même trimestre.
+    </div>
+  </div>
+</div>
+
+<!-- RÉFÉRENCE RAPIDE -->
+<div class="page page-break">
+  <div class="widget-header" style="background: linear-gradient(135deg, #3a003a, #7a00aa); margin-top: 0;">
+    <div class="widget-header-icon">📌</div>
+    <div><h1>Référence rapide</h1><p>Tous les codes et abréviations en un coup d'œil</p></div>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Types d'actes</h2>
+    <table class="doc-table">
+      <thead><tr><th>Code</th><th>Libellé complet</th></tr></thead>
+      <tbody>
+        <tr><td><span class="chip chip-blue">PC</span></td><td>Permis de construire</td></tr>
+        <tr><td><span class="chip chip-blue">PCM</span></td><td>Permis de construire modificatif</td></tr>
+        <tr><td><span class="chip chip-red">PD</span></td><td>Permis de démolir</td></tr>
+        <tr><td><span class="chip chip-blue">PA</span></td><td>Permis d'aménager</td></tr>
+        <tr><td><span class="chip chip-blue">PAM</span></td><td>Permis d'aménager modificatif</td></tr>
+        <tr><td><span class="chip chip-blue">DP</span></td><td>Déclaration préalable</td></tr>
+        <tr><td><span class="chip chip-blue">DP Div.</span></td><td>Déclaration préalable de division</td></tr>
+        <tr><td><span class="chip chip-green">ZA</span></td><td>Permis zone agricole</td></tr>
+        <tr><td><span class="chip chip-blue">Trans/Proro</span></td><td>Transmissions &amp; Prorogations</td></tr>
+        <tr><td><span class="chip chip-red">Ret./Rej.</span></td><td>Retraits &amp; Rejets</td></tr>
+        <tr><td><span class="chip chip-orange">Ref./Sursis</span></td><td>Refus &amp; Sursis</td></tr>
+        <tr><td><span class="chip chip-green">CU</span></td><td>Certificat d'Urbanisme</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Types de permis</h2>
+    <table class="doc-table">
+      <thead><tr><th>Code</th><th>Libellé complet</th></tr></thead>
+      <tbody>
+        <tr><td><span class="chip chip-blue">I</span></td><td>Permis initial</td></tr>
+        <tr><td><span class="chip chip-blue">M</span></td><td>Permis modificatif</td></tr>
+        <tr><td><span class="chip chip-blue">T</span></td><td>Transfert de permis</td></tr>
+        <tr><td><span class="chip chip-blue">P</span></td><td>Prorogation du permis</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Enjeux liés à la commune</h2>
+    <table class="doc-table">
+      <thead><tr><th>Code</th><th>Libellé complet</th></tr></thead>
+      <tbody>
+        <tr><td><span class="chip chip-blue">ZI</span></td><td>Zone risque naturel</td></tr>
+        <tr><td><span class="chip chip-blue">ZA</span></td><td>Zone agricole</td></tr>
+        <tr><td><span class="chip chip-blue">ZN</span></td><td>Zone naturelle</td></tr>
+        <tr><td><span class="chip chip-blue">RT</span></td><td>Risques technologiques</td></tr>
+        <tr><td><span class="chip chip-blue">STEP</span></td><td>Station d'épuration</td></tr>
+        <tr><td><span class="chip chip-blue">PEB</span></td><td>Plan d'exposition au bruit</td></tr>
+        <tr><td><span class="chip chip-blue">Site classé</span></td><td>Dans le périmètre d'un site classé</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Motifs de contrôle (enjeux projet)</h2>
+    <table class="doc-table">
+      <thead><tr><th>Code</th><th>Libellé complet</th><th>Note</th></tr></thead>
+      <tbody>
+        <tr><td><span class="chip chip-blue">LLS</span></td><td>Mixité sociale — logements</td><td></td></tr>
+        <tr><td><span class="chip chip-blue">ERP 1/2/3</span></td><td>Établissement Recevant du Public cat. 1 à 3</td><td></td></tr>
+        <tr><td><span class="chip chip-blue">ERP 4/5</span></td><td>Établissement Recevant du Public cat. 4 et 5</td><td>Enjeu "Oui" automatique</td></tr>
+        <tr><td><span class="chip chip-blue">EE</span></td><td>Évaluation environnementale</td><td></td></tr>
+        <tr><td><span class="chip chip-blue">Signalé</span></td><td>Acte signalé</td><td></td></tr>
+        <tr><td><span class="chip chip-blue">Aléatoire</span></td><td>Sélection aléatoire</td><td></td></tr>
+        <tr><td><span class="chip chip-blue">Taille</span></td><td>Taille du projet (seuil logements)</td><td>Enjeu "Oui" automatique</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="section">
+    <h2 class="section-title">Stratégies de sélection trimestrielle</h2>
+    <table class="doc-table">
+      <thead><tr><th>Badge</th><th>Signification</th></tr></thead>
+      <tbody>
+        <tr><td><span class="chip chip-yellow">Fixe</span></td><td>Commune systématiquement contrôlée chaque trimestre</td></tr>
+        <tr><td><span class="chip chip-orange">Rotation</span></td><td>Commune contrôlée selon un plan de rotation</td></tr>
+        <tr><td><span class="chip chip-red">Ciblée</span></td><td>Commune ciblée ponctuellement sur décision</td></tr>
+        <tr><td><em>(aucun badge)</em></td><td>Commune non sélectionnée pour ce trimestre</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="doc-footer">
+    Guide utilisateur DDT 31 &nbsp;·&nbsp; Usage interne &nbsp;·&nbsp; 2026
+  </div>
+</div>
+
+</body>
+</html>

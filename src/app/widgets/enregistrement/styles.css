@@ -1517,7 +1517,8 @@ input[type="date"].is-empty::-webkit-datetime-edit-year-field{
 
 .toast__close:hover {
   color: white;
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.22);
+  border-radius: 50%;
 }
 
 @media (max-width: 768px) {

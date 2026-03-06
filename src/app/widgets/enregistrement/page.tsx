@@ -1225,7 +1225,7 @@ export default function EnregistrementPage() {
       const errs = validateFormNow();
       if (Object.keys(errs).length > 0) {
         setErrors(errs);
-        showToast("error", "Formulaire incomplet", "Merci de corriger les champs indiqués.");
+        showToast("error", "Formulaire incomplet", "Merci de corriger les champs indiqués.", 10000);
         return;
       }
 

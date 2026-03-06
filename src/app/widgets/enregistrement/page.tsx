@@ -496,15 +496,15 @@ function MotifItem({ itemKey, kind, checked, enjeuValue, onCheck, onEnjeu, hasEr
   );
 }
 
-interface ToastContainerProps { toasts: Toast[]; onClose: (id: number) => void; inline?: boolean; }
+interface ToastContainerProps { toasts: Toast[]; onClose: (id: number) => void; }
 
-function ToastContainer({ toasts, onClose, inline }: ToastContainerProps) {
+function ToastContainer({ toasts, onClose }: ToastContainerProps) {
   const iconMap: Record<string, string> = {
     success: "fa-circle-check", error: "fa-circle-xmark",
     warning: "fa-triangle-exclamation", info: "fa-circle-info",
   };
   return (
-    <div className={inline ? "toast-container--inline" : "toast-container"}>
+    <div className="toast-container">
       {toasts.map(t => (
         <div key={t.id} className={`toast toast--${t.kind}`} role="alert">
           <div className="toast__icon"><i className={`fa-solid ${iconMap[t.kind]}`} aria-hidden="true" /></div>
@@ -1506,7 +1506,7 @@ export default function EnregistrementPage() {
           <p className="fr-text--lg fr-mt-2w">Chargement des données…</p>
         </div>
       )}
-      {tab !== "saisie" && <ToastContainer toasts={toasts} onClose={closeToast} />}
+      <ToastContainer toasts={toasts} onClose={closeToast} />
 
       <div className="app-main">
         {/* Header */}
@@ -1883,8 +1883,6 @@ export default function EnregistrementPage() {
                 </div>
 
               </section>
-
-              <ToastContainer toasts={toasts} onClose={closeToast} inline />
 
               {/* Action bar */}
               <div className="actions-band" role="region">

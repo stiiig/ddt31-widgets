@@ -1399,31 +1399,18 @@ input[type="date"].is-empty::-webkit-datetime-edit-year-field{
 .motifs-enjeux-col{ width: 100%; }
 .motifs-enjeux-col > .fr-col-12{ width:100%; max-width:none; }
 
-/* Toast inline dans le formulaire (saisie tab) — au-dessus des boutons, dans le flux */
-.toast-container--inline {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin: 0.75rem 0 0;
-  pointer-events: none;
-}
-.toast-container--inline .toast {
-  pointer-events: auto;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* Toast notifications flottantes (autres onglets) */
+/* Toast notifications — fixe en haut de page */
 .toast-container {
   position: fixed;
-  bottom: 2rem;
+  top: 1.5rem;
   left: 50%;
   transform: translateX(-50%);
   z-index: 9999;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  min-width: 400px;
-  max-width: 600px;
+  gap: 0.75rem;
+  min-width: 380px;
+  max-width: 560px;
   pointer-events: none;
 }
 
@@ -1431,19 +1418,18 @@ input[type="date"].is-empty::-webkit-datetime-edit-year-field{
   pointer-events: auto;
   background: white;
   border-radius: 0.5rem;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15), 0 4px 12px rgba(0, 0, 0, 0.1);
-  padding: 1.25rem 1.5rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  padding: 1rem 1.25rem;
   display: flex;
-  align-items: flex-start;
-  gap: 1rem;
-  border-left: 4px solid;
-  animation: slideIn 0.3s ease-out;
+  align-items: center;
+  gap: 0.875rem;
+  animation: slideIn 0.25s ease-out;
 }
 
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(-12px);
   }
   to {
     opacity: 1;
@@ -1467,50 +1453,32 @@ input[type="date"].is-empty::-webkit-datetime-edit-year-field{
 }
 
 .toast--success {
-  border-left-color: #18753C;
+  background: #1a7a3f;
+  color: white;
 }
 
 .toast--error {
-  border-left-color: #CE0500;
+  background: #c9100d;
+  color: white;
 }
 
 .toast--warning {
-  border-left-color: #B34000;
+  background: #a63000;
+  color: white;
 }
 
 .toast--info {
-  border-left-color: #0063CB;
+  background: #0050a0;
+  color: white;
 }
 
 .toast__icon {
   flex-shrink: 0;
-  width: 2rem;
-  height: 2rem;
+  font-size: 1.2rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
-  font-size: 1rem;
-}
-
-.toast--success .toast__icon {
-  background: #B8FEC9;
-  color: #18753C;
-}
-
-.toast--error .toast__icon {
-  background: #FFE9E9;
-  color: #CE0500;
-}
-
-.toast--warning .toast__icon {
-  background: #FFE9E6;
-  color: #B34000;
-}
-
-.toast--info .toast__icon {
-  background: #E8EDFF;
-  color: #0063CB;
+  opacity: 0.95;
 }
 
 .toast__content {
@@ -1520,16 +1488,16 @@ input[type="date"].is-empty::-webkit-datetime-edit-year-field{
 
 .toast__title {
   font-weight: 700;
-  font-size: 1rem;
-  margin: 0 0 0.25rem 0;
-  color: var(--text-title-grey);
+  font-size: 0.9375rem;
+  margin: 0;
+  color: white;
 }
 
 .toast__message {
-  font-size: 0.875rem;
-  margin: 0;
-  color: var(--text-mention-grey);
-  line-height: 1.5;
+  font-size: 0.8125rem;
+  margin: 0.15rem 0 0;
+  color: rgba(255, 255, 255, 0.88);
+  line-height: 1.4;
 }
 
 .toast__close {
@@ -1537,7 +1505,7 @@ input[type="date"].is-empty::-webkit-datetime-edit-year-field{
   background: none;
   border: none;
   cursor: pointer;
-  color: var(--text-mention-grey);
+  color: rgba(255, 255, 255, 0.8);
   padding: 0.25rem;
   width: 1.5rem;
   height: 1.5rem;
@@ -1545,12 +1513,11 @@ input[type="date"].is-empty::-webkit-datetime-edit-year-field{
   align-items: center;
   justify-content: center;
   border-radius: 0.25rem;
-  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .toast__close:hover {
-  background: var(--background-contrast-grey);
-  color: var(--text-title-grey);
+  color: white;
+  background: rgba(255, 255, 255, 0.15);
 }
 
 @media (max-width: 768px) {

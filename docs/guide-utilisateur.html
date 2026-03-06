@@ -19,6 +19,7 @@
     .no-break    { page-break-inside: avoid; }
     body         { font-size: 9.5pt; }
     .cover       { page-break-after: always; }
+    figure       { page-break-inside: avoid; }
   }
 
   .page { max-width: 800px; margin: 0 auto; padding: 2rem 2.5rem; }
@@ -140,6 +141,26 @@
   .btn-oui.active { background: #ffaaaa; }
   .btn-non { background: #f0f0f0; border: 1px solid #ccc; color: #555; border-radius: 12px; padding: .1rem .5rem; font-size: 8.5pt; font-weight: 600; }
   .btn-non.active { background: #d0ffd0; border-color: #80cc80; color: #006600; }
+
+  /* Screenshots */
+  figure {
+    margin: 1rem 0 1.5rem;
+    page-break-inside: avoid;
+  }
+  figure img {
+    display: block;
+    width: 100%;
+    border: 1px solid #d0d4e8;
+    border-radius: 8px;
+    box-shadow: 0 2px 14px rgba(0,0,40,.13);
+  }
+  figcaption {
+    text-align: center;
+    font-size: 8.5pt;
+    color: #888;
+    margin-top: .4rem;
+    font-style: italic;
+  }
 
   .doc-footer { text-align: center; font-size: 8.5pt; color: #aaa; padding: 2rem; margin-top: 3rem; border-top: 1px solid #eee; }
 </style>
@@ -275,24 +296,25 @@
   </div>
 
   <div class="section">
-    <h2 class="section-title">Sélection de la commune</h2>
+    <h2 class="section-title">Sélection de la commune et saisie des actes</h2>
     <div class="steps">
       <div class="step"><div class="step-num"></div><div class="step-content">Cliquer sur le champ <strong>COMMUNE</strong> et taper le nom de la commune.</div></div>
       <div class="step"><div class="step-num"></div><div class="step-content">Sélectionner la commune dans la liste déroulante qui apparaît.</div></div>
       <div class="step"><div class="step-num"></div><div class="step-content">Les badges de <strong>stratégie</strong> (Fixe / Rotation / Ciblée) et d'<strong>arrondissement</strong> apparaissent automatiquement à droite du champ.</div></div>
     </div>
     <p>La barre de période permet de naviguer mois par mois avec les boutons <strong>&lt;</strong> et <strong>&gt;</strong>. Le badge <span class="chip chip-blue">en cours</span> indique le mois actuel. Le <strong>Total</strong> affiche le cumul des actes saisis pour le mois affiché.</p>
-  </div>
 
-  <div class="section">
-    <h2 class="section-title">Saisie des actes</h2>
+    <figure>
+      <img src="images/Screenshot 2026-03-05 at 22.23.00.png" alt="Décompte — vue saisie vide">
+      <figcaption>Vue de saisie pour Castanet-Tolosan en Mars 2026 — tous les compteurs à zéro, prêts à saisir.</figcaption>
+    </figure>
+
+    <h3 class="sub-title">Types d'actes disponibles</h3>
     <p>L'acte principal affiché en grand au centre est le <strong>DP (Déclaration Préalable)</strong>. Les autres types figurent en dessous dans la section <strong>AUTRES ACTES</strong>. Pour chaque type, deux boutons ajustent le compteur :</p>
     <div class="ui-row">
       <span class="chip chip-gray">— &nbsp;diminuer de 1</span>
       <span class="chip chip-blue">+ &nbsp;augmenter de 1</span>
     </div>
-
-    <h3 class="sub-title">Types d'actes disponibles</h3>
     <div class="acte-grid">
       <div class="acte-card"><div class="acte-code">DP</div><div class="acte-label">Déclaration Préalable</div></div>
       <div class="acte-card"><div class="acte-code red">PD</div><div class="acte-label">Permis de Démolir</div></div>
@@ -316,6 +338,12 @@
       <li>Mode <strong>normal</strong> (par défaut) : actes comptabilisés comme transmis via @CTES</li>
       <li>Mode <strong>Papier ON</strong> <span class="chip chip-orange">Papier ON</span> : actes comptabilisés séparément en tant qu'actes papier. Un bandeau orange d'avertissement s'affiche en permanence.</li>
     </ul>
+
+    <figure>
+      <img src="images/Screenshot 2026-03-05 at 22.23.09.png" alt="Décompte — Mode Papier activé">
+      <figcaption>Mode Papier activé — le bandeau orange apparaît sous la barre de période pour signaler que les saisies sont comptabilisées en papier.</figcaption>
+    </figure>
+
     <div class="info-box warn">
       <strong>⚠️ Attention</strong>
       Bien vérifier le mode actif avant de saisir. Un acte saisi en mode Papier ne peut pas être automatiquement reconverti. Utiliser le Journal pour annuler si nécessaire.
@@ -326,6 +354,12 @@
     <h2 class="section-title">Journal des modifications</h2>
     <p>Le bouton <span class="chip chip-blue">🕐 Journal N</span> (en haut à droite) ouvre le panneau historique. Le badge rouge indique le nombre d'opérations de la session.</p>
     <p>Chaque ligne du Journal affiche : type d'acte + commune, date/heure, auteur, et un bouton <span class="chip chip-gray">↺ Annuler</span>.</p>
+
+    <figure>
+      <img src="images/Screenshot 2026-03-05 at 22.23.19.png" alt="Décompte — Journal des modifications">
+      <figcaption>Panneau Journal ouvert — chaque ligne correspond à une saisie avec son auteur, sa date et son bouton Annuler.</figcaption>
+    </figure>
+
     <div class="info-box tip">
       <strong>💡 Correction rapide</strong>
       En cas d'erreur (mauvaise commune, mauvais type), ouvrir le Journal et cliquer "Annuler" plutôt que de décrémenter manuellement.
@@ -341,6 +375,12 @@
       <li><strong>Par total</strong> — tri décroissant par nombre total d'actes</li>
       <li><strong>Commune sélectionnée / Toutes les communes</strong> — périmètre géographique</li>
     </ul>
+
+    <figure>
+      <img src="images/Screenshot 2026-03-05 at 22.23.39.png" alt="Décompte — Tableau de bord global">
+      <figcaption>Tableau de bord global — T1 2026, tous arrondissements, avec les badges Fixe/Rotation sur chaque commune et les lignes de synthèse en bas.</figcaption>
+    </figure>
+
     <p>Les lignes de synthèse en bas du tableau regroupent :</p>
     <ul class="doc-list">
       <li><strong>TOTAL</strong> — cumul de toutes les communes affichées</li>
@@ -358,12 +398,23 @@
   <div class="section no-break">
     <h2 class="section-title">Tableau de bord — vue par arrondissement</h2>
     <p>En cliquant sur un onglet d'arrondissement (ex. <strong>Muret</strong>), le tableau n'affiche que les communes de ce territoire. Les colonnes s'adaptent aux types d'actes présents (les colonnes vides sont masquées). Les lignes de synthèse sont recalculées sur le périmètre filtré.</p>
+
+    <figure>
+      <img src="images/Screenshot 2026-03-05 at 22.25.14.png" alt="Décompte — vue par arrondissement Muret">
+      <figcaption>Vue filtrée sur l'arrondissement de Muret — seules les colonnes avec des données apparaissent (PD, DP, CU) et les totaux sont recalculés.</figcaption>
+    </figure>
   </div>
 
   <div class="section no-break">
     <h2 class="section-title">Tableau de bord — vue annuelle par commune</h2>
     <p>Lorsqu'une commune est sélectionnée <strong>et</strong> que la granularité est réglée sur <strong>Année</strong>, le tableau affiche le récapitulatif trimestriel pour cette commune uniquement.</p>
     <p>Le titre indique : <em>"Vue Année 2026 — [Commune]"</em>. Chaque ligne correspond à un trimestre (T1 à T4) avec le badge de stratégie associé. La ligne <strong>TOTAL ANNUEL</strong> cumule les 4 trimestres.</p>
+
+    <figure>
+      <img src="images/Screenshot 2026-03-05 at 22.25.42.png" alt="Décompte — vue annuelle commune Eaunes">
+      <figcaption>Vue annuelle pour Eaunes — T1 2026 en cours avec badge Fixe, les trimestres futurs sont à zéro. TOTAL ANNUEL en bas.</figcaption>
+    </figure>
+
     <div class="info-box tip">
       <strong>💡 Lecture de la vue annuelle</strong>
       Le badge <span class="chip chip-blue">en cours</span> identifie le trimestre actuel. Les trimestres futurs affichent des zéros (pas encore saisis). Le badge <span class="chip chip-yellow">Fixe</span> ou <span class="chip chip-orange">Rotation</span> à côté du trimestre indique la stratégie prévue pour ce trimestre.
@@ -386,6 +437,12 @@
   <div class="section">
     <h2 class="section-title">Onglet Saisie — Informations générales</h2>
     <p>Les champs marqués d'un <strong style="color:#cc0000;">*</strong> sont obligatoires. Le formulaire ne peut pas être soumis s'ils sont vides.</p>
+
+    <figure>
+      <img src="images/Screenshot 2026-03-05 at 22.21.05.png" alt="Enregistrement — formulaire saisie vide">
+      <figcaption>Formulaire de saisie vierge — section Informations générales (haut) et section Contrôle de légalité avec les enjeux (bas).</figcaption>
+    </figure>
+
     <table class="doc-table">
       <thead><tr><th>Champ</th><th>Obligatoire</th><th>Description</th></tr></thead>
       <tbody>
@@ -418,6 +475,11 @@
       <li>La <strong>stratégie de sélection</strong> du trimestre en cours</li>
       <li>Le <strong>seuil logements</strong> de la commune (10+, 75+, 100+…)</li>
     </ul>
+
+    <figure>
+      <img src="images/Screenshot 2026-03-05 at 22.21.51.png" alt="Enregistrement — saisie avec commune sélectionnée">
+      <figcaption>Aigrefeuille sélectionnée (Rotation, 75+) — les enjeux de la commune sont pré-chargés, les boutons Créer et Réinitialiser apparaissent en bas.</figcaption>
+    </figure>
 
     <h3 class="sub-title">2. Enjeux liés à la commune</h3>
     <p>Ces enjeux sont <strong>pré-remplis automatiquement</strong> en fonction des caractéristiques de la commune dans Grist. Cocher uniquement les enjeux pertinents pour cet acte spécifique.</p>
@@ -473,10 +535,21 @@
     </div>
 
     <p style="margin-top:.75rem;">La troisième ligne (fond rose) illustre un enjeu coché mais <strong>sans réponse Oui/Non</strong> : c'est ce qui déclenche l'erreur de validation.</p>
+
+    <figure>
+      <img src="images/Screenshot 2026-03-05 at 22.27.33.png" alt="Enregistrement — enjeux avec réponses Oui/Non">
+      <figcaption>Contrôle de légalité rempli pour Toulouse (Fixe, 100+) — ZI et PEB répondus Oui, ZA cochée avec Oui/Non en attente. Les indicateurs automatiques s'affichent à droite de chaque section.</figcaption>
+    </figure>
+
     <div class="info-box">
       <strong>ℹ️ ERP 4/5 et Taille</strong>
       Ces deux enjeux ont leur valeur fixée à "Oui" automatiquement lorsqu'ils sont cochés. Les boutons Oui/Non n'apparaissent pas.
     </div>
+
+    <figure>
+      <img src="images/Screenshot 2026-03-05 at 22.31.45.png" alt="Enjeu Taille du projet">
+      <figcaption>L'enjeu Taille — lorsqu'il est coché, un champ "logements" apparaît pour saisir le nombre de logements du projet.</figcaption>
+    </figure>
 
     <h3 class="sub-title">Indicateurs de contrôle automatiques</h3>
     <p>En haut à droite de chaque section, un badge s'affiche en temps réel :</p>
@@ -496,6 +569,12 @@
       <li>Un message d'erreur rouge s'affiche en bas de l'écran : <em>"Formulaire incomplet — Merci de corriger les champs indiqués."</em></li>
       <li>Les champs ou enjeux manquants sont <strong>encadrés en rouge</strong> pour les identifier rapidement</li>
     </ul>
+
+    <figure>
+      <img src="images/Screenshot 2026-03-05 at 22.29.25.png" alt="Enregistrement — toast formulaire incomplet">
+      <figcaption>Toast d'erreur "Formulaire incomplet" en bas de l'écran — les enjeux non répondus sont également encadrés en rouge dans le formulaire.</figcaption>
+    </figure>
+
     <div class="info-box err">
       <strong>❌ Causes fréquentes d'erreur</strong>
       – Un ou plusieurs champs obligatoires (Réception préf., Visa mairie, Type d'acte, Type de permis, Origine) non remplis<br>
@@ -515,6 +594,21 @@
       <li><strong>Commune sélectionnée / Toutes les communes</strong> — périmètre géographique</li>
       <li>Compteurs en haut à droite : <span class="chip chip-blue">PC : 14</span> <span class="chip chip-blue">PD : 1</span> <span class="chip chip-gray">Total : 15</span></li>
     </ul>
+
+    <figure>
+      <img src="images/Screenshot 2026-03-05 at 22.22.02.png" alt="Enregistrement — tableau de bord colonnes gauche">
+      <figcaption>Tableau de bord — colonnes gauche : MAJCS, Commune, N° acte, Nom du projet, Arrondissement, Stratégie, Logements, Acte, Permis, Enjeux.</figcaption>
+    </figure>
+
+    <figure>
+      <img src="images/Screenshot 2026-03-05 at 22.22.09.png" alt="Enregistrement — tableau de bord colonnes droite">
+      <figcaption>Suite du tableau (défilement horizontal) — Motifs, Réglementation, Réception préf., Visa mairie, Saisi par, Saisi le.</figcaption>
+    </figure>
+
+    <figure>
+      <img src="images/Screenshot 2026-03-05 at 22.22.43.png" alt="Enregistrement — tableau filtré commune Aigrefeuille">
+      <figcaption>Vue filtrée sur la commune d'Aigrefeuille en mode Année 2026 — 5 lignes, toutes en Rotation 75+.</figcaption>
+    </figure>
 
     <h3 class="sub-title">Colonnes du tableau</h3>
     <table class="doc-table">
@@ -611,10 +705,20 @@
     </div>
     <p>Par défaut, les trois arrondissements sont affichés. Activer un seul arrondissement (ex. <strong>Muret</strong>) pour ne voir que ses communes.</p>
 
+    <figure>
+      <img src="images/Screenshot 2026-03-05 at 22.25.55.png" alt="Stratégie — vue globale tous filtres">
+      <figcaption>Vue globale — T1 2026, tous arrondissements et tous types de sélection affichés (195 communes).</figcaption>
+    </figure>
+
     <div class="info-box">
       <strong>ℹ️ Combinaison des filtres</strong>
       Les deux groupes de filtres se combinent. Exemple : <span class="chip chip-orange">Rotation</span> <span class="chip chip-red">Ciblée</span> + <span class="chip chip-blue">Muret</span> affiche uniquement les communes de Muret en Rotation ou Ciblée (11 communes dans l'exemple).
     </div>
+
+    <figure>
+      <img src="images/Screenshot 2026-03-05 at 22.29.06.png" alt="Stratégie — vue filtrée Muret Rotation+Ciblée">
+      <figcaption>Vue filtrée sur Muret avec Rotation + Ciblée uniquement — 11 communes, dont Lacaugne et Saint-Lys avec les deux badges Ciblée + Fixe.</figcaption>
+    </figure>
   </div>
 
   <div class="section">

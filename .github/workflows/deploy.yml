@@ -35,6 +35,9 @@ jobs:
         env:
           NEXT_PUBLIC_GRIST_PROFILE_PROXY_URL: ${{ secrets.GRIST_PROFILE_PROXY_URL }}
 
+      - name: Copy docs to output
+        run: cp -r docs out/docs
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

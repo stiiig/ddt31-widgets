@@ -504,7 +504,7 @@ function ToastContainer({ toasts, onClose, inline }: ToastContainerProps) {
     warning: "fa-triangle-exclamation", info: "fa-circle-info",
   };
   return (
-    <div className={inline ? "toast-container toast-container--inline" : "toast-container"}>
+    <div className={inline ? "toast-container--inline" : "toast-container"}>
       {toasts.map(t => (
         <div key={t.id} className={`toast toast--${t.kind}`} role="alert">
           <div className="toast__icon"><i className={`fa-solid ${iconMap[t.kind]}`} aria-hidden="true" /></div>
@@ -1236,14 +1236,14 @@ export default function EnregistrementPage() {
 
       if (wasCreate) {
         await docApi.applyUserActions([["AddRecord", TABLE_ACTES, null, payload]]);
-        showToast("success", "Contrôle créé", `${formReceptionPref ? formReceptionPref.split("-").reverse().join("/") + " — " : ""}${selectedCommune?.nom || ""}`, 12000);
+        showToast("success", "Enregistrement créé", `${formReceptionPref ? formReceptionPref.split("-").reverse().join("/") + " — " : ""}${selectedCommune?.nom || ""}`, 12000);
         resetForm();
         setModeState("create");
         setCurrentRowId(null);
         setAnpcDataLoaded(false);
       } else {
         await docApi.applyUserActions([["UpdateRecord", TABLE_ACTES, currentRowId, payload]]);
-        showToast("success", "Contrôle mis à jour", `${formReceptionPref ? formReceptionPref.split("-").reverse().join("/") + " — " : ""}${selectedCommune?.nom || ""}`, 12000);
+        showToast("success", "Enregistrement mis à jour", `${formReceptionPref ? formReceptionPref.split("-").reverse().join("/") + " — " : ""}${selectedCommune?.nom || ""}`, 12000);
         setAnpcDataLoaded(false);
       }
     } catch (e: unknown) {

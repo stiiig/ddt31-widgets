@@ -1399,11 +1399,16 @@ input[type="date"].is-empty::-webkit-datetime-edit-year-field{
 .motifs-enjeux-col{ width: 100%; }
 .motifs-enjeux-col > .fr-col-12{ width:100%; max-width:none; }
 
-/* Toast inline dans le formulaire (saisie tab) */
+/* Toast inline dans le formulaire (saisie tab) — au-dessus des boutons, dans le flux */
 .toast-container--inline {
-  margin: 0.75rem 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 0.75rem 0 0;
+  pointer-events: none;
 }
 .toast-container--inline .toast {
+  pointer-events: auto;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 

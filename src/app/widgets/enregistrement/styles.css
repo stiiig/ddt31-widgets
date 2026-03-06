@@ -599,6 +599,12 @@
       flex: 1;
       min-width: 0;
     }
+    .motif-item__content--taille {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
     .motif-item__label {
       font-size: 0.8125rem !important; /* 13px — override DSFR fr-fieldset .fr-label */
       font-weight: 600;
@@ -620,8 +626,8 @@
       display: none;
       align-items: center;
       gap: 0.35rem;
-      margin-left: auto;
       flex-shrink: 0;
+      padding: 0.15rem 0;
     }
     .motif-item.is-checked .motif-item__taille-input {
       display: flex;
@@ -1393,10 +1399,18 @@ input[type="date"].is-empty::-webkit-datetime-edit-year-field{
 .motifs-enjeux-col{ width: 100%; }
 .motifs-enjeux-col > .fr-col-12{ width:100%; max-width:none; }
 
-/* Toast notifications modernes en haut de page */
+/* Toast inline dans le formulaire (saisie tab) */
+.toast-container--inline {
+  margin: 0.75rem 0;
+}
+.toast-container--inline .toast {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Toast notifications flottantes (autres onglets) */
 .toast-container {
   position: fixed;
-  top: 2rem;
+  bottom: 2rem;
   left: 50%;
   transform: translateX(-50%);
   z-index: 9999;
@@ -1424,7 +1438,7 @@ input[type="date"].is-empty::-webkit-datetime-edit-year-field{
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateY(-20px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -1443,7 +1457,7 @@ input[type="date"].is-empty::-webkit-datetime-edit-year-field{
   }
   to {
     opacity: 0;
-    transform: translateY(-20px);
+    transform: translateY(-10px);
   }
 }
 

@@ -496,15 +496,15 @@ function MotifItem({ itemKey, kind, checked, enjeuValue, onCheck, onEnjeu, hasEr
   );
 }
 
-interface ToastContainerProps { toasts: Toast[]; onClose: (id: number) => void; }
+interface ToastContainerProps { toasts: Toast[]; onClose: (id: number) => void; inline?: boolean; }
 
-function ToastContainer({ toasts, onClose }: ToastContainerProps) {
+function ToastContainer({ toasts, onClose, inline }: ToastContainerProps) {
   const iconMap: Record<string, string> = {
     success: "fa-circle-check", error: "fa-circle-xmark",
     warning: "fa-triangle-exclamation", info: "fa-circle-info",
   };
   return (
-    <div className="toast-container">
+    <div className={inline ? "toast-container toast-container--inline" : "toast-container"}>
       {toasts.map(t => (
         <div key={t.id} className={`toast toast--${t.kind}`} role="alert">
           <div className="toast__icon"><i className={`fa-solid ${iconMap[t.kind]}`} aria-hidden="true" /></div>
@@ -1236,14 +1236,14 @@ export default function EnregistrementPage() {
 
       if (wasCreate) {
         await docApi.applyUserActions([["AddRecord", TABLE_ACTES, null, payload]]);
-        showToast("success", "Contrôle créé", `${selectedCommune?.nom || ""}${formReceptionPref ? " — Réception préf. : " + formReceptionPref.split("-").reverse().join("/") : ""}`, 12000);
+        showToast("success", "Contrôle créé", `${formReceptionPref ? formReceptionPref.split("-").reverse().join("/") + " — " : ""}${selectedCommune?.nom || ""}`, 12000);
         resetForm();
         setModeState("create");
         setCurrentRowId(null);
         setAnpcDataLoaded(false);
       } else {
         await docApi.applyUserActions([["UpdateRecord", TABLE_ACTES, currentRowId, payload]]);
-        showToast("success", "Contrôle mis à jour", `${selectedCommune?.nom || ""}${formReceptionPref ? " — Réception préf. : " + formReceptionPref.split("-").reverse().join("/") : ""}`, 12000);
+        showToast("success", "Contrôle mis à jour", `${formReceptionPref ? formReceptionPref.split("-").reverse().join("/") + " — " : ""}${selectedCommune?.nom || ""}`, 12000);
         setAnpcDataLoaded(false);
       }
     } catch (e: unknown) {
@@ -1506,7 +1506,7 @@ export default function EnregistrementPage() {
           <p className="fr-text--lg fr-mt-2w">Chargement des données…</p>
         </div>
       )}
-      <ToastContainer toasts={toasts} onClose={closeToast} />
+      {tab !== "saisie" && <ToastContainer toasts={toasts} onClose={closeToast} />}
 
       <div className="app-main">
         {/* Header */}
@@ -1858,24 +1858,24 @@ export default function EnregistrementPage() {
                             onChange={e => setSelectedObjets(prev => e.target.checked ? [...prev, "Taille"] : prev.filter(o => o !== "Taille"))}
                           />
                         </div>
-                        <div className="motif-item__content">
+                        <div className="motif-item__content motif-item__content--taille">
                           <label className="fr-label motif-item__label motif-item__label--badge" htmlFor="objet-taille">
                             <span className="motif-badge motif-badge--sm">Taille</span>
                             Taille du projet
                             {selectedCommune && (
                               <span className="taille-seuil-hint">(seuil : ≥ {getSeuilLogements(selectedCommune)} logements)</span>
                             )}
-                            <div className="motif-item__taille-input">
-                              <input type="number" id="taille-logements" min="0" max="9999"
-                                placeholder="0" autoComplete="off"
-                                value={tailleLogements}
-                                onChange={e => { setTailleLogements(e.target.value); setErrors(p => ({ ...p, taille: "" })); }}
-                                style={errors.taille ? { borderColor: "var(--border-plain-error)" } : {}}
-                              />
-                              <span className="taille-unit">logements</span>
-                              {errors.taille && <p className="fr-error-text" style={{ margin: 0 }}>{errors.taille}</p>}
-                            </div>
                           </label>
+                          <div className="motif-item__taille-input">
+                            <input type="number" id="taille-logements" min="0" max="9999"
+                              placeholder="0" autoComplete="off"
+                              value={tailleLogements}
+                              onChange={e => { setTailleLogements(e.target.value); setErrors(p => ({ ...p, taille: "" })); }}
+                              style={errors.taille ? { borderColor: "var(--border-plain-error)" } : {}}
+                            />
+                            <span className="taille-unit">logements</span>
+                            {errors.taille && <p className="fr-error-text" style={{ margin: 0 }}>{errors.taille}</p>}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -1883,6 +1883,8 @@ export default function EnregistrementPage() {
                 </div>
 
               </section>
+
+              <ToastContainer toasts={toasts} onClose={closeToast} inline />
 
               {/* Action bar */}
               <div className="actions-band" role="region">

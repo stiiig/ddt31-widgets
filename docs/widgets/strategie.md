@@ -4,6 +4,8 @@ Visualisation des **statuts de contrôle des communes** sur une période donnée
 Permet de savoir quelles communes sont en contrôle Fixe, Rotation ou Ciblée
 et pendant quelle période.
 
+Widget en **lecture seule** — les données sont alimentées par le référent stratégie DDT 31.
+
 ---
 
 ## Fonctionnalités
@@ -13,7 +15,7 @@ et pendant quelle période.
   - **Tags** : Fixe, Rotation, Ciblée (cochés/décochés individuellement)
   - **Arrondissements** : Toulouse, Muret, Saint-Gaudens (multi-sélection)
 - Tri du tableau : par **commune** (A→Z) ou par **période de début** (chronologique)
-- Compteur de communes visibles
+- Compteur de communes visibles (en haut à droite)
 - Toasts de notification en cas d'erreur de chargement
 
 ---
@@ -59,6 +61,20 @@ Combiné avec :
 | `arrFilters` | `Set<string>` | Arrondissements actifs |
 | `sortBy` | `"periode" \| "commune"` | Critère de tri du tableau |
 
+### Type `StatutRow`
+
+```ts
+type StatutRow = {
+  id: number;
+  communeId: number;
+  selection: string[];   // ex: ["Fixe"], ["Rotation", "Ciblée"]
+  debut: Date | null;
+  fin: Date | null;
+  explications: string;
+  createdByName: string; // agent ayant saisi la ligne (colonne "Saisi par")
+};
+```
+
 ---
 
 ## Helpers de période
@@ -69,6 +85,7 @@ Combiné avec :
 | `periodLabel(vue, year, month)` | Libellé affiché (ex: "T1 2026", "Février 2026", "Année 2026") |
 | `navigatePeriod(dir)` | Avance (+1) ou recule (-1) d'une unité de période |
 | `rowPeriodeLabel(row)` | Trimestre du début de la ligne (ex: "T1 2026") |
+| `moisLabel(m, a)` | Libellé mois/année formaté en français |
 
 ---
 
@@ -80,6 +97,9 @@ Combiné avec :
 | `Ciblée` | `statut-chip--ciblee` |
 | `Rotation` | `statut-chip--rotation` |
 | Autre | `statut-chip--nonciblee` |
+
+Une commune peut avoir plusieurs chips si elle apparaît dans plusieurs critères de sélection
+(ex: Ciblée + Fixe simultanément).
 
 ---
 

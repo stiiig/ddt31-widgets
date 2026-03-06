@@ -20,16 +20,21 @@ des logiques d'enjeux par commune, un système de motifs/objets, et un dashboard
   - Trimestre (calculé automatiquement depuis la date)
   - Origine (défaut : @CTES)
   - MAJCS (Mise à jour du contrôle en section)
-- Section **Enjeux pré-identifiés** : cases à cocher pour chaque motif/objet avec radio Oui/Non
-- Seuil logements : affiché selon l'arrondissement (100/75/20/10)
-- Bouton Contrôle / Non contrôle (avec raison si non contrôle)
+- Section **Contrôle de légalité** : enjeux liés à la commune et au projet
+  - Cases à cocher pour chaque enjeu avec radio Oui/Non
+  - ERP 4/5 et Taille : valeur "Oui" automatique (pas de radio affiché)
+- Seuil logements : affiché selon l'arrondissement (100 / 75 / 20 / 10)
+- Indicateurs automatiques : "Oui, la commune est concernée" / "Non, le projet n'est pas concerné"
 - Création via `AddRecord` dans `AN_PC`
 
 ### Onglet Tableau de bord
-- Liste des actes du trimestre sélectionné avec filtres :
-  - Arrondissement, Motif, Objet, Sélection commune, Réglementation
-- Compteurs par catégorie
-- Export possible (si implémenté)
+- Liste des actes de la période sélectionnée avec barre de filtres :
+  - **Arrondissement**, **Stratégie**, **Logements**, **Acte**, **Permis**,
+    **Enjeux**, **Motifs**, **Réglementation**, **Saisi par**
+- Compteurs en haut à droite : PC / PD / Total
+- Recherche par commune
+- Tri sur chaque colonne (clic sur l'en-tête)
+- Scrollbar miroir au-dessus du tableau (synchronisée)
 
 ---
 
@@ -37,7 +42,7 @@ des logiques d'enjeux par commune, un système de motifs/objets, et un dashboard
 
 | Table | Accès | Colonnes clés |
 |-------|-------|---------------|
-| `Communes` | Lecture | `Nom commune`, `Code INSEE`, `Arrondissement`, `Logements`, `Enjeux`, `Hors_ZI` |
+| `Communes` | Lecture | `Nom commune`, `Code INSEE`, `Arrondissement`, `Logements`, `Enjeux`, `Hors_ZI`, `Reglementation` |
 | `Communes_Statut` | Lecture | `Commune` (Ref), `Selection` (ChoiceList), `Debut`, `Fin` |
 | `AN_PC` | Lecture + Écriture | Voir section Colonnes AN_PC ci-dessous |
 
@@ -59,40 +64,45 @@ des logiques d'enjeux par commune, un système de motifs/objets, et un dashboard
 | `Origine` | `Origine` | Source : @CTES, Courrier… |
 | `Enjeux` | `Enjeux_pre_identifies` | Enjeux sélectionnés (ChoiceList) |
 | `MotifsControle` | `Motifs_controle` | Motifs de contrôle sélectionnés |
+| `EnjeuOld` | `O_Concerne_par_l_enjeu` | **Legacy** — colonne pré-refactor, lecture seule |
+| `EnjeuPrefix` | `Enjeu_` | Préfixe des colonnes enjeu individuelles |
 | `Controle` | `Controle` | Boolean : dossier contrôlé ou non |
 | `RaisonControle` | `P_Raison_du_controle_ou_non_controle` | Raison si non contrôlé |
 | `MAJCS` | `MAJCS` | Mise à jour contrôle en section |
-| `Trimestre` | `Trimestre` | Format `YYYY-TN` (calculé auto) |
+| `Trimestre` | `Trimestre` | Format `YYYY-TN` (calculé auto depuis date réception préf.) |
 | `SelectionSnapshot` | `Selection_commune_au_moment` | Sélection de la commune au moment de la saisie |
 | `CommuneRef` | `Communes` | Référence Grist vers la commune |
+| `TailleLogements` | `Taille_logements` | Nombre de logements saisi pour l'enjeu Taille |
 
 ---
 
-## Motifs et Objets
+## Enjeux liés à la commune (`ALL_MOTIFS`)
 
-### Motifs de contrôle (`ALL_MOTIFS`)
-`ZI`, `RT`, `ZA`, `ZN`, `STEP`, `PEB`, `Site classé`
+`ZI`, `ZA`, `ZN`, `RT`, `STEP`, `PEB`, `Site classé`
 
-### Objets de contrôle (`ALL_OBJETS`)
-`ERP 1/2/3`, `ERP 4/5`, `EE`, `LLS`, `Signalé`, `Aléatoire`, `Taille`
+Chaque enjeu a une colonne dans `AN_PC` préfixée `Enjeu_` (ex: `Enjeu_ZI`, `Enjeu_RT`).
+Le mapping code → nom de colonne est géré par `MOTIF_TO_COL` (seule exception : `Site classé` → `Classe`).
 
-Chaque motif/objet a une colonne dans `AN_PC` préfixée `Enjeu_` (ex: `Enjeu_ZI`, `Enjeu_ERP123`).
-Le mapping clé → nom de colonne est géré par `OBJET_TO_COL` et `MOTIF_TO_COL`.
+## Motifs de contrôle — enjeux liés au projet (`ALL_OBJETS`)
 
-Les items `ERP 4/5` et `Taille` sont **indolores** (pas de radio Oui/Non).
+`LLS`, `ERP 1/2/3`, `ERP 4/5`, `EE`, `Signalé`, `Aléatoire`, `Taille`
+
+Le mapping clé → nom de colonne est géré par `OBJET_TO_COL`.
+
+Les items **`ERP 4/5`** et **`Taille`** sont dans `INDOLORES` : leur valeur est automatiquement
+"Oui" quand la case est cochée, sans radio Oui/Non à afficher.
 
 ---
 
-## Logique de seuil logements
+## Logique de seuil logements (`getSeuilLogements`)
 
-Le seuil de contrôle dépend de l'arrondissement de la commune :
+Le seuil de l'enjeu **Taille** dépend de l'arrondissement :
 
-| Arrondissement | Commune Toulouse | Autres |
-|---------------|-----------------|--------|
-| Toulouse | 100 | 75 |
-| Muret | — | 20 |
-| Saint-Gaudens | — | 10 |
-| Autres | — | 75 |
+| Arrondissement | Commune Toulouse | Autres communes |
+|----------------|-----------------|-----------------|
+| Toulouse       | 100             | 75              |
+| Muret          | —               | 20              |
+| Saint-Gaudens  | —               | 10              |
 
 ---
 
@@ -121,6 +131,8 @@ score 4 → INSEE contient la requête
 score 99 → pas de match → exclu
 ```
 
+Maximum `MAX_COMMUNE_RESULTS` (25) résultats retournés.
+
 ---
 
 ## Composants internes
@@ -128,7 +140,7 @@ score 99 → pas de match → exclu
 | Composant | Description |
 |-----------|-------------|
 | `TypeDropdown` | Dropdown accessible (aria) pour sélectionner un type d'acte ou sous-type |
-| `MotifItem` | Case à cocher + radio Oui/Non pour un motif ou objet d'enjeu |
+| `MotifItem` | Case à cocher + radio Oui/Non pour un enjeu commune ou projet |
 | `ToastContainer` | Affiche les notifications (succès, erreur, avertissement, info) |
 
 ---
@@ -138,14 +150,52 @@ score 99 → pas de match → exclu
 | State | Type | Description |
 |-------|------|-------------|
 | `communes` | `Commune[]` | Liste complète des communes |
-| `communesByNom/ByInsee` | `Map` | Index pour la résolution des références |
+| `communesByNom/ByInsee/ById` | `Map` | Index pour la résolution des références |
 | `selectedCommune` | `Commune \| null` | Commune active |
 | `statutsByKey` | `Map<string, Statut>` | Statuts indexés par `communeId\|trimestre` |
-| `formData` | `object` | Valeurs du formulaire de saisie |
-| `checkedMotifs/Objets` | `Set<string>` | Motifs/objets cochés |
+| `selectedMotifs` | `Set<string>` | Enjeux commune cochés |
+| `selectedObjets` | `Set<string>` | Enjeux projet cochés |
 | `enjeuValues` | `Map<string, "Oui"\|"Non">` | Valeur Oui/Non par enjeu coché |
 | `tab` | `"saisie" \| "dashboard"` | Onglet actif |
+| `allAnpcRows` | `AnpcRow[]` | Tous les actes AN_PC pour le dashboard |
 | `dashFilters` | `DashFilters` | Filtres actifs dans le dashboard |
+
+### Interface `DashFilters`
+
+```ts
+interface DashFilters {
+  arr: string[];           // Arrondissements
+  selection: string[];     // Stratégie (Fixe / Rotation / Ciblée)
+  logements: string[];     // Seuil logements (10+ / 20+ / 75+ / 100+)
+  type: string[];          // Type d'acte (PC, PD, PA, DP)
+  type2: string[];         // Type de permis (I, M, T, P)
+  motif: string[];         // Enjeux commune (ZI, ZA, ZN, RT, STEP, PEB, Site classé)
+  objet: string[];         // Motifs projet (LLS, ERP 1/2/3, ERP 4/5, EE…)
+  reglementation: string[];// Réglementation applicable
+  createdByName: string[]; // Agent ayant saisi l'acte
+}
+```
+
+### Colonnes du tableau de bord
+
+| Colonne | Source |
+|---------|--------|
+| MAJCS | `AN_PC.MAJCS` |
+| Commune | Lookup via `communesByIdRef` |
+| N° acte | `AN_PC.N_ACTE` |
+| Nom du projet | `AN_PC.Nom_du_projet` |
+| Arrondissement | Lookup via commune |
+| **Stratégie** | Calculé depuis `statutsByKey` au moment de la saisie |
+| **Logements** | Seuil de la commune (ex: "75+") |
+| **Acte** | `AN_PC.Type` |
+| **Permis** | `AN_PC.Type2` |
+| Enjeux | `AN_PC.Enjeux_pre_identifies` |
+| Motifs | `AN_PC.Motifs_controle` |
+| Réglementation | Lookup via commune |
+| Réception préf. | `AN_PC.Reception_Pref` |
+| Visa mairie | `AN_PC.Visa_Mairie` |
+| Saisi par | `AN_PC.createdByName` |
+| Saisi le | `AN_PC.createdAt` |
 
 ---
 
@@ -154,11 +204,17 @@ score 99 → pas de match → exclu
 ```
 handleSave()
     │
-    ├─ Validation : commune requise, type requis, motifs avec valeurs Oui/Non
+    ├─ Validation (9 contrôles) :
+    │   - Type, Type2, Visa mairie, Réception préf. requis
+    │   - Commune sélectionnée
+    │   - Origine requise
+    │   - Chaque enjeu coché doit avoir une valeur Oui/Non (sauf INDOLORES)
+    │   - Enjeu Taille : nombre de logements requis si coché
+    │   - N° ACTE : unicité vérifiée dans l'index local
     │
     ├─ Construit le record à écrire :
     │   - Champs de base (type, dates, n°, etc.)
-    │   - Trimestre calculé depuis la date visa mairie
+    │   - Trimestre calculé depuis la date réception préf.
     │   - Selection snapshot depuis statutsByKey
     │   - Enjeux : colonnes Enjeu_X = "Oui"/"Non"/null selon les cases cochées
     │
@@ -177,5 +233,9 @@ handleSave()
 | `parseDate(v)` | Parse une date depuis Unix secondes, string ISO ou string `DD/MM/YYYY` |
 | `computeTrimestreFromDate` | Calcule `"YYYY-TN"` depuis une date ISO |
 | `getStatutSelection` | Retourne la sélection active d'une commune à une date donnée |
-| `debounce(fn, delay)` | Debounce une fonction (utilisé pour l'autocomplete commune) |
+| `getSeuilLogements` | Seuil logements selon l'arrondissement |
+| `selectionHasAny` | Vérifie si une liste de sélections contient l'un des tags voulus |
+| `debounce(fn, delay)` | Debounce (utilisé pour l'autocomplete commune) |
 | `enjeuColForItem(item)` | Retourne le nom de colonne Grist pour un motif/objet (ex: `Enjeu_ERP123`) |
+| `scoreCommune(c, q, qNorm)` | Score de pertinence pour l'autocomplete |
+| `filterCommunesFromList` | Filtre et trie les communes selon la requête |

@@ -1,7 +1,7 @@
 # Widget Décompte
 
 Saisie et suivi des **décomptes mensuels d'actes d'urbanisme** par commune.
-C'est le widget le plus complet : il combine un formulaire de saisie et un tableau de bord analytique.
+Il combine un formulaire de saisie, un journal des modifications et un tableau de bord analytique.
 
 ---
 
@@ -9,19 +9,19 @@ C'est le widget le plus complet : il combine un formulaire de saisie et un table
 
 ### Onglet Saisie
 - Recherche d'une commune par nom ou code INSEE
-- Sélection du mois/année
+- Sélection du mois/année avec navigation ← →
 - Saisie des compteurs pour chaque type d'acte (PD, PC, PCM, PA, PAM, ZA, DP, DP Div., Trans/Proro, Ret./Rej., Ref./Sursis, CU)
-- Détection du **mode Papier** : affiche une bannière distincte si la commune est en mode papier pour le mois sélectionné
-- Sauvegarde via `applyUserActions` → crée ou met à jour la ligne DECOMPTE correspondante
-- **Journal** latéral (sidebar) : historique des `DECOMPTE_LOGS` pour la commune et le mois sélectionnés
+- Mode **Papier** : bascule entre actes @CTES et actes sur papier — affiche une bannière orange distincte
+- Sauvegarde via `applyUserActions` → crée ou met à jour la ligne `DECOMPTE` correspondante
+- **Journal** latéral (sidebar) : historique des `DECOMPTE_LOGS` pour la commune et le mois sélectionnés, avec bouton Annuler
 
 ### Onglet Tableau de bord
 - Vue **Tableau** (tableau croisé) : communes en lignes × types d'actes en colonnes
   - Colonnes vides (tous les totaux à 0 sur la période) masquées automatiquement
-  - Filtres par arrondissement (multi-sélection : Toulouse, Muret, Saint-Gaudens)
+  - Filtres par arrondissement (onglets : Tous / Toulouse / Muret / Saint-Gaudens)
   - Ligne de totaux par type d'acte
-  - Lignes de synthèse : Sélection, Total, **Total sans Fixe+Rotation+Ciblée**
-- Vue **Liste** : décomptes ligne par ligne avec colonnes configurables
+  - Lignes de synthèse : Total, Total Fixe, Total Fixe+Rotation+Ciblée, Total sans Fixe+Rotation+Ciblée
+- Vue **Graphique** : représentation visuelle des volumes par type d'acte
 
 ---
 
@@ -65,11 +65,12 @@ C'est le widget le plus complet : il combine un formulaire de saisie et un table
 | `counts` | `Record<string, number>` | Valeurs du formulaire (1 entrée par DocType) |
 | `savedCounts` | `Record<string, number>` | Valeurs sauvegardées (pour détecter les changements) |
 | `decompteId` | `number \| null` | Row ID Grist de la ligne DECOMPTE courante |
-| `isPapier` | `boolean` | True si la commune est en mode papier ce mois |
+| `isPapier` | `boolean` | True si les actes de ce mois sont en mode papier |
 | `dashArr` | `Set<string>` | Arrondissements actifs dans le dashboard |
+| `dashSubTab` | `"croise" \| "chart"` | Vue active dans le tableau de bord |
 | `tab` | `"saisie" \| "dashboard"` | Onglet actif |
 | `sidebarOpen` | `boolean` | Sidebar journal ouverte ou non |
-| `logEntries` | `LogEntry[]` | Entrées du journal chargées |
+| `logs` | `LogEntry[]` | Entrées du journal chargées |
 
 ---
 
@@ -116,8 +117,9 @@ communeList (toutes communes)
 
 | Ligne | Calcul |
 |-------|--------|
-| **Sélection** | Communes dans Communes_Statut avec sélection active (Fixe/Rotation/Ciblée) ce mois |
 | **Total** | Somme de toutes les communes visibles |
+| **Total Fixe** | Communes ayant la sélection "Fixe" ce trimestre |
+| **Total Fixe+Rotation+Ciblée** | Communes avec une sélection active (Fixe, Rotation ou Ciblée) |
 | **Total sans Fixe+Rotation+Ciblée** | Total − communes ayant une sélection active |
 
 ---
@@ -126,8 +128,9 @@ communeList (toutes communes)
 
 La colonne `Papier` dans la table `DECOMPTE` indique si les données du mois ont été saisies
 à partir de bulletins papier plutôt que d'@CTES. Quand `isPapier === true` :
-- Une bannière jaune "Mode papier" apparaît sous le header dans l'onglet Saisie
-- La case à cocher "Papier" est visible dans le formulaire
+- Le bouton "Papier" dans la barre de période s'affiche en orange (`Papier ON`)
+- Une bannière orange "Mode Papier activé — chaque acte ajouté sera comptabilisé en Papier"
+  s'affiche sous la barre de période
 
 ---
 
@@ -141,4 +144,5 @@ Chaque log enregistre :
 - `CommuneNom` : dénormalisé pour la lisibilité
 
 La sidebar affiche les logs du mois courant pour la commune sélectionnée,
-du plus récent au plus ancien.
+du plus récent au plus ancien. Chaque entrée dispose d'un bouton **Annuler**
+qui applique le delta inverse.

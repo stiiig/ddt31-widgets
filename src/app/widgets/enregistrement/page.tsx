@@ -11,7 +11,9 @@ const TABLE_ACTES   = "AN_PC";
 const TABLE_COMMUNES = "Communes";
 const TABLE_STATUT  = "Communes_Statut";
 
+// Trimestre de secours quand la date de réception préf. n'est pas renseignée
 const DEFAULT_TRIMESTRE = "2026-T1";
+// Sélection affichée quand la commune n'a pas de statut actif ce trimestre
 const DEFAULT_SELECTION = "Non ciblée";
 const SHOW_SELECTIONS   = new Set(["Fixe", "Ciblée", "Rotation"]);
 const DEBOUNCE_DELAY_MS = 300;
@@ -30,7 +32,8 @@ const COLS = {
   Origine: "Origine",
   Enjeux: "Enjeux_pre_identifies",
   MotifsControle: "Motifs_controle",
-  EnjeuOld: "O_Concerne_par_l_enjeu",
+  EnjeuOld: "O_Concerne_par_l_enjeu",  // Colonne legacy pré-refactor (lecture seule, migration)
+
   EnjeuPrefix: "Enjeu_",
   Controle: "Controle",
   RaisonControle: "P_Raison_du_controle_ou_non_controle",
@@ -55,6 +58,8 @@ const OBJET_TO_COL: Record<string, string> = {
 };
 const MOTIF_TO_COL: Record<string, string> = { "Site classé": "Classe" };
 
+// Enjeux commune dont le code correspond directement à un champ de l'objet Commune
+// (nom de la propriété dans l'interface Commune, pas le nom de colonne Grist)
 const COMMUNE_ENJEUX_MAP: Record<string, string> = { STEP: "STEP", RT: "RT", PEB: "PEB", LLS: "LLS" };
 
 const TYPE_LABELS: Record<string, string> = {
@@ -250,6 +255,10 @@ function enjeuColForItem(item: string): string {
   return `${COLS.EnjeuPrefix}${item}`;
 }
 
+// Seuil logements déclenchant l'enjeu "Taille" selon l'arrondissement :
+//   Toulouse (ville) → 100, autres communes Toulouse → 75
+//   Muret            → 20
+//   Saint-Gaudens    → 10
 function getSeuilLogements(commune: Commune): number {
   const arr = (commune.arr || "").trim();
   const nom = (commune.nom || "").trim().toLowerCase();
@@ -328,6 +337,7 @@ function normalizeCommuneId(
   return null;
 }
 
+// Vérifie si au moins un élément de `wanted` est présent dans `selections` (insensible à la casse)
 function selectionHasAny(selections: string[], wanted: string[]): boolean {
   return selections.some(s => wanted.some(w => s.toLowerCase().includes(w.toLowerCase())));
 }
@@ -604,7 +614,7 @@ export default function EnregistrementPage() {
   const [dashCommuneQuery, setDashCommuneQuery] = useState("");
   const [dashCommuneDdOpen, setDashCommuneDdOpen] = useState(false);
 
-  // Gestion premier onRecord
+  // Ignore le premier événement onRecord (déclenché au chargement, avant toute sélection utilisateur)
   const isFirstRecordEvent = useRef(true);
   const docApiRef = useRef(docApi);
 

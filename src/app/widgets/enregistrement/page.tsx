@@ -626,7 +626,7 @@ export default function EnregistrementPage() {
   const showToast = useCallback((kind: Toast["kind"], title: string, message = "", duration = 5000) => {
     const id = ++toastCounter;
     setToasts(prev => [...prev, { id, kind, title, message }]);
-    if (kind !== "error" && duration > 0) {
+    if (duration > 0) {
       setTimeout(() => setToasts(prev => prev.filter(t => t.id !== id)), duration);
     }
     return id;

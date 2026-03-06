@@ -48,6 +48,9 @@
   .toc ul { list-style: none; margin-left: 1.5rem; margin-top: .35rem; }
   .toc ul li { font-weight: 400; font-size: 10pt; color: #444; margin-bottom: .25rem; }
   .toc ul li::before { content: "→ "; color: #aaa; }
+  .toc a { color: inherit; text-decoration: none; }
+  .toc a:hover { text-decoration: underline; color: #2626c8; }
+  .toc > ol > li > a { color: #0a0a6e; }
 
   /* Widget header */
   .widget-header {
@@ -184,54 +187,53 @@
 <div class="toc page-break">
   <h2>Sommaire</h2>
   <ol>
-    <li>Introduction
+    <li><a href="#intro">Introduction</a>
       <ul>
-        <li>Présentation de la plateforme</li>
-        <li>Navigation générale</li>
-        <li>Codes couleur et badges</li>
+        <li><a href="#intro-presentation">Présentation de la plateforme</a></li>
+        <li><a href="#intro-navigation">Navigation générale</a></li>
+        <li><a href="#intro-codes">Codes couleur et badges</a></li>
       </ul>
     </li>
-    <li>Widget — Décompte des actes
+    <li><a href="#decompte">Widget — Décompte des actes</a>
       <ul>
-        <li>Sélection de la commune et de la période</li>
-        <li>Saisie des actes</li>
-        <li>Mode Papier</li>
-        <li>Journal des modifications</li>
-        <li>Tableau de bord — vue globale</li>
-        <li>Tableau de bord — vue par arrondissement</li>
-        <li>Tableau de bord — vue annuelle par commune</li>
+        <li><a href="#decompte-saisie">Sélection de la commune et saisie des actes</a></li>
+        <li><a href="#decompte-papier">Mode Papier</a></li>
+        <li><a href="#decompte-journal">Journal des modifications</a></li>
+        <li><a href="#decompte-global">Tableau de bord — vue globale</a></li>
+        <li><a href="#decompte-arr">Tableau de bord — vue par arrondissement</a></li>
+        <li><a href="#decompte-annuel">Tableau de bord — vue annuelle par commune</a></li>
       </ul>
     </li>
-    <li>Widget — Enregistrement
+    <li><a href="#enregistrement">Widget — Enregistrement</a>
       <ul>
-        <li>Onglet Saisie — Informations générales</li>
-        <li>Onglet Saisie — Contrôle de légalité</li>
-        <li>Enjeux : répondre Oui / Non</li>
-        <li>Validation et messages d'erreur</li>
-        <li>Onglet Tableau de bord</li>
-        <li>Utiliser les filtres</li>
+        <li><a href="#enreg-saisie">Onglet Saisie — Informations générales</a></li>
+        <li><a href="#enreg-controle">Onglet Saisie — Contrôle de légalité</a></li>
+        <li><a href="#enreg-enjeux">Enjeux : répondre Oui / Non</a></li>
+        <li><a href="#enreg-validation">Validation et messages d'erreur</a></li>
+        <li><a href="#enreg-dashboard">Onglet Tableau de bord</a></li>
+        <li><a href="#enreg-filtres">Utiliser les filtres</a></li>
       </ul>
     </li>
-    <li>Widget — Stratégie
+    <li><a href="#strategie">Widget — Stratégie</a>
       <ul>
-        <li>Présentation</li>
-        <li>Filtres et navigation</li>
-        <li>Lecture du tableau</li>
+        <li><a href="#strat-role">Présentation</a></li>
+        <li><a href="#strat-filtres">Filtres et navigation</a></li>
+        <li><a href="#strat-lecture">Lecture du tableau</a></li>
       </ul>
     </li>
-    <li>Référence rapide — Codes actes et enjeux</li>
+    <li><a href="#reference">Référence rapide — Codes actes et enjeux</a></li>
   </ol>
 </div>
 
 <!-- INTRODUCTION -->
-<div class="page page-break">
+<div id="intro" class="page page-break">
   <div class="widget-header" style="background: linear-gradient(135deg, #1a1a4e, #3a3a9e); margin-top: 0;">
     <div class="widget-header-icon">📋</div>
     <div><h1>Introduction</h1><p>Présentation générale de la plateforme</p></div>
   </div>
 
   <div class="section">
-    <h2 class="section-title">Présentation de la plateforme</h2>
+    <h2 id="intro-presentation" class="section-title">Présentation de la plateforme</h2>
     <p>La plateforme DDT 31 est un outil interne de gestion et de suivi du <strong>contrôle de légalité des actes d'urbanisme</strong> reçus par la Direction Départementale des Territoires de la Haute-Garonne.</p>
     <p>Elle est composée de <strong>trois widgets Grist</strong> complémentaires :</p>
     <ul class="doc-list">
@@ -248,7 +250,7 @@
   </div>
 
   <div class="section">
-    <h2 class="section-title">Navigation générale</h2>
+    <h2 id="intro-navigation" class="section-title">Navigation générale</h2>
     <p>Chaque widget partage la même barre de navigation en haut de l'écran :</p>
     <div class="nav-mock">
       <span class="brand">🏛 DDT 31 &nbsp; Nom du widget</span>
@@ -266,7 +268,7 @@
   </div>
 
   <div class="section">
-    <h2 class="section-title">Codes couleur et badges</h2>
+    <h2 id="intro-codes" class="section-title">Codes couleur et badges</h2>
     <table class="doc-table">
       <thead><tr><th>Badge</th><th>Signification</th></tr></thead>
       <tbody>
@@ -284,7 +286,7 @@
 </div>
 
 <!-- WIDGET 1 — DÉCOMPTE -->
-<div class="page page-break">
+<div id="decompte" class="page page-break">
   <div class="widget-header" style="margin-top: 0;">
     <div class="widget-header-icon">📊</div>
     <div><h1>Widget — Décompte des actes</h1><p>Comptage mensuel des actes reçus par commune</p></div>
@@ -296,7 +298,7 @@
   </div>
 
   <div class="section">
-    <h2 class="section-title">Sélection de la commune et saisie des actes</h2>
+    <h2 id="decompte-saisie" class="section-title">Sélection de la commune et saisie des actes</h2>
     <div class="steps">
       <div class="step"><div class="step-num"></div><div class="step-content">Cliquer sur le champ <strong>COMMUNE</strong> et taper le nom de la commune.</div></div>
       <div class="step"><div class="step-num"></div><div class="step-content">Sélectionner la commune dans la liste déroulante qui apparaît.</div></div>
@@ -332,7 +334,7 @@
   </div>
 
   <div class="section no-break">
-    <h2 class="section-title">Mode Papier</h2>
+    <h2 id="decompte-papier" class="section-title">Mode Papier</h2>
     <p>Le bouton <strong>Papier</strong> bascule entre saisie numérique et saisie papier.</p>
     <ul class="doc-list">
       <li>Mode <strong>normal</strong> (par défaut) : actes comptabilisés comme transmis via @CTES</li>
@@ -351,7 +353,7 @@
   </div>
 
   <div class="section no-break">
-    <h2 class="section-title">Journal des modifications</h2>
+    <h2 id="decompte-journal" class="section-title">Journal des modifications</h2>
     <p>Le bouton <span class="chip chip-blue">🕐 Journal N</span> (en haut à droite) ouvre le panneau historique. Le badge rouge indique le nombre d'opérations de la session.</p>
     <p>Chaque ligne du Journal affiche : type d'acte + commune, date/heure, auteur, et un bouton <span class="chip chip-gray">↺ Annuler</span>.</p>
 
@@ -367,7 +369,7 @@
   </div>
 
   <div class="section">
-    <h2 class="section-title">Tableau de bord — vue globale</h2>
+    <h2 id="decompte-global" class="section-title">Tableau de bord — vue globale</h2>
     <p>L'onglet <strong>Tableau de bord</strong> liste toutes les communes avec le détail des actes par type pour la période sélectionnée.</p>
     <ul class="doc-list">
       <li><strong>Arrondissement</strong> — onglets Tous / Toulouse / Muret / Saint-Gaudens pour filtrer par territoire</li>
@@ -396,7 +398,7 @@
   </div>
 
   <div class="section no-break">
-    <h2 class="section-title">Tableau de bord — vue par arrondissement</h2>
+    <h2 id="decompte-arr" class="section-title">Tableau de bord — vue par arrondissement</h2>
     <p>En cliquant sur un onglet d'arrondissement (ex. <strong>Muret</strong>), le tableau n'affiche que les communes de ce territoire. Les colonnes s'adaptent aux types d'actes présents (les colonnes vides sont masquées). Les lignes de synthèse sont recalculées sur le périmètre filtré.</p>
 
     <figure>
@@ -406,7 +408,7 @@
   </div>
 
   <div class="section no-break">
-    <h2 class="section-title">Tableau de bord — vue annuelle par commune</h2>
+    <h2 id="decompte-annuel" class="section-title">Tableau de bord — vue annuelle par commune</h2>
     <p>Lorsqu'une commune est sélectionnée <strong>et</strong> que la granularité est réglée sur <strong>Année</strong>, le tableau affiche le récapitulatif trimestriel pour cette commune uniquement.</p>
     <p>Le titre indique : <em>"Vue Année 2026 — [Commune]"</em>. Chaque ligne correspond à un trimestre (T1 à T4) avec le badge de stratégie associé. La ligne <strong>TOTAL ANNUEL</strong> cumule les 4 trimestres.</p>
 
@@ -423,7 +425,7 @@
 </div>
 
 <!-- WIDGET 2 — ENREGISTREMENT -->
-<div class="page page-break">
+<div id="enregistrement" class="page page-break">
   <div class="widget-header" style="margin-top: 0;">
     <div class="widget-header-icon">📝</div>
     <div><h1>Widget — Enregistrement</h1><p>Saisie détaillée des actes et tableau de bord analytique</p></div>
@@ -435,7 +437,7 @@
   </div>
 
   <div class="section">
-    <h2 class="section-title">Onglet Saisie — Informations générales</h2>
+    <h2 id="enreg-saisie" class="section-title">Onglet Saisie — Informations générales</h2>
     <p>Les champs marqués d'un <strong style="color:#cc0000;">*</strong> sont obligatoires. Le formulaire ne peut pas être soumis s'ils sont vides.</p>
 
     <figure>
@@ -459,7 +461,7 @@
   </div>
 
   <div class="section">
-    <h2 class="section-title">Onglet Saisie — Contrôle de légalité</h2>
+    <h2 id="enreg-controle" class="section-title">Onglet Saisie — Contrôle de légalité</h2>
 
     <h3 class="sub-title">1. Sélectionner une commune</h3>
     <p>Taper le nom dans le champ de recherche. Une fois sélectionnée, le champ affiche automatiquement :</p>
@@ -512,7 +514,7 @@
   </div>
 
   <div class="section no-break">
-    <h2 class="section-title">Enjeux : répondre Oui / Non</h2>
+    <h2 id="enreg-enjeux" class="section-title">Enjeux : répondre Oui / Non</h2>
     <p>Lorsqu'un enjeu est coché, deux boutons apparaissent à droite de la ligne pour indiquer si la commune ou le projet est effectivement concerné :</p>
 
     <div class="enjeu-row checked">
@@ -563,7 +565,7 @@
   </div>
 
   <div class="section no-break">
-    <h2 class="section-title">Validation et messages d'erreur</h2>
+    <h2 id="enreg-validation" class="section-title">Validation et messages d'erreur</h2>
     <p>Un clic sur <strong>✓ Créer</strong> déclenche la validation du formulaire. Si des champs obligatoires sont manquants :</p>
     <ul class="doc-list">
       <li>Un message d'erreur rouge s'affiche en bas de l'écran : <em>"Formulaire incomplet — Merci de corriger les champs indiqués."</em></li>
@@ -585,7 +587,7 @@
   </div>
 
   <div class="section">
-    <h2 class="section-title">Onglet Tableau de bord</h2>
+    <h2 id="enreg-dashboard" class="section-title">Onglet Tableau de bord</h2>
 
     <h3 class="sub-title">Navigation</h3>
     <ul class="doc-list">
@@ -639,7 +641,7 @@
   </div>
 
   <div class="section no-break">
-    <h2 class="section-title">Utiliser les filtres</h2>
+    <h2 id="enreg-filtres" class="section-title">Utiliser les filtres</h2>
     <p>Le bouton <strong>Filtres</strong> ouvre le panneau de filtres. Un badge rouge indique le nombre de filtres actifs. Plusieurs valeurs peuvent être sélectionnées par filtre (logique OU). Le bouton <strong>Réinitialiser</strong> en bas efface tous les filtres.</p>
     <table class="doc-table">
       <thead><tr><th>Filtre</th><th>Valeurs</th></tr></thead>
@@ -659,14 +661,14 @@
 </div>
 
 <!-- WIDGET 3 — STRATÉGIE -->
-<div class="page page-break">
+<div id="strategie" class="page page-break">
   <div class="widget-header" style="background: linear-gradient(135deg, #006644, #009966); margin-top: 0;">
     <div class="widget-header-icon">🗺️</div>
     <div><h1>Widget — Stratégie</h1><p>Consultation de la stratégie de contrôle par commune et trimestre</p></div>
   </div>
 
   <div class="section">
-    <h2 class="section-title">Rôle du widget</h2>
+    <h2 id="strat-role" class="section-title">Rôle du widget</h2>
     <p>Le widget <strong>Stratégie</strong> liste toutes les communes de la Haute-Garonne avec leur <strong>statut de sélection</strong> (Fixe / Rotation / Ciblée) pour chaque période. Il permet de savoir quelles communes doivent faire l'objet d'un contrôle ce trimestre.</p>
     <p>Ce widget est en <strong>lecture seule</strong> pour la grande majorité des utilisateurs. Les données sont alimentées par le référent stratégie de la DDT 31.</p>
     <div class="info-box tip">
@@ -686,7 +688,7 @@
   </div>
 
   <div class="section">
-    <h2 class="section-title">Filtres du widget Stratégie</h2>
+    <h2 id="strat-filtres" class="section-title">Filtres du widget Stratégie</h2>
     <p>Deux groupes de filtres à cocher / décocher sont disponibles :</p>
 
     <h3 class="sub-title">Filtre par type de sélection</h3>
@@ -722,7 +724,7 @@
   </div>
 
   <div class="section">
-    <h2 class="section-title">Lecture du tableau</h2>
+    <h2 id="strat-lecture" class="section-title">Lecture du tableau</h2>
     <table class="doc-table">
       <thead><tr><th>Colonne</th><th>Description</th></tr></thead>
       <tbody>
@@ -743,7 +745,7 @@
 </div>
 
 <!-- RÉFÉRENCE RAPIDE -->
-<div class="page page-break">
+<div id="reference" class="page page-break">
   <div class="widget-header" style="background: linear-gradient(135deg, #3a003a, #7a00aa); margin-top: 0;">
     <div class="widget-header-icon">📌</div>
     <div><h1>Référence rapide</h1><p>Tous les codes et abréviations en un coup d'œil</p></div>

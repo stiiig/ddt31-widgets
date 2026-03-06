@@ -166,9 +166,113 @@
   }
 
   .doc-footer { text-align: center; font-size: 8.5pt; color: #aaa; padding: 2rem; margin-top: 3rem; border-top: 1px solid #eee; }
+
+  /* ─── Sidebar layout (écran uniquement) ─── */
+  @media screen {
+    .toc { display: none; } /* Remplacé par la sidebar — conservé pour l'impression */
+
+    body { display: flex; min-height: 100vh; }
+
+    .app-sidebar {
+      position: sticky;
+      top: 0;
+      width: 230px;
+      min-width: 230px;
+      height: 100vh;
+      overflow-y: auto;
+      background: #f4f6ff;
+      border-right: 2px solid #d0d5f0;
+      padding: 1.25rem .9rem 2rem;
+      font-size: 9pt;
+      flex-shrink: 0;
+    }
+    .app-sidebar::-webkit-scrollbar { width: 4px; }
+    .app-sidebar::-webkit-scrollbar-thumb { background: #c0c8f0; border-radius: 2px; }
+
+    .app-main-content { flex: 1; min-width: 0; }
+  }
+
+  @media print {
+    .app-sidebar { display: none; }
+    .app-main-content { margin-left: 0; }
+  }
+
+  /* Sidebar interne */
+  .sidebar-brand {
+    font-size: 9.5pt; font-weight: 800; color: #0a0a6e;
+    text-transform: uppercase; letter-spacing: .5px;
+    margin-bottom: 1rem; padding-bottom: .6rem;
+    border-bottom: 2px solid #2626c8;
+  }
+  .sidebar-toc { list-style: none; counter-reset: stoc; padding: 0; margin: 0; }
+  .sidebar-toc > li { counter-increment: stoc; margin-bottom: .5rem; }
+  .sidebar-toc > li > a {
+    font-weight: 700; font-size: 9pt; color: #0a0a6e;
+    text-decoration: none; display: block;
+    padding: .25rem .5rem; border-radius: 5px;
+    transition: background .12s;
+  }
+  .sidebar-toc > li > a::before { content: counter(stoc) ". "; opacity: .5; font-weight: 400; }
+  .sidebar-toc > li > a:hover { background: #e2e8ff; }
+  .sidebar-toc > li > a.active { background: #0a0a6e; color: white; }
+  .sidebar-toc > li > a.active::before { opacity: .7; }
+  .sidebar-toc ul { list-style: none; padding: 0; margin: .2rem 0 .3rem .8rem; }
+  .sidebar-toc ul li { margin-bottom: .05rem; }
+  .sidebar-toc ul li a {
+    font-size: 8.5pt; color: #555; text-decoration: none;
+    display: block; padding: .15rem .4rem; border-radius: 3px;
+    transition: background .1s;
+  }
+  .sidebar-toc ul li a::before { content: "› "; color: #bbb; }
+  .sidebar-toc ul li a:hover { color: #0a0a6e; background: #eef0ff; }
+  .sidebar-toc ul li a.active { color: #0a0a6e; font-weight: 700; background: #dde4ff; }
 </style>
 </head>
 <body>
+
+<!-- SIDEBAR -->
+<nav class="app-sidebar" aria-label="Navigation">
+  <div class="sidebar-brand">DDT 31 — Guide</div>
+  <ol class="sidebar-toc">
+    <li><a href="#intro">Introduction</a>
+      <ul>
+        <li><a href="#intro-presentation">Présentation</a></li>
+        <li><a href="#intro-navigation">Navigation</a></li>
+        <li><a href="#intro-codes">Codes couleur</a></li>
+      </ul>
+    </li>
+    <li><a href="#decompte">Décompte des actes</a>
+      <ul>
+        <li><a href="#decompte-saisie">Saisie</a></li>
+        <li><a href="#decompte-papier">Mode Papier</a></li>
+        <li><a href="#decompte-journal">Journal</a></li>
+        <li><a href="#decompte-global">Tableau — vue globale</a></li>
+        <li><a href="#decompte-arr">Tableau — arrondissement</a></li>
+        <li><a href="#decompte-annuel">Tableau — annuel</a></li>
+      </ul>
+    </li>
+    <li><a href="#enregistrement">Enregistrement</a>
+      <ul>
+        <li><a href="#enreg-saisie">Infos générales</a></li>
+        <li><a href="#enreg-controle">Contrôle de légalité</a></li>
+        <li><a href="#enreg-enjeux">Enjeux Oui / Non</a></li>
+        <li><a href="#enreg-validation">Validation</a></li>
+        <li><a href="#enreg-dashboard">Tableau de bord</a></li>
+        <li><a href="#enreg-filtres">Filtres</a></li>
+      </ul>
+    </li>
+    <li><a href="#strategie">Stratégie</a>
+      <ul>
+        <li><a href="#strat-role">Présentation</a></li>
+        <li><a href="#strat-filtres">Filtres</a></li>
+        <li><a href="#strat-lecture">Lecture du tableau</a></li>
+      </ul>
+    </li>
+    <li><a href="#reference">Référence rapide</a></li>
+  </ol>
+</nav>
+
+<div class="app-main-content">
 
 <!-- COUVERTURE -->
 <div class="cover">
@@ -834,6 +938,40 @@
     Guide utilisateur DDT 31 &nbsp;·&nbsp; Usage interne &nbsp;·&nbsp; 2026
   </div>
 </div>
+
+</div><!-- /.app-main-content -->
+
+<script>
+  // Highlight la section active dans la sidebar au scroll
+  (function() {
+    const anchors = ["intro","intro-presentation","intro-navigation","intro-codes",
+      "decompte","decompte-saisie","decompte-papier","decompte-journal",
+      "decompte-global","decompte-arr","decompte-annuel",
+      "enregistrement","enreg-saisie","enreg-controle","enreg-enjeux",
+      "enreg-validation","enreg-dashboard","enreg-filtres",
+      "strategie","strat-role","strat-filtres","strat-lecture","reference"];
+
+    const links = {};
+    anchors.forEach(id => {
+      const a = document.querySelector('.app-sidebar a[href="#' + id + '"]');
+      if (a) links[id] = a;
+    });
+
+    function update() {
+      let current = anchors[0];
+      for (const id of anchors) {
+        const el = document.getElementById(id);
+        if (el && el.getBoundingClientRect().top <= 80) current = id;
+      }
+      Object.values(links).forEach(a => a.classList.remove("active"));
+      if (links[current]) links[current].classList.add("active");
+    }
+
+    document.querySelector(".app-main-content").addEventListener("scroll", update, { passive: true });
+    window.addEventListener("scroll", update, { passive: true });
+    update();
+  })();
+</script>
 
 </body>
 </html>

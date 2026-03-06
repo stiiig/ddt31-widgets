@@ -2204,7 +2204,6 @@ input[type="date"].is-empty::-webkit-datetime-edit-year-field{
   font-size: 0.875rem;
   color: #333;
   white-space: nowrap;
-  transition: all 0.2s ease;
 }
 
 .filter-btn:hover {
@@ -2212,7 +2211,10 @@ input[type="date"].is-empty::-webkit-datetime-edit-year-field{
   background: #f5f5f5;
 }
 
-.filter-btn.active {
+.filter-btn.active,
+.filter-btn.active:hover,
+.filter-btn.active:active,
+.filter-btn.active:focus {
   background: #0066CC;
   border-color: #0066CC;
   color: white;

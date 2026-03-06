@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Documentation technique — DDT 31 Grist</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    font-size: 10.5pt;
+    color: #1a1a2e;
+    line-height: 1.55;
+    background: #fff;
+  }
+
+  @media print {
+    .page-break { page-break-before: always; }
+    .no-break    { page-break-inside: avoid; }
+    body         { font-size: 9.5pt; }
+    .cover       { page-break-after: always; }
+    pre          { page-break-inside: avoid; }
+  }
+
+  .page { max-width: 800px; margin: 0 auto; padding: 2rem 2.5rem; }
+
+  /* Cover */
+  .cover {
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: flex-start;
+    min-height: 100vh;
+    background: linear-gradient(145deg, #0a0a2e 0%, #0a0a6e 55%, #1a1aaa 100%);
+    color: white; padding: 4rem 5rem;
+  }
+  .cover-logo { font-size: 13pt; font-weight: 700; letter-spacing: 1px; opacity: .75; margin-bottom: 3rem; text-transform: uppercase; }
+  .cover-title { font-size: 34pt; font-weight: 800; line-height: 1.1; margin-bottom: 1rem; }
+  .cover-sub { font-size: 14pt; opacity: .8; margin-bottom: 3rem; }
+  .cover-meta { font-size: 10pt; opacity: .6; border-top: 1px solid rgba(255,255,255,.3); padding-top: 1rem; margin-top: auto; }
+  .cover-widgets { display: flex; gap: 1rem; margin-top: 2.5rem; flex-wrap: wrap; }
+  .cover-badge { background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.25); border-radius: 8px; padding: .5rem 1.2rem; font-size: 10pt; font-weight: 600; font-family: monospace; }
+
+  /* TOC */
+  .toc { padding: 3rem 2.5rem; max-width: 800px; margin: 0 auto; }
+  .toc h2 { font-size: 18pt; color: #0a0a6e; margin-bottom: 1.5rem; border-bottom: 2px solid #0a0a6e; padding-bottom: .5rem; }
+  .toc ol { list-style: none; counter-reset: toc; }
+  .toc > ol > li { counter-increment: toc; font-weight: 700; font-size: 11pt; margin-bottom: .75rem; color: #0a0a6e; }
+  .toc > ol > li::before { content: counter(toc) ". "; }
+  .toc ul { list-style: none; margin-left: 1.5rem; margin-top: .35rem; }
+  .toc ul li { font-weight: 400; font-size: 10pt; color: #444; margin-bottom: .25rem; }
+  .toc ul li::before { content: "→ "; color: #aaa; }
+  .toc a { color: inherit; text-decoration: none; }
+  .toc a:hover { text-decoration: underline; color: #2626c8; }
+  .toc > ol > li > a { color: #0a0a6e; }
+
+  /* Widget header */
+  .widget-header {
+    background: linear-gradient(135deg, #0a0a6e, #2626c8);
+    color: white; border-radius: 10px 10px 0 0;
+    padding: 1.5rem 2rem;
+    display: flex; align-items: center; gap: 1rem;
+    margin-top: 2rem;
+  }
+  .widget-header-icon { width: 42px; height: 42px; border-radius: 10px; background: rgba(255,255,255,.2); display: flex; align-items: center; justify-content: center; font-size: 18pt; }
+  .widget-header h1 { font-size: 17pt; font-weight: 800; }
+  .widget-header p  { font-size: 9.5pt; opacity: .75; margin-top: .15rem; font-family: monospace; }
+
+  /* Section */
+  .section { border: 1px solid #e0e0e0; border-top: none; padding: 1.5rem 2rem; background: #fff; }
+  .section:last-of-type { border-radius: 0 0 10px 10px; }
+  .section + .section { border-top: 1px solid #f0f0f0; }
+
+  h2.section-title { font-size: 13pt; font-weight: 700; color: #0a0a6e; margin-bottom: 1rem; display: flex; align-items: center; gap: .5rem; }
+  h2.section-title::before { content: ""; display: inline-block; width: 4px; height: 18px; background: #2626c8; border-radius: 2px; }
+  h3.sub-title { font-size: 10.5pt; font-weight: 700; color: #333; margin: 1.1rem 0 .5rem; }
+  p { margin-bottom: .6rem; color: #333; }
+
+  ul.doc-list { list-style: none; padding: 0; margin: .5rem 0 1rem; }
+  ul.doc-list li { padding: .3rem 0 .3rem 1.2rem; position: relative; color: #333; font-size: 10pt; border-bottom: 1px solid #f5f5f5; }
+  ul.doc-list li::before { content: "▸"; position: absolute; left: 0; color: #2626c8; font-size: 8pt; top: .45rem; }
+  ul.doc-list li strong { color: #1a1a2e; }
+
+  /* Info boxes */
+  .info-box { border-left: 4px solid #2626c8; background: #f0f2ff; padding: .75rem 1rem; border-radius: 0 6px 6px 0; margin: .75rem 0; font-size: 9.5pt; }
+  .info-box.warn { border-left-color: #e07000; background: #fff8ee; }
+  .info-box.tip  { border-left-color: #1a6e3a; background: #eefaf2; }
+  .info-box.err  { border-left-color: #cc0000; background: #fff0f0; }
+  .info-box strong { display: block; margin-bottom: .25rem; }
+
+  /* Tables */
+  .doc-table { width: 100%; border-collapse: collapse; margin: .75rem 0; font-size: 9pt; }
+  .doc-table th { background: #0a0a6e; color: white; padding: .5rem .75rem; text-align: left; font-weight: 600; }
+  .doc-table td { padding: .45rem .75rem; border-bottom: 1px solid #eee; vertical-align: top; }
+  .doc-table tr:nth-child(even) td { background: #f8f9ff; }
+  .doc-table tr:last-child td { border-bottom: none; }
+  .doc-table code { background: #eef0ff; padding: .05rem .3rem; border-radius: 3px; font-size: 8.5pt; }
+
+  /* Code blocks */
+  pre {
+    background: #0e1117;
+    color: #e2e8f0;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin: .75rem 0 1rem;
+    font-size: 8.5pt;
+    line-height: 1.6;
+    overflow-x: auto;
+    font-family: "Cascadia Code", "Fira Code", "Consolas", monospace;
+  }
+  pre .c  { color: #64748b; }  /* comment */
+  pre .k  { color: #93c5fd; }  /* keyword */
+  pre .s  { color: #86efac; }  /* string */
+  pre .t  { color: #fcd34d; }  /* type */
+  pre .f  { color: #c4b5fd; }  /* function */
+  pre .n  { color: #f9a8d4; }  /* constant */
+  code { font-family: "Cascadia Code", "Fira Code", "Consolas", monospace; background: #eef0ff; padding: .05rem .35rem; border-radius: 3px; font-size: 8.5pt; color: #2626c8; }
+
+  /* Chips */
+  .ui-row { display: flex; flex-wrap: wrap; gap: .5rem; margin: .5rem 0 .75rem; }
+  .chip { display: inline-flex; align-items: center; gap: .3rem; padding: .2rem .7rem; border-radius: 20px; font-size: 8.5pt; font-weight: 600; white-space: nowrap; font-family: monospace; }
+  .chip-blue   { background: #e8eeff; color: #0a0a6e; border: 1px solid #b0baff; }
+  .chip-green  { background: #e6f9ec; color: #1a6e3a; border: 1px solid #9dd4b0; }
+  .chip-yellow { background: #fff8e0; color: #7a5900; border: 1px solid #f0d080; }
+  .chip-gray   { background: #f0f0f0; color: #555;    border: 1px solid #ddd; }
+  .chip-purple { background: #f0e8ff; color: #5a0a8a; border: 1px solid #c8a0f0; }
+
+  /* Flow diagram */
+  .flow { background: #0e1117; border-radius: 8px; padding: 1rem 1.25rem; margin: .75rem 0 1rem; font-family: monospace; font-size: 8.5pt; color: #94a3b8; line-height: 1.7; overflow-x: auto; }
+  .flow .hi { color: #fcd34d; }
+  .flow .ok { color: #86efac; }
+  .flow .err { color: #fca5a5; }
+
+  .divider { border: none; border-top: 1px solid #e8eeff; margin: 1.25rem 0; }
+  .doc-footer { text-align: center; font-size: 8.5pt; color: #aaa; padding: 2rem; margin-top: 3rem; border-top: 1px solid #eee; }
+
+  /* ─── Sidebar layout ─── */
+  @media screen {
+    .toc { display: none; }
+    body { display: flex; min-height: 100vh; }
+    .app-sidebar {
+      position: sticky; top: 0;
+      width: 270px; min-width: 270px;
+      height: 100vh; overflow-y: auto;
+      background: #0e1117;
+      border-right: 2px solid #1e2a3a;
+      padding: 1.25rem 1.1rem 2rem;
+      font-size: 9pt; flex-shrink: 0;
+    }
+    .app-sidebar::-webkit-scrollbar { width: 4px; }
+    .app-sidebar::-webkit-scrollbar-thumb { background: #2a3a4a; border-radius: 2px; }
+    .app-main-content { flex: 1; min-width: 0; }
+  }
+  @media print {
+    .app-sidebar { display: none; }
+    .app-main-content { margin-left: 0; }
+  }
+
+  /* Sidebar dark theme */
+  .sidebar-brand {
+    font-size: 9.5pt; font-weight: 800; color: #93c5fd;
+    text-transform: uppercase; letter-spacing: .5px;
+    margin-bottom: 1rem; padding-bottom: .6rem;
+    border-bottom: 2px solid #2563eb;
+  }
+  .sidebar-toc { list-style: none; counter-reset: stoc; padding: 0; margin: 0; }
+  .sidebar-toc > li { counter-increment: stoc; margin-bottom: .5rem; }
+  .sidebar-toc > li > a {
+    font-weight: 700; font-size: 8.5pt; color: #cbd5e1;
+    text-decoration: none; display: block;
+    padding: .25rem .5rem; border-radius: 5px;
+    transition: background .12s;
+  }
+  .sidebar-toc > li > a::before { content: counter(stoc) ". "; opacity: .4; font-weight: 400; }
+  .sidebar-toc > li > a:hover { background: #1e2a3a; color: white; }
+  .sidebar-toc > li > a.active { background: #1d4ed8; color: white; }
+  .sidebar-toc > li > a.active::before { opacity: .7; }
+  .sidebar-toc ul { list-style: none; padding: 0; margin: .2rem 0 .3rem .8rem; }
+  .sidebar-toc ul li { margin-bottom: .05rem; }
+  .sidebar-toc ul li a {
+    font-size: 8pt; color: #64748b; text-decoration: none;
+    display: block; padding: .15rem .4rem; border-radius: 3px;
+    transition: background .1s;
+  }
+  .sidebar-toc ul li a::before { content: "› "; color: #334155; }
+  .sidebar-toc ul li a:hover { color: #93c5fd; background: #1e2a3a; }
+  .sidebar-toc ul li a.active { color: #93c5fd; font-weight: 700; background: #1e2a3a; }
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<nav class="app-sidebar" aria-label="Navigation">
+  <div class="sidebar-brand">DDT 31 — Tech</div>
+  <ol class="sidebar-toc">
+    <li><a href="#archi">Architecture</a>
+      <ul>
+        <li><a href="#archi-stack">Stack</a></li>
+        <li><a href="#archi-modes">Modes d'initialisation</a></li>
+        <li><a href="#archi-structure">Structure du projet</a></li>
+        <li><a href="#archi-data">Format des données Grist</a></li>
+      </ul>
+    </li>
+    <li><a href="#lib-grist">Lib Grist</a>
+      <ul>
+        <li><a href="#lib-init">init.ts</a></li>
+        <li><a href="#lib-hooks">hooks.ts</a></li>
+        <li><a href="#lib-meta">meta.ts</a></li>
+        <li><a href="#lib-rest">rest.ts</a></li>
+      </ul>
+    </li>
+    <li><a href="#widget-decompte">Widget Décompte</a>
+      <ul>
+        <li><a href="#decompte-tables">Tables Grist</a></li>
+        <li><a href="#decompte-types">Types d'actes</a></li>
+        <li><a href="#decompte-state">État React</a></li>
+        <li><a href="#decompte-flux">Flux de saisie</a></li>
+        <li><a href="#decompte-dashboard">Dashboard</a></li>
+      </ul>
+    </li>
+    <li><a href="#widget-enregistrement">Widget Enregistrement</a>
+      <ul>
+        <li><a href="#enreg-tables">Tables Grist</a></li>
+        <li><a href="#enreg-cols">Colonnes AN_PC</a></li>
+        <li><a href="#enreg-enjeux">Enjeux &amp; Motifs</a></li>
+        <li><a href="#enreg-search">Recherche commune</a></li>
+        <li><a href="#enreg-state">État React</a></li>
+        <li><a href="#enreg-save">Flux de sauvegarde</a></li>
+        <li><a href="#enreg-dashboard">Dashboard</a></li>
+      </ul>
+    </li>
+    <li><a href="#widget-strategie">Widget Stratégie</a>
+      <ul>
+        <li><a href="#strat-tables">Tables Grist</a></li>
+        <li><a href="#strat-filter">Logique de filtrage</a></li>
+        <li><a href="#strat-state">État React</a></li>
+        <li><a href="#strat-helpers">Helpers période</a></li>
+      </ul>
+    </li>
+    <li><a href="#deploy">Déploiement</a>
+      <ul>
+        <li><a href="#deploy-ci">GitHub Actions</a></li>
+        <li><a href="#deploy-env">Variables d'env.</a></li>
+        <li><a href="#deploy-identity">Identité utilisateur</a></li>
+      </ul>
+    </li>
+  </ol>
+</nav>
+
+<div class="app-main-content">
+
+<!-- COVER -->
+<div class="cover">
+  <div class="cover-logo">DDT 31 — Grist Widgets</div>
+  <div class="cover-title">Documentation<br>technique</div>
+  <div class="cover-sub">Architecture, lib Grist, widgets</div>
+  <div class="cover-widgets">
+    <span class="cover-badge">Next.js 14</span>
+    <span class="cover-badge">TypeScript 5</span>
+    <span class="cover-badge">Grist Plugin API</span>
+    <span class="cover-badge">GitHub Pages</span>
+  </div>
+  <div class="cover-meta">DDT 31 · Usage interne</div>
+</div>
+
+<!-- TOC (print only) -->
+<div class="toc">
+  <h2>Sommaire</h2>
+  <ol>
+    <li><a href="#archi">Architecture générale</a>
+      <ul>
+        <li><a href="#archi-stack">Stack</a></li>
+        <li><a href="#archi-modes">Modes d'initialisation</a></li>
+        <li><a href="#archi-structure">Structure du projet</a></li>
+        <li><a href="#archi-data">Format des données Grist</a></li>
+      </ul>
+    </li>
+    <li><a href="#lib-grist">Lib Grist (src/lib/grist/)</a>
+      <ul>
+        <li><a href="#lib-init">init.ts</a></li>
+        <li><a href="#lib-hooks">hooks.ts</a></li>
+        <li><a href="#lib-meta">meta.ts</a></li>
+        <li><a href="#lib-rest">rest.ts</a></li>
+      </ul>
+    </li>
+    <li><a href="#widget-decompte">Widget Décompte</a></li>
+    <li><a href="#widget-enregistrement">Widget Enregistrement</a></li>
+    <li><a href="#widget-strategie">Widget Stratégie</a></li>
+    <li><a href="#deploy">Déploiement</a></li>
+  </ol>
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- 1. ARCHITECTURE -->
+<!-- ══════════════════════════════════════════ -->
+<div class="page">
+
+  <div id="archi" class="widget-header">
+    <div class="widget-header-icon">⚙</div>
+    <div>
+      <h1>Architecture générale</h1>
+      <p>Stack · modes · structure · format données</p>
+    </div>
+  </div>
+
+  <div id="archi-stack" class="section">
+    <h2 class="section-title">Stack</h2>
+    <table class="doc-table">
+      <thead><tr><th>Technologie</th><th>Version</th><th>Rôle</th></tr></thead>
+      <tbody>
+        <tr><td><code>Next.js</code></td><td>14</td><td>Framework React — export statique (<code>output: "export"</code>)</td></tr>
+        <tr><td><code>TypeScript</code></td><td>5</td><td>Typage strict sur tout le projet</td></tr>
+        <tr><td><code>Font Awesome</code></td><td>6 (CDN)</td><td>Icônes</td></tr>
+        <tr><td><code>DSFR</code></td><td>CDN</td><td>Design System de l'État — composants et tokens CSS</td></tr>
+        <tr><td><code>GitHub Pages</code></td><td>—</td><td>Hébergement statique</td></tr>
+        <tr><td><code>GitHub Actions</code></td><td>—</td><td>CI/CD automatique sur push master</td></tr>
+        <tr><td><code>Grist Plugin API</code></td><td>latest</td><td>Communication iframe ↔ Grist via postMessage</td></tr>
+      </tbody>
+    </table>
+    <div class="info-box tip">
+      <strong>Export statique</strong>
+      Tous les widgets sont compilés en HTML/JS/CSS statiques (<code>next build</code> → dossier <code>out/</code>).
+      Aucun serveur Node.js en production — tout est servi depuis GitHub Pages.
+    </div>
+  </div>
+
+  <div id="archi-modes" class="section">
+    <h2 class="section-title">Modes d'initialisation</h2>
+    <p>La fonction <code>initGristOrMock()</code> dans <code>src/lib/grist/init.ts</code> détecte le contexte au démarrage :</p>
+    <div class="flow">
+<span class="hi">initGristOrMock()</span>
+│
+├─ window.grist &amp;&amp; isInFrame   →  mode <span class="ok">"grist"</span>   (production iframe dans Grist)
+├─ window.__GRIST_MOCK__        →  mode <span class="ok">"mock"</span>    (dev local / tests)
+├─ NEXT_PUBLIC_GRIST_PROXY_URL  →  mode <span class="ok">"rest"</span>    (pages standalone magic links)
+└─ sinon                        →  mode <span class="err">"none"</span>    (rien affiché)
+    </div>
+    <table class="doc-table">
+      <thead><tr><th>Mode</th><th>Transport</th><th>Usage</th></tr></thead>
+      <tbody>
+        <tr><td><code>grist</code></td><td>postMessage</td><td>Déploiement normal — widget dans une iframe Grist</td></tr>
+        <tr><td><code>mock</code></td><td>données locales</td><td>Développement sans instance Grist (<code>window.__GRIST_MOCK__</code>)</td></tr>
+        <tr><td><code>rest</code></td><td>HTTP via proxy n8n</td><td>Pages standalone accessibles par magic links</td></tr>
+        <tr><td><code>none</code></td><td>—</td><td>Contexte non reconnu — widget inactif</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="archi-structure" class="section">
+    <h2 class="section-title">Structure du projet</h2>
+    <pre>
+ddt31/
+├── src/
+│   ├── app/
+│   │   └── widgets/
+│   │       ├── decompte/        <span class="c"># Widget Décompte (page.tsx + styles.css)</span>
+│   │       ├── enregistrement/  <span class="c"># Widget Enregistrement (page.tsx + styles.css)</span>
+│   │       └── strategie/       <span class="c"># Widget Stratégie (page.tsx + styles.css)</span>
+│   └── lib/
+│       └── grist/
+│           ├── init.ts          <span class="c"># Détection du mode (grist/mock/rest/none)</span>
+│           ├── hooks.ts         <span class="c"># useGristInit() — hook principal</span>
+│           ├── meta.ts          <span class="c"># Types, utilitaires, dates, listes</span>
+│           └── rest.ts          <span class="c"># Client REST via proxy n8n</span>
+├── docs/
+│   ├── guide-utilisateur.html   <span class="c"># Doc utilisateur</span>
+│   ├── doc-technique.html       <span class="c"># Ce fichier</span>
+│   └── widgets/
+│       ├── decompte.md
+│       ├── enregistrement.md
+│       └── strategie.md
+├── .github/workflows/deploy.yml <span class="c"># CI/CD GitHub Actions</span>
+└── next.config.js               <span class="c"># basePath dynamique selon GITHUB_REPOSITORY</span></pre>
+  </div>
+
+  <div id="archi-data" class="section">
+    <h2 class="section-title">Format des données Grist</h2>
+    <p>Grist retourne les tables au format <strong>columnar</strong> (par colonne, pas par ligne) :</p>
+    <pre>
+<span class="c">// Exemple : table avec 3 lignes</span>
+{
+  id:  [1, 2, 3],
+  Nom: ["Paris", "Lyon", "Marseille"],
+  Pop: [2161000, 513000, 861000],
+}
+
+<span class="c">// ChoiceList (ex: sélections multiples)</span>
+Selection: [["L", "Fixe", "Ciblée"], ["L", "Rotation"], null]
+
+<span class="c">// Ref:* (référence vers une autre table)</span>
+Commune: [12, 7, 34]   <span class="c">// entiers = rowId de la table cible</span>
+
+<span class="c">// Dates</span>
+Debut: [1704067200, 1706745600]  <span class="c">// Unix secondes (pas ms !)</span></pre>
+    <div class="info-box warn">
+      <strong>Attention : Unix secondes</strong>
+      Grist stocke les dates en secondes Unix, pas en millisecondes. Utiliser <code>unixSecondsToISODate()</code> de <code>meta.ts</code> pour la conversion.
+    </div>
+    <h3 class="sub-title">Utilitaires de conversion (<code>meta.ts</code>)</h3>
+    <table class="doc-table">
+      <thead><tr><th>Fonction</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>unixSecondsToISODate(n)</code></td><td>Unix s → <code>"YYYY-MM-DD"</code></td></tr>
+        <tr><td><code>isoDateToUnixSeconds(s)</code></td><td><code>"YYYY-MM-DD"</code> → Unix s</td></tr>
+        <tr><td><code>encodeListCell(arr)</code></td><td><code>["a","b"]</code> → <code>["L","a","b"]</code></td></tr>
+        <tr><td><code>decodeListCell(v)</code></td><td><code>["L","a","b"]</code> → <code>["a","b"]</code></td></tr>
+        <tr><td><code>pickCol(table, candidates)</code></td><td>Trouve une colonne par nom exact puis normalisé</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- 2. LIB GRIST -->
+<!-- ══════════════════════════════════════════ -->
+<div class="page page-break">
+
+  <div id="lib-grist" class="widget-header">
+    <div class="widget-header-icon">📦</div>
+    <div>
+      <h1>Lib Grist</h1>
+      <p>src/lib/grist/</p>
+    </div>
+  </div>
+
+  <div id="lib-init" class="section">
+    <h2 class="section-title">init.ts — Détection du contexte</h2>
+    <p>Point d'entrée partagé par tous les widgets. Expose :</p>
+    <ul class="doc-list">
+      <li><strong>initGristOrMock()</strong> — détecte le mode et initialise <code>grist.docApi</code> ou son équivalent</li>
+      <li><strong>getMode()</strong> — retourne le mode actif : <code>"grist" | "mock" | "rest" | "none"</code></li>
+    </ul>
+    <div class="info-box">
+      <strong>Détection iframe</strong>
+      La détection <code>isInFrame</code> vérifie <code>window.self !== window.top</code>.
+      En dehors d'une iframe (accès direct à l'URL), le mode <code>"grist"</code> ne s'active pas même si <code>window.grist</code> existe.
+    </div>
+  </div>
+
+  <div id="lib-hooks" class="section">
+    <h2 class="section-title">hooks.ts — Hook principal</h2>
+    <p><code>useGristInit(opts)</code> est appelé au montage de chaque widget. Il orchestre l'initialisation complète :</p>
+    <div class="flow">
+<span class="hi">useGristInit({ requiredAccess: "full" })</span>
+│
+├─ 1. Charge grist-plugin-api.js si nécessaire (CDN docs.getgrist.com)
+├─ 2. Appelle initGristOrMock()
+├─ 3. En mode "grist" : appelle grist.ready() avec requiredAccess
+│
+└─ 4. Récupère l'utilisateur connecté :
+       ├─ grist.getUserProfile()     <span class="c"># postMessage, Grist ≥ 1.1.5</span>
+       └─ GET n8n proxy (fallback)   <span class="c"># CORS proxy via webhook</span>
+
+<span class="ok">Retourne : { mode, docApi, gristUser }</span>
+    </div>
+    <table class="doc-table">
+      <thead><tr><th>Option</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>requiredAccess</code></td><td><code>"read table" | "full"</code></td><td>Niveau d'accès demandé à Grist. <code>"full"</code> requis pour écrire.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="lib-meta" class="section">
+    <h2 class="section-title">meta.ts — Types et utilitaires</h2>
+    <h3 class="sub-title">Types principaux</h3>
+    <pre>
+<span class="k">interface</span> <span class="t">GristDocAPI</span> {
+  fetchTable(name: string): Promise&lt;Record&lt;string, unknown[]&gt;&gt;;
+  applyUserActions(actions: unknown[][]): Promise&lt;unknown&gt;;
+  getAccessToken(opts?): Promise&lt;{ token: string }&gt;;
+  getUserProfile?(): Promise&lt;<span class="t">GristUser</span>&gt;;
+}
+
+<span class="k">interface</span> <span class="t">RefCache</span> {
+  [colId: string]: { id: number; value: string }[];
+}</pre>
+    <h3 class="sub-title">Résolution de colonnes</h3>
+    <p><code>loadColumnsMetaFor(docApi, tableName)</code> charge les métadonnées via la table système <code>_grist_Tables_column</code>. Utile pour résoudre dynamiquement les noms de colonnes sans les hardcoder.</p>
+    <p><code>ensureRefCache(docApi, table, col)</code> construit un cache des valeurs de colonnes <code>Ref:*</code> pour affichage dans les dropdowns.</p>
+  </div>
+
+  <div id="lib-rest" class="section">
+    <h2 class="section-title">rest.ts — Client REST via n8n</h2>
+    <p>Implémente la même interface que <code>grist.docApi</code> mais via des appels HTTP au proxy n8n (<code>NEXT_PUBLIC_GRIST_PROXY_URL</code>).</p>
+    <div class="flow">
+<span class="hi">Widget (browser)</span>       <span class="hi">n8n Proxy</span>                   <span class="hi">Grist REST API</span>
+      │                        │                              │
+      │  GET ?table=COMMUNES   │                              │
+      │ ──────────────────►    │                              │
+      │                        │  GET /api/docs/{id}/tables   │
+      │                        │ ──────────────────────────►  │
+      │                        │  { records: [...] }          │
+      │                        │ ◄──────────────────────────  │
+      │  { records: [...] }    │                              │
+      │ ◄──────────────────    │                              │
+    </div>
+    <div class="info-box tip">
+      <strong>Trick CORS</strong>
+      Les requêtes POST utilisent <code>Content-Type: text/plain</code> au lieu de <code>application/json</code>.
+      C'est une <em>simple CORS request</em> qui ne déclenche pas de preflight OPTIONS — contournement volontaire des restrictions CORS.
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- 3. WIDGET DÉCOMPTE -->
+<!-- ══════════════════════════════════════════ -->
+<div class="page page-break">
+
+  <div id="widget-decompte" class="widget-header">
+    <div class="widget-header-icon">📊</div>
+    <div>
+      <h1>Widget Décompte</h1>
+      <p>src/app/widgets/decompte/</p>
+    </div>
+  </div>
+
+  <div id="decompte-tables" class="section">
+    <h2 class="section-title">Tables Grist</h2>
+    <table class="doc-table">
+      <thead><tr><th>Table</th><th>Accès</th><th>Colonnes clés</th></tr></thead>
+      <tbody>
+        <tr><td><code>Communes</code></td><td>Lecture</td><td><code>Nom commune</code>, <code>Code INSEE</code>, <code>Arrondissement</code>, <code>Papier</code></td></tr>
+        <tr><td><code>Communes_Statut</code></td><td>Lecture</td><td><code>Commune</code> (Ref), <code>Selection</code> (ChoiceList), <code>Debut</code>, <code>Fin</code></td></tr>
+        <tr><td><code>DECOMPTE</code></td><td>Lecture + Écriture</td><td><code>Commune</code> (Ref), <code>Annee</code>, <code>Mois</code>, <code>Trimestre</code>, 1 col/type acte, <code>Papier</code></td></tr>
+        <tr><td><code>DECOMPTE_LOGS</code></td><td>Lecture + Écriture</td><td><code>Commune</code> (Ref), <code>DecompteId</code> (Ref), <code>Type</code>, <code>Delta</code>, <code>Timestamp</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="decompte-types" class="section">
+    <h2 class="section-title">Types d'actes (<code>DOC_TYPES</code>)</h2>
+    <table class="doc-table">
+      <thead><tr><th>Clé</th><th>Code affiché</th><th>Label complet</th></tr></thead>
+      <tbody>
+        <tr><td><code>PD</code></td><td>PD</td><td>Permis de Démolir</td></tr>
+        <tr><td><code>PC</code></td><td>PC</td><td>Permis de Construire</td></tr>
+        <tr><td><code>Pcm</code></td><td>PCM</td><td>Permis de Construire modificatif</td></tr>
+        <tr><td><code>PA</code></td><td>PA</td><td>Permis d'Aménager</td></tr>
+        <tr><td><code>Pam</code></td><td>PAM</td><td>Permis d'Aménager modificatif</td></tr>
+        <tr><td><code>Permis_ZA</code></td><td>ZA</td><td>Permis Zone Agricole</td></tr>
+        <tr><td><code>DP</code></td><td>DP</td><td>Déclaration Préalable <em>(héros — grande taille)</em></td></tr>
+        <tr><td><code>DP_Division</code></td><td>DP Div.</td><td>DP Division</td></tr>
+        <tr><td><code>Trans_Proro</code></td><td>Trans/Proro</td><td>Transmissions &amp; Prorogations</td></tr>
+        <tr><td><code>Retraits_Rejets</code></td><td>Ret./Rej.</td><td>Retraits &amp; Rejets</td></tr>
+        <tr><td><code>Refus_Sursis</code></td><td>Ref./Sursis</td><td>Refus &amp; Sursis</td></tr>
+        <tr><td><code>CU</code></td><td>CU</td><td>Certificat d'Urbanisme</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="decompte-state" class="section">
+    <h2 class="section-title">État React principal</h2>
+    <table class="doc-table">
+      <thead><tr><th>State</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>communeList</code></td><td><code>Commune[]</code></td><td>Liste complète des communes chargées</td></tr>
+        <tr><td><code>selectedCommune</code></td><td><code>Commune | null</code></td><td>Commune active dans le formulaire</td></tr>
+        <tr><td><code>selectedYear / selectedMonth</code></td><td><code>number</code></td><td>Période courante</td></tr>
+        <tr><td><code>counts</code></td><td><code>Record&lt;string, number&gt;</code></td><td>Valeurs du formulaire (1 entrée par DocType)</td></tr>
+        <tr><td><code>savedCounts</code></td><td><code>Record&lt;string, number&gt;</code></td><td>Valeurs sauvegardées — détection de changements</td></tr>
+        <tr><td><code>decompteId</code></td><td><code>number | null</code></td><td>Row ID Grist de la ligne DECOMPTE courante</td></tr>
+        <tr><td><code>isPapier</code></td><td><code>boolean</code></td><td>Mode papier activé pour ce mois</td></tr>
+        <tr><td><code>tab</code></td><td><code>"saisie" | "dashboard"</code></td><td>Onglet actif</td></tr>
+        <tr><td><code>sidebarOpen</code></td><td><code>boolean</code></td><td>Sidebar journal ouverte</td></tr>
+        <tr><td><code>logs</code></td><td><code>LogEntry[]</code></td><td>Entrées journal chargées</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="decompte-flux" class="section">
+    <h2 class="section-title">Flux de saisie</h2>
+    <div class="flow">
+Sélection commune
+    │
+    ▼
+<span class="hi">loadDecompteForCommune()</span>
+    │ fetchTable("DECOMPTE") filtré communeId + mois + année
+    │ → peuple counts + savedCounts + decompteId
+    ▼
+Utilisateur modifie les compteurs
+    │
+    ▼
+<span class="hi">handleSave()</span>
+    │
+    ├─ decompteId existe ?
+    │   ├─ OUI → <span class="ok">UpdateRecord DECOMPTE [decompteId]</span>
+    │   └─ NON → <span class="ok">AddRecord DECOMPTE</span> (crée la ligne)
+    │
+    └─ <span class="ok">AddRecord DECOMPTE_LOGS</span> (Δ pour chaque type modifié)
+    </div>
+    <h3 class="sub-title">Journal (<code>DECOMPTE_LOGS</code>)</h3>
+    <p>À chaque sauvegarde, autant de logs que de types modifiés. Chaque log enregistre :</p>
+    <ul class="doc-list">
+      <li><strong>Delta</strong> — différence (positif = hausse, négatif = baisse)</li>
+      <li><strong>Type</strong> — code de l'acte (<code>"PC"</code>, <code>"DP"</code>…)</li>
+      <li><strong>Timestamp</strong> — ISO 8601</li>
+      <li><strong>CommuneNom</strong> — dénormalisé pour la lisibilité</li>
+    </ul>
+    <p>Le bouton <strong>Annuler</strong> dans la sidebar applique le delta inverse via <code>UpdateRecord</code>.</p>
+  </div>
+
+  <div id="decompte-dashboard" class="section">
+    <h2 class="section-title">Dashboard — Logique de filtrage</h2>
+    <div class="flow">
+communeList (toutes communes)
+    │
+    ├─ filtre dashArr (arrondissements sélectionnés)
+    └─ communeList filtrée
+            │
+            ├─ <span class="hi">visibleTypes</span> = DOC_TYPES où ∃ commune avec compteur &gt; 0
+            │   (colonnes vides masquées automatiquement)
+            └─ Tableau croisé commune × visibleTypes
+    </div>
+    <h3 class="sub-title">Lignes spéciales</h3>
+    <table class="doc-table">
+      <thead><tr><th>Ligne</th><th>Calcul</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Total</strong></td><td>Somme de toutes les communes visibles</td></tr>
+        <tr><td><strong>Total Fixe</strong></td><td>Communes ayant la sélection "Fixe" ce trimestre</td></tr>
+        <tr><td><strong>Total Fixe+Rotation+Ciblée</strong></td><td>Communes avec une sélection active</td></tr>
+        <tr><td><strong>Total sans Fixe+Rotation+Ciblée</strong></td><td>Total − communes ayant une sélection active</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- 4. WIDGET ENREGISTREMENT -->
+<!-- ══════════════════════════════════════════ -->
+<div class="page page-break">
+
+  <div id="widget-enregistrement" class="widget-header">
+    <div class="widget-header-icon">📝</div>
+    <div>
+      <h1>Widget Enregistrement</h1>
+      <p>src/app/widgets/enregistrement/</p>
+    </div>
+  </div>
+
+  <div id="enreg-tables" class="section">
+    <h2 class="section-title">Tables Grist</h2>
+    <table class="doc-table">
+      <thead><tr><th>Table</th><th>Accès</th><th>Colonnes clés</th></tr></thead>
+      <tbody>
+        <tr><td><code>Communes</code></td><td>Lecture</td><td><code>Nom commune</code>, <code>Code INSEE</code>, <code>Arrondissement</code>, <code>Logements</code>, <code>Enjeux</code>, <code>Hors_ZI</code>, <code>Reglementation</code></td></tr>
+        <tr><td><code>Communes_Statut</code></td><td>Lecture</td><td><code>Commune</code> (Ref), <code>Selection</code> (ChoiceList), <code>Debut</code>, <code>Fin</code></td></tr>
+        <tr><td><code>AN_PC</code></td><td>Lecture + Écriture</td><td>Voir section Colonnes AN_PC</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="enreg-cols" class="section">
+    <h2 class="section-title">Colonnes <code>AN_PC</code> (<code>COLS</code>)</h2>
+    <table class="doc-table">
+      <thead><tr><th>Clé interne</th><th>Colonne Grist</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>Type</code></td><td><code>Type</code></td><td>Type d'acte : PC, PA, PD, DP</td></tr>
+        <tr><td><code>Type2</code></td><td><code>Type2</code></td><td>Sous-type : I, M, T, P</td></tr>
+        <tr><td><code>Mois / Annee</code></td><td><code>Mois / Annee</code></td><td>Mois et année de la date visa mairie</td></tr>
+        <tr><td><code>NoActe</code></td><td><code>N_ACTE</code></td><td>Numéro de l'acte (unicité vérifiée localement)</td></tr>
+        <tr><td><code>VisaMairie</code></td><td><code>Visa_Mairie</code></td><td>Date visa mairie (ISO string)</td></tr>
+        <tr><td><code>ReceptionPref</code></td><td><code>Reception_Pref</code></td><td>Date réception préfecture — sert au calcul du trimestre</td></tr>
+        <tr><td><code>Trimestre</code></td><td><code>Trimestre</code></td><td>Format <code>YYYY-TN</code> — calculé depuis la date réception préf.</td></tr>
+        <tr><td><code>Enjeux</code></td><td><code>Enjeux_pre_identifies</code></td><td>ChoiceList des enjeux sélectionnés</td></tr>
+        <tr><td><code>MotifsControle</code></td><td><code>Motifs_controle</code></td><td>ChoiceList des motifs projet</td></tr>
+        <tr><td><code>EnjeuPrefix</code></td><td><code>Enjeu_</code></td><td>Préfixe des colonnes enjeu individuelles</td></tr>
+        <tr><td><code>SelectionSnapshot</code></td><td><code>Selection_commune_au_moment</code></td><td>Sélection de la commune au moment de la saisie</td></tr>
+        <tr><td><code>TailleLogements</code></td><td><code>Taille_logements</code></td><td>Nb de logements pour l'enjeu Taille</td></tr>
+        <tr><td><code>EnjeuOld</code></td><td><code>O_Concerne_par_l_enjeu</code></td><td><em>Legacy — pré-refactor, lecture seule</em></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="enreg-enjeux" class="section">
+    <h2 class="section-title">Enjeux &amp; Motifs</h2>
+    <h3 class="sub-title">Enjeux commune (<code>ALL_MOTIFS</code>)</h3>
+    <div class="ui-row">
+      <span class="chip chip-blue">ZI</span>
+      <span class="chip chip-blue">ZA</span>
+      <span class="chip chip-blue">ZN</span>
+      <span class="chip chip-blue">RT</span>
+      <span class="chip chip-blue">STEP</span>
+      <span class="chip chip-blue">PEB</span>
+      <span class="chip chip-blue">Site classé</span>
+    </div>
+    <p>Chaque enjeu a une colonne <code>Enjeu_X</code> dans <code>AN_PC</code>. Le mapping est géré par <code>MOTIF_TO_COL</code> (exception : <code>Site classé</code> → <code>Enjeu_Classe</code>).</p>
+
+    <h3 class="sub-title">Motifs de contrôle — enjeux projet (<code>ALL_OBJETS</code>)</h3>
+    <div class="ui-row">
+      <span class="chip chip-purple">LLS</span>
+      <span class="chip chip-purple">ERP 1/2/3</span>
+      <span class="chip chip-purple">ERP 4/5</span>
+      <span class="chip chip-purple">EE</span>
+      <span class="chip chip-purple">Signalé</span>
+      <span class="chip chip-purple">Aléatoire</span>
+      <span class="chip chip-purple">Taille</span>
+    </div>
+    <p>Le mapping clé → colonne est géré par <code>OBJET_TO_COL</code>.</p>
+    <div class="info-box">
+      <strong><code>INDOLORES</code> = {ERP 4/5, Taille}</strong>
+      Ces deux motifs ont une valeur automatiquement <code>"Oui"</code> quand la case est cochée — pas de radio Oui/Non affiché.
+    </div>
+
+    <h3 class="sub-title">Seuil logements (<code>getSeuilLogements</code>)</h3>
+    <table class="doc-table">
+      <thead><tr><th>Arrondissement</th><th>Commune Toulouse</th><th>Autres communes</th></tr></thead>
+      <tbody>
+        <tr><td>Toulouse</td><td>100</td><td>75</td></tr>
+        <tr><td>Muret</td><td>—</td><td>20</td></tr>
+        <tr><td>Saint-Gaudens</td><td>—</td><td>10</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="enreg-search" class="section">
+    <h2 class="section-title">Recherche commune (<code>scoreCommune</code>)</h2>
+    <p>Scoring de pertinence pour l'autocomplete. Le comportement diffère selon que la requête ressemble à un code INSEE (chiffres) ou à un nom :</p>
+    <pre>
+<span class="c">// Recherche par NOM</span>
+score 0  → nom exact
+score 1  → nom commence par la requête
+score 2  → nom contient la requête
+score 3  → INSEE commence par les chiffres
+score 4  → INSEE contient les chiffres
+score 99 → pas de match → exclu
+
+<span class="c">// Recherche par INSEE</span>
+score 0  → INSEE exact
+score 1  → INSEE commence par la requête
+score 2  → nom commence par la requête
+score 3  → nom contient la requête
+score 4  → INSEE contient la requête
+score 99 → pas de match → exclu</pre>
+    <p>Maximum <code>MAX_COMMUNE_RESULTS</code> (25) résultats retournés, triés par score croissant.</p>
+  </div>
+
+  <div id="enreg-state" class="section">
+    <h2 class="section-title">État React principal</h2>
+    <table class="doc-table">
+      <thead><tr><th>State</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>communes</code></td><td><code>Commune[]</code></td><td>Liste complète des communes</td></tr>
+        <tr><td><code>communesByNom/ByInsee/ById</code></td><td><code>Map</code></td><td>Index pour la résolution des références</td></tr>
+        <tr><td><code>selectedCommune</code></td><td><code>Commune | null</code></td><td>Commune active</td></tr>
+        <tr><td><code>statutsByKey</code></td><td><code>Map&lt;string, Statut&gt;</code></td><td>Statuts indexés par <code>communeId|trimestre</code></td></tr>
+        <tr><td><code>selectedMotifs</code></td><td><code>Set&lt;string&gt;</code></td><td>Enjeux commune cochés</td></tr>
+        <tr><td><code>selectedObjets</code></td><td><code>Set&lt;string&gt;</code></td><td>Enjeux projet cochés</td></tr>
+        <tr><td><code>enjeuValues</code></td><td><code>Map&lt;string, "Oui"|"Non"&gt;</code></td><td>Valeur Oui/Non par enjeu coché</td></tr>
+        <tr><td><code>tab</code></td><td><code>"saisie" | "dashboard"</code></td><td>Onglet actif</td></tr>
+        <tr><td><code>allAnpcRows</code></td><td><code>AnpcRow[]</code></td><td>Tous les actes AN_PC pour le dashboard</td></tr>
+        <tr><td><code>dashFilters</code></td><td><code>DashFilters</code></td><td>Filtres actifs dans le dashboard</td></tr>
+      </tbody>
+    </table>
+    <h3 class="sub-title">Interface <code>DashFilters</code></h3>
+    <pre>
+<span class="k">interface</span> <span class="t">DashFilters</span> {
+  arr:            string[];  <span class="c">// Arrondissements</span>
+  selection:      string[];  <span class="c">// Stratégie (Fixe / Rotation / Ciblée)</span>
+  logements:      string[];  <span class="c">// Seuil (10+ / 20+ / 75+ / 100+)</span>
+  type:           string[];  <span class="c">// Type d'acte (PC, PD, PA, DP)</span>
+  type2:          string[];  <span class="c">// Type de permis (I, M, T, P)</span>
+  motif:          string[];  <span class="c">// Enjeux commune (ZI, ZA, ZN…)</span>
+  objet:          string[];  <span class="c">// Motifs projet (LLS, ERP…)</span>
+  reglementation: string[];  <span class="c">// Réglementation applicable</span>
+  createdByName:  string[];  <span class="c">// Agent ayant saisi l'acte</span>
+}</pre>
+  </div>
+
+  <div id="enreg-save" class="section">
+    <h2 class="section-title">Flux de sauvegarde</h2>
+    <div class="flow">
+<span class="hi">handleSave()</span>
+    │
+    ├─ Validation (9 contrôles) :
+    │   - Type, Type2, Visa mairie, Réception préf. requis
+    │   - Commune sélectionnée
+    │   - Origine requise
+    │   - Chaque enjeu coché doit avoir Oui/Non (sauf INDOLORES)
+    │   - Enjeu Taille : nombre de logements requis si coché
+    │   - N° ACTE : unicité vérifiée dans l'index local
+    │
+    ├─ Construit le payload :
+    │   - Champs de base (type, dates, n°, etc.)
+    │   - Trimestre calculé depuis la date réception préf.
+    │   - SelectionSnapshot depuis statutsByKey
+    │   - Enjeux : colonnes Enjeu_X = "Oui"/"Non"/null
+    │
+    └─ <span class="ok">applyUserActions([["AddRecord", "AN_PC", null, fields]])</span>
+    </div>
+    <div class="info-box warn">
+      <strong>Accès requis</strong>
+      Le widget doit être configuré en <strong>Full access</strong> dans les options Grist pour pouvoir écrire.
+      En cas de refus, un toast d'erreur "Accès insuffisant" est affiché.
+    </div>
+    <h3 class="sub-title">Utilitaires purs notables</h3>
+    <table class="doc-table">
+      <thead><tr><th>Fonction</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>norm(s)</code></td><td>Normalise une chaîne (minuscules, sans accents, underscores)</td></tr>
+        <tr><td><code>computeTrimestreFromDate(iso)</code></td><td>Calcule <code>"YYYY-TN"</code> depuis une date ISO</td></tr>
+        <tr><td><code>getStatutSelection(map, id, tri, date)</code></td><td>Retourne la sélection active d'une commune à une date donnée</td></tr>
+        <tr><td><code>selectionHasAny(sel, tags)</code></td><td>Vérifie si une liste de sélections contient l'un des tags</td></tr>
+        <tr><td><code>parseDate(v)</code></td><td>Parse depuis Unix s, ISO string ou <code>DD/MM/YYYY</code></td></tr>
+        <tr><td><code>enjeuColForItem(item)</code></td><td>Retourne le nom de colonne Grist pour un motif (<code>Enjeu_ERP123</code>)</td></tr>
+        <tr><td><code>debounce(fn, delay)</code></td><td>Debounce — utilisé pour l'autocomplete commune</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="enreg-dashboard" class="section">
+    <h2 class="section-title">Dashboard — Colonnes du tableau</h2>
+    <table class="doc-table">
+      <thead><tr><th>Colonne affichée</th><th>Source</th></tr></thead>
+      <tbody>
+        <tr><td>MAJCS</td><td><code>AN_PC.MAJCS</code></td></tr>
+        <tr><td>Commune</td><td>Lookup via <code>communesByIdRef</code></td></tr>
+        <tr><td>N° acte</td><td><code>AN_PC.N_ACTE</code></td></tr>
+        <tr><td>Arrondissement</td><td>Lookup via commune</td></tr>
+        <tr><td>Stratégie</td><td>Calculé depuis <code>statutsByKey</code> au moment de la saisie</td></tr>
+        <tr><td>Logements</td><td>Seuil de la commune (<code>"75+"</code>)</td></tr>
+        <tr><td>Acte / Permis</td><td><code>AN_PC.Type</code> / <code>AN_PC.Type2</code></td></tr>
+        <tr><td>Enjeux / Motifs</td><td><code>AN_PC.Enjeux_pre_identifies</code> / <code>Motifs_controle</code></td></tr>
+        <tr><td>Réception préf. / Visa mairie</td><td>Dates ISO formatées <code>DD/MM/YYYY</code></td></tr>
+        <tr><td>Saisi par / Saisi le</td><td><code>AN_PC.createdByName</code> / <code>AN_PC.createdAt</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- 5. WIDGET STRATÉGIE -->
+<!-- ══════════════════════════════════════════ -->
+<div class="page page-break">
+
+  <div id="widget-strategie" class="widget-header">
+    <div class="widget-header-icon">🗺</div>
+    <div>
+      <h1>Widget Stratégie</h1>
+      <p>src/app/widgets/strategie/ — lecture seule</p>
+    </div>
+  </div>
+
+  <div id="strat-tables" class="section">
+    <h2 class="section-title">Tables Grist</h2>
+    <table class="doc-table">
+      <thead><tr><th>Table</th><th>Accès</th><th>Colonnes clés</th></tr></thead>
+      <tbody>
+        <tr><td><code>Communes</code></td><td>Lecture</td><td><code>Nom commune</code>, <code>Arrondissement</code></td></tr>
+        <tr><td><code>Communes_Statut</code></td><td>Lecture</td><td><code>Commune</code> (Ref), <code>Selection</code> (ChoiceList), <code>Debut</code> (date), <code>Fin</code> (date), <code>Explications</code></td></tr>
+      </tbody>
+    </table>
+    <h3 class="sub-title">Type <code>StatutRow</code></h3>
+    <pre>
+<span class="k">type</span> <span class="t">StatutRow</span> = {
+  id:            number;
+  communeId:     number;
+  selection:     string[];   <span class="c">// ex: ["Fixe"], ["Rotation", "Ciblée"]</span>
+  debut:         Date | null;
+  fin:           Date | null;
+  explications:  string;
+  createdByName: string;     <span class="c">// agent ayant saisi la ligne</span>
+};</pre>
+  </div>
+
+  <div id="strat-filter" class="section">
+    <h2 class="section-title">Logique de filtrage par période</h2>
+    <p>Une ligne <code>Communes_Statut</code> est visible si elle <strong>chevauche</strong> la période affichée :</p>
+    <pre>
+Période affichée :  [start ─────────────────── end]
+Ligne incluse si :  row.debut &lt;= end  <span class="k">ET</span>  row.fin &gt;= start
+
+Cas particuliers :
+  - row.debut = null → pas de borne de début (toujours "en cours" depuis avant)
+  - row.fin   = null → pas de borne de fin (encore actif)</pre>
+    <p>Combiné avec deux filtres supplémentaires :</p>
+    <ul class="doc-list">
+      <li><strong>tagFilters</strong> — au moins un tag de la ligne doit être dans l'ensemble actif</li>
+      <li><strong>arrFilters</strong> — l'arrondissement de la commune doit être sélectionné</li>
+    </ul>
+  </div>
+
+  <div id="strat-state" class="section">
+    <h2 class="section-title">État React</h2>
+    <table class="doc-table">
+      <thead><tr><th>State</th><th>Type</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>communes</code></td><td><code>Map&lt;number, Commune&gt;</code></td><td>Référentiel communes (id → {nom, arr})</td></tr>
+        <tr><td><code>statuts</code></td><td><code>StatutRow[]</code></td><td>Toutes les lignes Communes_Statut</td></tr>
+        <tr><td><code>vue</code></td><td><code>"mois" | "trimestre" | "annee"</code></td><td>Granularité de la période</td></tr>
+        <tr><td><code>year / month</code></td><td><code>number</code></td><td>Période courante</td></tr>
+        <tr><td><code>tagFilters</code></td><td><code>Set&lt;string&gt;</code></td><td>Tags actifs (Fixe, Rotation, Ciblée)</td></tr>
+        <tr><td><code>arrFilters</code></td><td><code>Set&lt;string&gt;</code></td><td>Arrondissements actifs</td></tr>
+        <tr><td><code>sortBy</code></td><td><code>"periode" | "commune"</code></td><td>Critère de tri du tableau</td></tr>
+      </tbody>
+    </table>
+    <h3 class="sub-title">Chips de sélection</h3>
+    <table class="doc-table">
+      <thead><tr><th>Valeur</th><th>Classe CSS</th></tr></thead>
+      <tbody>
+        <tr><td>Fixe</td><td><code>statut-chip--fixe</code></td></tr>
+        <tr><td>Ciblée</td><td><code>statut-chip--ciblee</code></td></tr>
+        <tr><td>Rotation</td><td><code>statut-chip--rotation</code></td></tr>
+        <tr><td>Autre</td><td><code>statut-chip--nonciblee</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="strat-helpers" class="section">
+    <h2 class="section-title">Helpers de période</h2>
+    <table class="doc-table">
+      <thead><tr><th>Fonction</th><th>Description</th></tr></thead>
+      <tbody>
+        <tr><td><code>periodBounds(vue, year, month)</code></td><td>Calcule les dates <code>start/end</code> de la période affichée</td></tr>
+        <tr><td><code>periodLabel(vue, year, month)</code></td><td>Libellé affiché (<code>"T1 2026"</code>, <code>"Février 2026"</code>…)</td></tr>
+        <tr><td><code>navigatePeriod(dir)</code></td><td>Avance (+1) ou recule (-1) d'une unité de période</td></tr>
+        <tr><td><code>rowPeriodeLabel(row)</code></td><td>Trimestre du début de la ligne (<code>"T1 2026"</code>)</td></tr>
+        <tr><td><code>moisLabel(m, a)</code></td><td>Libellé mois/année formaté en français</td></tr>
+      </tbody>
+    </table>
+    <div class="info-box">
+      <strong>Ordre des arrondissements (<code>ARR_ORDER</code>)</strong>
+      L'ordre d'affichage des boutons est imposé par : <code>["Toulouse", "Muret", "Saint-Gaudens"]</code>.
+      Les arrondissements inconnus sont triés alphabétiquement après les trois ci-dessus.
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════ -->
+<!-- 6. DÉPLOIEMENT -->
+<!-- ══════════════════════════════════════════ -->
+<div class="page page-break">
+
+  <div id="deploy" class="widget-header">
+    <div class="widget-header-icon">🚀</div>
+    <div>
+      <h1>Déploiement</h1>
+      <p>.github/workflows/deploy.yml</p>
+    </div>
+  </div>
+
+  <div id="deploy-ci" class="section">
+    <h2 class="section-title">GitHub Actions</h2>
+    <div class="flow">
+push master
+    │
+    ├─ npm ci
+    ├─ npm run build  <span class="c">(next build → export statique dans /out)</span>
+    │   └─ Variables injectées : NEXT_PUBLIC_GRIST_PROFILE_PROXY_URL
+    ├─ cp -r docs out/docs  <span class="c">(copie la doc dans l'artifact)</span>
+    └─ <span class="ok">Deploy to GitHub Pages</span>  (actions/deploy-pages@v4)
+    </div>
+    <h3 class="sub-title"><code>next.config.js</code> — basePath dynamique</h3>
+    <pre>
+<span class="k">const</span> repo = process.env.GITHUB_REPOSITORY?.split("/")[1] || "";
+<span class="k">const</span> isCI = !!process.env.GITHUB_ACTIONS;
+
+<span class="c">// En CI : basePath = "/ddt31-widgets"</span>
+<span class="c">// En local : pas de basePath (racine /)</span>
+...(isCI &amp;&amp; repo ? { basePath: `/${repo}`, assetPrefix: `/${repo}/` } : {})</pre>
+    <div class="info-box tip">
+      <strong>URL de la doc utilisateur</strong>
+      <code>https://stiiig.github.io/ddt31-widgets/docs/guide-utilisateur.html</code>
+    </div>
+    <div class="info-box tip">
+      <strong>URL de la doc technique</strong>
+      <code>https://stiiig.github.io/ddt31-widgets/docs/doc-technique.html</code>
+    </div>
+  </div>
+
+  <div id="deploy-env" class="section">
+    <h2 class="section-title">Variables d'environnement</h2>
+    <div class="info-box warn">
+      <strong>Variables NEXT_PUBLIC_* — visibles dans le bundle</strong>
+      Ces variables sont "baked" dans le JS à la compilation. Ne jamais y mettre de secrets.
+    </div>
+    <table class="doc-table">
+      <thead><tr><th>Variable</th><th>Source</th><th>Usage</th></tr></thead>
+      <tbody>
+        <tr><td><code>NEXT_PUBLIC_GRIST_PROFILE_PROXY_URL</code></td><td>GitHub Secret <code>GRIST_PROFILE_PROXY_URL</code></td><td>Webhook n8n pour récupérer le profil utilisateur Grist</td></tr>
+        <tr><td><code>NEXT_PUBLIC_GRIST_PROXY_URL</code></td><td>non défini en prod</td><td>Proxy n8n tables — mode REST standalone uniquement</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div id="deploy-identity" class="section">
+    <h2 class="section-title">Identité utilisateur</h2>
+    <p>L'affichage du nom de l'utilisateur connecté dans la top bar suit cette cascade :</p>
+    <div class="flow">
+1. <span class="hi">grist.getUserProfile()</span>     → postMessage, Grist ≥ 1.1.5
+        ↓ (échec)
+2. <span class="hi">getAccessToken() + GET n8n</span> → serveur n8n appelle /api/profile
+        ↓ (échec ou proxy non configuré)
+3. <span class="err">gristUser = null</span>            → rien affiché dans la top bar
+    </div>
+    <div class="info-box">
+      <strong>Configuration du proxy n8n</strong>
+      Pour activer le fallback utilisateur, configurer le GitHub Secret
+      <code>GRIST_PROFILE_PROXY_URL</code> avec l'URL du webhook n8n correspondant.
+    </div>
+  </div>
+
+  <div class="doc-footer">
+    DDT 31 — Documentation technique · Usage interne
+  </div>
+
+</div><!-- .app-main-content -->
+
+<script>
+// Highlight la section active dans la sidebar au scroll
+(function() {
+  var ids = Array.from(document.querySelectorAll('[id]')).map(function(el) { return el.id; }).filter(Boolean);
+  function update() {
+    var active = null;
+    for (var i = ids.length - 1; i >= 0; i--) {
+      var el = document.getElementById(ids[i]);
+      if (el && el.getBoundingClientRect().top <= 80) { active = ids[i]; break; }
+    }
+    document.querySelectorAll('.app-sidebar a').forEach(function(a) {
+      var href = a.getAttribute('href');
+      a.classList.toggle('active', href === '#' + active);
+    });
+  }
+  document.addEventListener('scroll', update, { passive: true });
+  update();
+})();
+</script>
+</body>
+</html>

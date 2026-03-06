@@ -1393,10 +1393,10 @@ input[type="date"].is-empty::-webkit-datetime-edit-year-field{
 .motifs-enjeux-col{ width: 100%; }
 .motifs-enjeux-col > .fr-col-12{ width:100%; max-width:none; }
 
-/* Toast notifications modernes en bas de page */
+/* Toast notifications modernes en haut de page */
 .toast-container {
   position: fixed;
-  bottom: 2rem;
+  top: 2rem;
   left: 50%;
   transform: translateX(-50%);
   z-index: 9999;
@@ -1424,7 +1424,7 @@ input[type="date"].is-empty::-webkit-datetime-edit-year-field{
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(-20px);
   }
   to {
     opacity: 1;
@@ -1443,7 +1443,7 @@ input[type="date"].is-empty::-webkit-datetime-edit-year-field{
   }
   to {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(-20px);
   }
 }
 

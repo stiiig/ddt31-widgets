@@ -1236,14 +1236,14 @@ export default function EnregistrementPage() {
 
       if (wasCreate) {
         await docApi.applyUserActions([["AddRecord", TABLE_ACTES, null, payload]]);
-        showToast("success", "Contrôle créé", `${selectedCommune?.nom || ""}`, 12000);
+        showToast("success", "Contrôle créé", `${selectedCommune?.nom || ""}${formReceptionPref ? " — Réception préf. : " + formReceptionPref.split("-").reverse().join("/") : ""}`, 12000);
         resetForm();
         setModeState("create");
         setCurrentRowId(null);
         setAnpcDataLoaded(false);
       } else {
         await docApi.applyUserActions([["UpdateRecord", TABLE_ACTES, currentRowId, payload]]);
-        showToast("success", "Contrôle mis à jour", `${selectedCommune?.nom || ""}`, 12000);
+        showToast("success", "Contrôle mis à jour", `${selectedCommune?.nom || ""}${formReceptionPref ? " — Réception préf. : " + formReceptionPref.split("-").reverse().join("/") : ""}`, 12000);
         setAnpcDataLoaded(false);
       }
     } catch (e: unknown) {

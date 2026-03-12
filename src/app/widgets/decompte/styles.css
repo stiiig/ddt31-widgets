@@ -847,6 +847,17 @@ body {
 .croise-table tr.croise-row-commune:hover td { background: #eef0fb; }
 .croise-table tr.croise-row-commune:hover td:first-child { background: #e4e7f7; color: #000091; }
 
+/* Colonne Sélection */
+.croise-table .col-sel {
+  white-space: nowrap;
+  padding: 0.2rem 0.4rem;
+}
+.croise-table thead .col-sel {
+  font-size: 0.72rem;
+  color: #555;
+  text-align: left;
+}
+
 /* Colonne Arrondissement */
 .croise-table .col-arr {
   font-size: 0.68rem;

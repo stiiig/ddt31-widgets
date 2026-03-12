@@ -251,7 +251,6 @@ body {
   margin: 3px 0;
   flex-shrink: 0;
 }
-.hscrollbar-track--hidden { visibility: hidden; }
 .hscrollbar-thumb {
   position: absolute;
   top: 0;
@@ -266,6 +265,7 @@ body {
 .hscrollbar-thumb:active { cursor: grabbing; background: #555; }
 .strat-table {
   width: 100%;
+  min-width: 860px;
   border-collapse: collapse;
   font-size: 0.8rem;
 }

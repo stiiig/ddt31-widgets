@@ -1276,7 +1276,7 @@ body {
   margin: 3px 0;
   flex-shrink: 0;
 }
-.hscrollbar-track--hidden { visibility: hidden; }
+/* .hscrollbar-track--hidden no longer used (thumb hidden via JS) */
 .hscrollbar-thumb {
   position: absolute;
   top: 0;

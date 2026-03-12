@@ -319,7 +319,6 @@ body {
 .strat-count {
   font-size: 0.75rem;
   color: #888;
-  margin-left: auto;
   white-space: nowrap;
 }
 .strat-count strong { color: #000091; }

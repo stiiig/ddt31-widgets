@@ -1750,6 +1750,8 @@ input[type="date"].is-empty::-webkit-datetime-edit-year-field{
   color: var(--text-action-high-blue-france);
   background: var(--background-alt-grey);
 }
+.sub-tab--xlsx { color: #217346; }
+.sub-tab--xlsx:hover { color: #145c30 !important; background: #e6f4ec !important; }
 
 .sub-tab.active {
   color: var(--text-action-high-blue-france);

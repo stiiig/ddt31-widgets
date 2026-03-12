@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useGristInit } from "@/lib/grist/hooks";
 import { exportCsv } from "@/lib/csv";
+import { exportXlsx } from "@/lib/xlsx";
+import type { XlsxRow, XlsxColMeta } from "@/lib/xlsx";
 
 // ═══════════════════════════════════════════════════════════
 // CONSTANTES
@@ -1529,6 +1531,57 @@ export default function EnregistrementPage() {
     exportCsv(`enregistrement_${period}.csv`, headers, data);
   }
 
+  function handleExportXlsx() {
+    const colMetas: XlsxColMeta[] = [
+      { label: "MAJCS",           width: 8  },
+      { label: "Commune",         width: 22 },
+      { label: "N° acte",         width: 13 },
+      { label: "Nom du projet",   width: 30 },
+      { label: "Arrondissement",  width: 16 },
+      { label: "Stratégie",       width: 14 },
+      { label: "Logements",       width: 12 },
+      { label: "Acte",            width: 12 },
+      { label: "Permis",          width: 12 },
+      { label: "Enjeux",          width: 30 },
+      { label: "Motifs",          width: 30 },
+      { label: "Réglementation",  width: 20 },
+      { label: "Réception préf.", width: 16 },
+      { label: "Visa mairie",     width: 14 },
+      { label: "Saisi par",       width: 16 },
+      { label: "Saisi le",        width: 18 },
+    ];
+    const xlsxRows: XlsxRow[] = filteredRows.map(row => {
+      const motifList = fromGristList(row.motif);
+      const objetList = fromGristList(row.objet);
+      const sels = getRowSelections(row);
+      const commune = row.communeId ? communesByIdRef.current.get(row.communeId) : null;
+      const kind: XlsxRow["kind"] = sels.includes("Ciblée")   ? "tag-ciblee"
+                                   : sels.includes("Rotation") ? "tag-rotation"
+                                   : sels.includes("Fixe")     ? "tag-fixe"
+                                   : "commune";
+      return { kind, values: [
+        row.majcs,
+        row.communeName,
+        row.nActe,
+        row.nomProjet,
+        row.arr,
+        sels.join(", "),
+        row.logements,
+        row.type,
+        row.type2,
+        motifList.join(", "),
+        objetList.join(", "),
+        commune?.reglementation || "",
+        formatDate(row.receptionPref),
+        formatDate(row.visaMairie),
+        row.createdByName,
+        formatDateTime(row.createdAt),
+      ]};
+    });
+    const period = getDashPeriodLabel(dashVue, dashMonth, dashYear).replace(/\s+/g, "_");
+    exportXlsx(`enregistrement_${period}.xlsx`, colMetas, xlsxRows);
+  }
+
   // ──────────────────────────────────────────
   // Render
   // ──────────────────────────────────────────
@@ -2048,6 +2101,9 @@ export default function EnregistrementPage() {
                       <span className="tag tag--light">Total : {filteredRows.length}</span>
                       <button type="button" className="sub-tab" onClick={handleExportCsv} title="Exporter en CSV">
                         <i className="fa-solid fa-download" /> CSV
+                      </button>
+                      <button type="button" className="sub-tab sub-tab--xlsx" onClick={handleExportXlsx} title="Exporter en Excel (couleurs)">
+                        <i className="fa-solid fa-file-excel" /> XLSX
                       </button>
                     </div>
                   )}

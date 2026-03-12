@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useGristInit } from "@/lib/grist/hooks";
 import { exportCsv } from "@/lib/csv";
+import { exportXlsx } from "@/lib/xlsx";
+import type { XlsxRow, XlsxColMeta } from "@/lib/xlsx";
 import type { GristDocAPI } from "@/lib/grist/meta";
 
 /* ══════════════════════════════════════
@@ -338,6 +340,38 @@ export default function StrategiePage() {
     exportCsv(`strategie_${label.replace(/\s+/g, "_")}.csv`, headers, data);
   }
 
+  function handleExportXlsx() {
+    const colMetas: XlsxColMeta[] = [
+      { label: "Commune",        width: 26 },
+      { label: "Arrondissement", width: 16 },
+      { label: "Sélection",      width: 14 },
+      { label: "Début",          width: 12 },
+      { label: "Fin",            width: 12 },
+      { label: "Période",        width: 14 },
+      { label: "Explications",   width: 42 },
+      { label: "Saisi par",      width: 18 },
+    ];
+    const xlsxRows: XlsxRow[] = rows.map(row => {
+      const commune = communes.get(row.communeId);
+      const sels = row.selection;
+      const kind: XlsxRow["kind"] = sels.includes("Ciblée")  ? "tag-ciblee"
+                                   : sels.includes("Rotation") ? "tag-rotation"
+                                   : sels.includes("Fixe")     ? "tag-fixe"
+                                   : "commune";
+      return { kind, values: [
+        commune?.nom || `#${row.communeId}`,
+        commune?.arr || "",
+        sels.join(", "),
+        formatDate(row.debut),
+        formatDate(row.fin),
+        rowPeriodeLabel(row),
+        row.explications,
+        row.createdByName,
+      ]};
+    });
+    exportXlsx(`strategie_${label.replace(/\s+/g, "_")}.xlsx`, colMetas, xlsxRows);
+  }
+
   /* ── Render ── */
   return (
     <div className="app-shell">
@@ -397,12 +431,15 @@ export default function StrategiePage() {
                 </span>
               )}
 
-              {/* Export CSV */}
-              {!loading && rows.length > 0 && (
+              {/* Export */}
+              {!loading && rows.length > 0 && (<>
                 <button type="button" className="vue-btn" onClick={handleExportCsv} title="Exporter en CSV">
                   <i className="fa-solid fa-download" /> CSV
                 </button>
-              )}
+                <button type="button" className="vue-btn vue-btn--xlsx" onClick={handleExportXlsx} title="Exporter en Excel (couleurs)">
+                  <i className="fa-solid fa-file-excel" /> XLSX
+                </button>
+              </>)}
             </div>
 
             {/* Ligne 2 : filtres */}

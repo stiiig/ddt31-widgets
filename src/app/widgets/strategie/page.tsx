@@ -154,7 +154,7 @@ export default function StrategiePage() {
     top.addEventListener("scroll",  onTop,  { passive: true });
     wrap.addEventListener("scroll", onWrap, { passive: true });
     return () => { top.removeEventListener("scroll", onTop); wrap.removeEventListener("scroll", onWrap); };
-  }, [rows]);
+  }, [loading]);
 
   // ── Toast helpers ──
   let toastCounter = 0;
@@ -438,18 +438,20 @@ export default function StrategiePage() {
                 ))}
               </div>
 
-              {/* Export + compteur */}
-              {!loading && rows.length > 0 && (<>
-                <button type="button" className="vue-btn" onClick={handleExportCsv} title="Exporter en CSV">
-                  <i className="fa-solid fa-download" /> CSV
-                </button>
-                <button type="button" className="vue-btn vue-btn--xlsx" onClick={handleExportXlsx} title="Exporter en Excel (couleurs)">
-                  <i className="fa-solid fa-file-excel" /> XLSX
-                </button>
-                <span className="strat-count">
-                  <strong>{rows.length}</strong> commune{rows.length !== 1 ? "s" : ""}
-                </span>
-              </>)}
+              {/* Export + compteur (poussé à droite) */}
+              {!loading && rows.length > 0 && (
+                <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                  <button type="button" className="vue-btn" onClick={handleExportCsv} title="Exporter en CSV">
+                    <i className="fa-solid fa-download" /> CSV
+                  </button>
+                  <button type="button" className="vue-btn vue-btn--xlsx" onClick={handleExportXlsx} title="Exporter en Excel (couleurs)">
+                    <i className="fa-solid fa-file-excel" /> XLSX
+                  </button>
+                  <span className="strat-count">
+                    <strong>{rows.length}</strong> commune{rows.length !== 1 ? "s" : ""}
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Ligne 2 : filtres */}

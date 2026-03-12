@@ -659,6 +659,8 @@ body {
 .vue-btn.active { background: #000091 !important; color: #fff; -webkit-appearance: none; appearance: none; }
 .vue-btn.active:hover { background: #1c1cae !important; color: #fff; }
 .vue-btn:hover:not(.active) { background: #e0e0e0; }
+.vue-btn--xlsx { color: #217346; }
+.vue-btn--xlsx:hover:not(.active) { background: #e6f4ec; color: #145c30; }
 
 .scope-bar {
   display: flex;

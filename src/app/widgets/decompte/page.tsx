@@ -719,7 +719,9 @@ export default function DecomptePage() {
         : allCommuneList;
       const visibleTypes = DOC_TYPES.filter(dt => communeList.some(c => (c.counters[dt.key] || 0) > 0));
       const headers = ["Commune", "Arrondissement", ...visibleTypes.map(dt => dt.code), "Total", "Saisi par"];
-      const data = communeList.map(c => {
+
+      // Lignes communes
+      const data: (string | number)[][] = communeList.map(c => {
         const commune = communesById.get(c.id);
         return [
           c.nom,
@@ -729,6 +731,68 @@ export default function DecomptePage() {
           c.createdByName || "",
         ];
       });
+
+      // Séparateur
+      data.push(["", "", ...visibleTypes.map(() => ""), "", ""]);
+
+      // Grand total
+      const grandTotals = Object.fromEntries(DOC_TYPES.map(dt => [dt.key, 0]));
+      communeList.forEach(c => DOC_TYPES.forEach(dt => { grandTotals[dt.key] += c.counters[dt.key]; }));
+      const grandTotal = communeList.reduce((s, c) => s + c.total, 0);
+      data.push(["TOTAL", "", ...visibleTypes.map(dt => grandTotals[dt.key] || 0), grandTotal, ""]);
+
+      // Totaux par tag (Fixe / Rotation / Ciblée)
+      for (const tag of ["Fixe", "Rotation", "Ciblée"]) {
+        const filtered = communeList.filter(c => {
+          const sels = vue === "annee" && c.statutsAnnee?.length ? c.statutsAnnee[0].sels : (c.statut || []);
+          return sels.some(s => s === tag);
+        });
+        if (filtered.length === 0) continue;
+        const counters = Object.fromEntries(DOC_TYPES.map(dt => [dt.key, 0]));
+        filtered.forEach(c => DOC_TYPES.forEach(dt => { counters[dt.key] += c.counters[dt.key]; }));
+        const total = filtered.reduce((s, c) => s + c.total, 0);
+        data.push([`Total ${tag}`, "", ...visibleTypes.map(dt => counters[dt.key] || 0), total, ""]);
+      }
+
+      // Total combiné Fixe+Rotation+Ciblée
+      const combinedFiltered = communeList.filter(c => {
+        const sels = vue === "annee" && c.statutsAnnee?.length ? c.statutsAnnee[0].sels : (c.statut || []);
+        return sels.some(s => s === "Fixe" || s === "Rotation" || s === "Ciblée");
+      });
+      if (combinedFiltered.length > 0) {
+        const counters = Object.fromEntries(DOC_TYPES.map(dt => [dt.key, 0]));
+        combinedFiltered.forEach(c => DOC_TYPES.forEach(dt => { counters[dt.key] += c.counters[dt.key]; }));
+        const total = combinedFiltered.reduce((s, c) => s + c.total, 0);
+        data.push(["Total Fixe+Rotation+Ciblée", "", ...visibleTypes.map(dt => counters[dt.key] || 0), total, ""]);
+      }
+
+      // Total sans Fixe+Rotation+Ciblée
+      const noTagFiltered = communeList.filter(c => {
+        const sels = vue === "annee" && c.statutsAnnee?.length ? c.statutsAnnee[0].sels : (c.statut || []);
+        return !sels.some(s => s === "Fixe" || s === "Rotation" || s === "Ciblée");
+      });
+      if (noTagFiltered.length > 0) {
+        const counters = Object.fromEntries(DOC_TYPES.map(dt => [dt.key, 0]));
+        noTagFiltered.forEach(c => DOC_TYPES.forEach(dt => { counters[dt.key] += c.counters[dt.key]; }));
+        const total = noTagFiltered.reduce((s, c) => s + c.total, 0);
+        data.push(["Total sans Fixe+Rotation+Ciblée", "", ...visibleTypes.map(dt => counters[dt.key] || 0), total, ""]);
+      }
+
+      // Total Papier (communes flag Papier)
+      const papierFiltered = communeList.filter(c => communesById.get(c.id)?.papier === true);
+      if (papierFiltered.length > 0) {
+        const counters = Object.fromEntries(DOC_TYPES.map(dt => [dt.key, 0]));
+        papierFiltered.forEach(c => DOC_TYPES.forEach(dt => { counters[dt.key] += c.counters[dt.key]; }));
+        const total = papierFiltered.reduce((s, c) => s + c.total, 0);
+        data.push(["Total Papier", "", ...visibleTypes.map(dt => counters[dt.key] || 0), total, ""]);
+      }
+
+      // Total actes saisis en mode Papier
+      const totalPapierActes = communeList.reduce((s, c) => s + (c.papierCount || 0), 0);
+      if (totalPapierActes > 0) {
+        data.push(["Total actes papier", "", ...visibleTypes.map(() => ""), totalPapierActes, ""]);
+      }
+
       const period = dashPeriodLabel().replace(/\s+/g, "_");
       exportCsv(`decompte_${period}.csv`, headers, data);
     }

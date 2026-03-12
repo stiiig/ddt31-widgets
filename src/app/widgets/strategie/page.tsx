@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useGristInit } from "@/lib/grist/hooks";
 import { exportCsv } from "@/lib/csv";
 import { useForceScrollbars } from "@/lib/use-scrollbars";
+import { HScrollbar } from "@/lib/HScrollbar";
 import { exportXlsx } from "@/lib/xlsx";
 import type { XlsxRow, XlsxColMeta } from "@/lib/xlsx";
 import type { GristDocAPI } from "@/lib/grist/meta";
@@ -143,20 +144,7 @@ export default function StrategiePage() {
 
   // ── Refs ──
   useEffect(() => { docApiRef.current = docApi; }, [docApi]);
-  const topScrollRef = useRef<HTMLDivElement>(null);
   const tableWrapRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const top  = topScrollRef.current;
-    const wrap = tableWrapRef.current;
-    if (!top || !wrap) return;
-    const spacer = top.firstElementChild as HTMLDivElement;
-    if (spacer) spacer.style.width = wrap.scrollWidth + "px";
-    const onTop  = () => { wrap.scrollLeft = top.scrollLeft; };
-    const onWrap = () => { top.scrollLeft  = wrap.scrollLeft; };
-    top.addEventListener("scroll",  onTop,  { passive: true });
-    wrap.addEventListener("scroll", onWrap, { passive: true });
-    return () => { top.removeEventListener("scroll", onTop); wrap.removeEventListener("scroll", onWrap); };
-  }, [loading]);
 
   // ── Toast helpers ──
   let toastCounter = 0;
@@ -512,7 +500,7 @@ export default function StrategiePage() {
               <p>Aucun statut de commune ne correspond aux filtres sélectionnés pour cette période.</p>
             </div>
           ) : (<>
-            <div className="strat-scroll-top" ref={topScrollRef}><div /></div>
+            <HScrollbar scrollRef={tableWrapRef} />
             <div className="strat-table-wrap" ref={tableWrapRef}>
               <table className="strat-table">
                 <thead>

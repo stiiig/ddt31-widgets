@@ -232,21 +232,38 @@ body {
 .statut-chip--nonciblee { background: #f5f5f5; border-color: #ddd; color: #555; }
 
 /* ── Stratégie table ── */
-.strat-scroll-top {
-  overflow-x: scroll;
-  overflow-y: hidden;
-  height: 14px;
-  border-radius: 8px 8px 0 0;
-}
-.strat-scroll-top > div { height: 1px; }
 .strat-table-wrap {
   background: #fff;
   border: 1px solid #ddd;
-  border-radius: 0 0 0.5rem 0.5rem;
-  overflow-x: scroll;
+  border-radius: 0.5rem;
+  overflow-x: auto;
   overflow-y: auto;
   box-shadow: 0 1px 3px rgba(0,0,0,.05);
 }
+
+/* ── Scrollbar personnalisée (toujours visible) ── */
+.hscrollbar-track {
+  position: relative;
+  height: 12px;
+  background: #e8e8e8;
+  border-radius: 6px;
+  cursor: pointer;
+  margin: 3px 0;
+  flex-shrink: 0;
+}
+.hscrollbar-track--hidden { visibility: hidden; }
+.hscrollbar-thumb {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: #aaa;
+  border-radius: 6px;
+  cursor: grab;
+  min-width: 40px;
+  transition: background 0.15s;
+}
+.hscrollbar-thumb:hover { background: #777; }
+.hscrollbar-thumb:active { cursor: grabbing; background: #555; }
 .strat-table {
   width: 100%;
   border-collapse: collapse;

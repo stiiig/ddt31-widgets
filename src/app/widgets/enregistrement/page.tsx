@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from "react";
 import { useGristInit } from "@/lib/grist/hooks";
 import { exportCsv } from "@/lib/csv";
 import { useForceScrollbars } from "@/lib/use-scrollbars";
+import { HScrollbar } from "@/lib/HScrollbar";
 import { exportXlsx } from "@/lib/xlsx";
 import type { XlsxRow, XlsxColMeta } from "@/lib/xlsx";
 
@@ -547,7 +548,6 @@ export default function EnregistrementPage() {
   const [communes, setCommunes] = useState<Commune[]>([]);
   const communesRef       = useRef<Commune[]>([]);
   const communesByIdRef   = useRef<Map<number, Commune>>(new Map());
-  const topScrollRef      = useRef<HTMLDivElement>(null);
   const tableWrapRef      = useRef<HTMLDivElement>(null);
   const communesByNomRef  = useRef<Map<string, Commune>>(new Map());
   const communesByInseeRef = useRef<Map<string, Commune>>(new Map());
@@ -1464,22 +1464,7 @@ export default function EnregistrementPage() {
   const periodRows  = getRowsForPeriod(allAnpcRows);
   const filteredRows = sortRows(applyDashFilters(periodRows));
 
-  // Sync scrollbar du dessus avec le tableau
-  useEffect(() => {
-    const top  = topScrollRef.current;
-    const wrap = tableWrapRef.current;
-    if (!top || !wrap) return;
-    const spacer = top.firstElementChild as HTMLDivElement;
-    if (spacer) spacer.style.width = wrap.scrollWidth + "px";
-    const onTop  = () => { wrap.scrollLeft = top.scrollLeft; };
-    const onWrap = () => { top.scrollLeft  = wrap.scrollLeft; };
-    top.addEventListener("scroll",  onTop,  { passive: true });
-    wrap.addEventListener("scroll", onWrap, { passive: true });
-    return () => {
-      top.removeEventListener("scroll",  onTop);
-      wrap.removeEventListener("scroll", onWrap);
-    };
-  }, [filteredRows, sortField, sortDir]);
+  // (scroll sync handled by HScrollbar component)
 
   // Unique filter values — ordres fixes
   const ARR_ORDER = ["Toulouse", "Muret", "Saint-Gaudens"];
@@ -2326,7 +2311,7 @@ export default function EnregistrementPage() {
                 </div>
               ) : (
                 <>
-                <div className="croise-scroll-top" ref={topScrollRef}><div /></div>
+                <HScrollbar scrollRef={tableWrapRef} />
                 <div className="croise-wrap" ref={tableWrapRef}>
                   <table className="croise-table">
                     <thead>

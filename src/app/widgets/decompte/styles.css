@@ -799,18 +799,11 @@ body {
 .recap-table tr.total-row td { font-weight: 800; background: #f5f5fe; color: #000091; }
 .recap-table tr:hover td { background: #f9f9ff; }
 
-.croise-scroll-top {
-  overflow-x: scroll;
-  overflow-y: hidden;
-  height: 14px;
-  border-radius: 8px 8px 0 0;
-}
-.croise-scroll-top > div { height: 1px; }
 .croise-wrap {
   background: #fff;
   border: 1px solid #ddd;
-  border-radius: 0 0 0.5rem 0.5rem;
-  overflow-x: scroll;
+  border-radius: 0.5rem;
+  overflow-x: auto;
   overflow-y: auto;
   box-shadow: 0 1px 3px rgba(0,0,0,.05);
 }
@@ -1273,14 +1266,26 @@ body {
   .scope-bar { margin-left: 0; }
 }
 
-/* ── Scrollbars toujours visibles (mode souris) ── */
-.croise-scroll-top,
-.croise-wrap { scrollbar-width: thin; scrollbar-color: #bbb #f0f0f0; }
-.croise-scroll-top::-webkit-scrollbar,
-.croise-wrap::-webkit-scrollbar { -webkit-appearance: none; height: 8px; width: 8px; }
-.croise-scroll-top::-webkit-scrollbar-track,
-.croise-wrap::-webkit-scrollbar-track { background: #f0f0f0; border-radius: 4px; }
-.croise-scroll-top::-webkit-scrollbar-thumb,
-.croise-wrap::-webkit-scrollbar-thumb { background: #bbb; border-radius: 4px; min-height: 40px; }
-.croise-scroll-top::-webkit-scrollbar-thumb:hover,
-.croise-wrap::-webkit-scrollbar-thumb:hover { background: #888; }
+/* ── Scrollbar personnalisée (toujours visible) ── */
+.hscrollbar-track {
+  position: relative;
+  height: 12px;
+  background: #e8e8e8;
+  border-radius: 6px;
+  cursor: pointer;
+  margin: 3px 0;
+  flex-shrink: 0;
+}
+.hscrollbar-track--hidden { visibility: hidden; }
+.hscrollbar-thumb {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  background: #aaa;
+  border-radius: 6px;
+  cursor: grab;
+  min-width: 40px;
+  transition: background 0.15s;
+}
+.hscrollbar-thumb:hover { background: #777; }
+.hscrollbar-thumb:active { cursor: grabbing; background: #555; }

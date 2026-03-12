@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useGristInit } from "@/lib/grist/hooks";
+import { exportCsv } from "@/lib/csv";
 
 // ═══════════════════════════════════════════════════════════
 // CONSTANTES
@@ -1496,6 +1497,39 @@ export default function EnregistrementPage() {
   const uniqueCreatedByNames   = [...new Set(allAnpcRows.map(r => r.createdByName).filter(v => v && v !== "—"))].sort();
 
   // ──────────────────────────────────────────
+  // Export CSV
+  // ──────────────────────────────────────────
+  function handleExportCsv() {
+    const headers = ["MAJCS", "Commune", "N° acte", "Nom du projet", "Arrondissement", "Stratégie", "Logements", "Acte", "Permis", "Enjeux", "Motifs", "Réglementation", "Réception préf.", "Visa mairie", "Saisi par", "Saisi le"];
+    const data = filteredRows.map(row => {
+      const motifList = fromGristList(row.motif);
+      const objetList = fromGristList(row.objet);
+      const sels = getRowSelections(row);
+      const commune = row.communeId ? communesByIdRef.current.get(row.communeId) : null;
+      return [
+        row.majcs,
+        row.communeName,
+        row.nActe,
+        row.nomProjet,
+        row.arr,
+        sels.join(", "),
+        row.logements,
+        row.type,
+        row.type2,
+        motifList.join(", "),
+        objetList.join(", "),
+        commune?.reglementation || "",
+        formatDate(row.receptionPref),
+        formatDate(row.visaMairie),
+        row.createdByName,
+        formatDateTime(row.createdAt),
+      ];
+    });
+    const period = getDashPeriodLabel(dashVue, dashMonth, dashYear).replace(/\s+/g, "_");
+    exportCsv(`enregistrement_${period}.csv`, headers, data);
+  }
+
+  // ──────────────────────────────────────────
   // Render
   // ──────────────────────────────────────────
   return (
@@ -2012,6 +2046,9 @@ export default function EnregistrementPage() {
                         .map(([type, count]) => <span key={type} className="tag tag--info">{type} : {count}</span>)
                       }
                       <span className="tag tag--light">Total : {filteredRows.length}</span>
+                      <button type="button" className="sub-tab" onClick={handleExportCsv} title="Exporter en CSV">
+                        <i className="fa-solid fa-download" /> CSV
+                      </button>
                     </div>
                   )}
                   <button type="button" id="btnToggleFilters" className={dashFiltersOpen ? "open" : ""}

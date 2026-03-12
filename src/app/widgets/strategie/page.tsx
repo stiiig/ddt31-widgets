@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useGristInit } from "@/lib/grist/hooks";
+import { exportCsv } from "@/lib/csv";
 import type { GristDocAPI } from "@/lib/grist/meta";
 
 /* ══════════════════════════════════════
@@ -319,6 +320,24 @@ export default function StrategiePage() {
   const label = periodLabel(vue, year, month);
   const rows  = sortedRows(filteredStatuts());
 
+  function handleExportCsv() {
+    const headers = ["Commune", "Arrondissement", "Sélection", "Début", "Fin", "Période", "Explications", "Saisi par"];
+    const data = rows.map(row => {
+      const commune = communes.get(row.communeId);
+      return [
+        commune?.nom || `#${row.communeId}`,
+        commune?.arr || "",
+        row.selection.join(", "),
+        formatDate(row.debut),
+        formatDate(row.fin),
+        rowPeriodeLabel(row),
+        row.explications,
+        row.createdByName,
+      ];
+    });
+    exportCsv(`strategie_${label.replace(/\s+/g, "_")}.csv`, headers, data);
+  }
+
   /* ── Render ── */
   return (
     <div className="app-shell">
@@ -376,6 +395,13 @@ export default function StrategiePage() {
                 <span className="strat-count">
                   <strong>{rows.length}</strong> commune{rows.length !== 1 ? "s" : ""}
                 </span>
+              )}
+
+              {/* Export CSV */}
+              {!loading && rows.length > 0 && (
+                <button type="button" className="vue-btn" onClick={handleExportCsv} title="Exporter en CSV">
+                  <i className="fa-solid fa-download" /> CSV
+                </button>
               )}
             </div>
 

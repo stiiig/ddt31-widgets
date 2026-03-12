@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useGristInit } from "@/lib/grist/hooks";
 import type { GristDocAPI } from "@/lib/grist/meta";
+import { exportCsv } from "@/lib/csv";
 
 /* ══════════════════════════════════════
    CONFIG
@@ -710,6 +711,28 @@ export default function DecomptePage() {
   /* ── Dashboard Tab ── */
   function DashboardTab() {
     const atCurrent = isDashAtCurrentPeriod();
+
+    function handleExportCsv() {
+      const allCommuneList = buildCommuneList();
+      const communeList = dashArr.size > 0
+        ? allCommuneList.filter(c => dashArr.has(communesById.get(c.id)?.arr ?? ""))
+        : allCommuneList;
+      const visibleTypes = DOC_TYPES.filter(dt => communeList.some(c => (c.counters[dt.key] || 0) > 0));
+      const headers = ["Commune", "Arrondissement", ...visibleTypes.map(dt => dt.code), "Total", "Saisi par"];
+      const data = communeList.map(c => {
+        const commune = communesById.get(c.id);
+        return [
+          c.nom,
+          commune?.arr || "",
+          ...visibleTypes.map(dt => c.counters[dt.key] || 0),
+          c.total,
+          c.createdByName || "",
+        ];
+      });
+      const period = dashPeriodLabel().replace(/\s+/g, "_");
+      exportCsv(`decompte_${period}.csv`, headers, data);
+    }
+
     return (
       <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
         {/* Toolbar */}
@@ -740,6 +763,9 @@ export default function DecomptePage() {
               <i className="fa-solid fa-earth-europe" />Toutes les communes
             </button>
           </div>
+          <button type="button" className="vue-btn" onClick={handleExportCsv} title="Exporter en CSV">
+            <i className="fa-solid fa-download" /> CSV
+          </button>
         </div>
         {dashScope === "commune" ? <DashCommune /> : <DashAll />}
       </div>

@@ -803,7 +803,8 @@ body {
   background: #fff;
   border: 1px solid #ddd;
   border-radius: 0 0 0.5rem 0.5rem;
-  overflow: auto;
+  overflow-x: scroll;
+  overflow-y: auto;
   box-shadow: 0 1px 3px rgba(0,0,0,.05);
 }
 .croise-table {

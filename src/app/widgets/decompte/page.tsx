@@ -1090,8 +1090,12 @@ export default function DecomptePage() {
             {communeList.map(c => {
               const statuts = vue === "annee" && c.statutsAnnee?.length ? c.statutsAnnee[0].sels : (c.statut || []);
               const isCiblee = statuts.some(s => s === "Ciblée");
+              const tagCls = statuts.some(s => s === "Ciblée") ? " croise-row--ciblee"
+                           : statuts.some(s => s === "Rotation") ? " croise-row--rotation"
+                           : statuts.some(s => s === "Fixe")     ? " croise-row--fixe"
+                           : "";
               return (
-                <tr key={c.id} className="croise-row-commune" style={{ cursor: "pointer" }} title={`Voir le détail de ${c.nom}`}
+                <tr key={c.id} className={`croise-row-commune${tagCls}`} style={{ cursor: "pointer" }} title={`Voir le détail de ${c.nom}`}
                   onClick={() => { const comm = communesById.get(c.id); if (comm) handleSelectCommune(comm); }}>
                   <td>{c.nom}</td>
                   <td className="col-arr">{communesById.get(c.id)?.arr || ""}</td>

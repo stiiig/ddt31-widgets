@@ -849,6 +849,29 @@ body {
 .croise-table tr.croise-row-commune:hover td { background: #eef0fb; }
 .croise-table tr.croise-row-commune:hover td:first-child { background: #e4e7f7; color: #000091; }
 
+/* Couleurs de ligne par sélection (Ciblée > Rotation > Fixe) */
+.croise-table tr.croise-row--fixe td     { background: #fefce8; }
+.croise-table tr.croise-row--rotation td { background: #fff7ed; }
+.croise-table tr.croise-row--ciblee td   { background: #fff1f1; }
+/* col-highlight */
+.croise-table tr.croise-row--fixe td.col-highlight     { background: #fef08a; }
+.croise-table tr.croise-row--rotation td.col-highlight { background: #fed7aa; }
+.croise-table tr.croise-row--ciblee td.col-highlight   { background: #fecaca; }
+/* col-total */
+.croise-table tr.croise-row--fixe td.col-total     { background: #fde047; color: #713f12; }
+.croise-table tr.croise-row--rotation td.col-total { background: #fb923c; color: #7c2d12; }
+.croise-table tr.croise-row--ciblee td.col-total   { background: #f87171; color: #7f1d1d; }
+/* hover */
+.croise-table tr.croise-row--fixe:hover td     { background: #fef08a; }
+.croise-table tr.croise-row--rotation:hover td { background: #fed7aa; }
+.croise-table tr.croise-row--ciblee:hover td   { background: #fecaca; }
+.croise-table tr.croise-row--fixe:hover td.col-highlight     { background: #fde047; }
+.croise-table tr.croise-row--rotation:hover td.col-highlight { background: #fdba74; }
+.croise-table tr.croise-row--ciblee:hover td.col-highlight   { background: #fca5a5; }
+.croise-table tr.croise-row--fixe:hover td.col-total     { background: #eab308; color: #713f12; }
+.croise-table tr.croise-row--rotation:hover td.col-total { background: #f97316; color: #7c2d12; }
+.croise-table tr.croise-row--ciblee:hover td.col-total   { background: #ef4444; color: #fff; }
+
 /* Colonne Sélection */
 .croise-table .col-sel {
   white-space: nowrap;

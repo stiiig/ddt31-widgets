@@ -729,7 +729,11 @@ export default function DecomptePage() {
       communeList.forEach(c => {
         const commune = communesById.get(c.id);
         const statuts = vue === "annee" && c.statutsAnnee?.length ? c.statutsAnnee[0].sels : (c.statut || []);
-        rows.push({ kind: "commune", values: [
+        const kind: XlsxRow["kind"] = statuts.includes("Ciblée")   ? "tag-ciblee"
+                                     : statuts.includes("Rotation") ? "tag-rotation"
+                                     : statuts.includes("Fixe")     ? "tag-fixe"
+                                     : "commune";
+        rows.push({ kind, values: [
           c.nom, commune?.arr || "", statuts.join(", "),
           ...visibleTypes.map(dt => c.counters[dt.key] || 0),
           c.total, c.createdByName || "",

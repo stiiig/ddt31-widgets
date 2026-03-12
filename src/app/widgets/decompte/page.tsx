@@ -856,14 +856,8 @@ export default function DecomptePage() {
               <i className="fa-solid fa-earth-europe" />Toutes les communes
             </button>
           </div>
-          <button type="button" className="vue-btn" onClick={handleExportCsv} title="Exporter en CSV">
-            <i className="fa-solid fa-download" /> CSV
-          </button>
-          <button type="button" className="vue-btn vue-btn--xlsx" onClick={handleExportXlsx} title="Exporter en Excel (couleurs)">
-            <i className="fa-solid fa-file-excel" /> XLSX
-          </button>
         </div>
-        {dashScope === "commune" ? <DashCommune /> : <DashAll />}
+        {dashScope === "commune" ? <DashCommune /> : <DashAll onExportCsv={handleExportCsv} onExportXlsx={handleExportXlsx} />}
       </div>
     );
   }
@@ -997,7 +991,7 @@ export default function DecomptePage() {
     return Array.from(byCommune.values()).sort((a, b) => dashSort === "alpha" ? a.nom.localeCompare(b.nom, "fr") : b.total - a.total);
   }
 
-  function DashAll() {
+  function DashAll({ onExportCsv, onExportXlsx }: { onExportCsv: () => void; onExportXlsx: () => void }) {
     const allCommuneList = buildCommuneList();
     const ARR_ORDER = ["Toulouse", "Muret", "Saint-Gaudens"];
     const availableArrs = new Set(communes.map(c => c.arr).filter(Boolean));
@@ -1006,14 +1000,22 @@ export default function DecomptePage() {
     if (allCommuneList.length === 0) return <div className="chart-empty">Aucune donnée pour cette période.</div>;
     return (
       <div style={{ background: "#fff", border: "1px solid #ddd", borderRadius: ".5rem", overflow: "hidden", boxShadow: "0 1px 3px rgba(0,0,0,.05)" }}>
-        {allArrs.length > 1 && (
-          <div className="arr-filter-bar">
+        <div className="arr-filter-bar">
+          {allArrs.length > 1 && (<>
             <button className={`arr-filter-btn${dashArr.size === 0 ? " active" : ""}`} type="button" onClick={() => setDashArr(new Set())}>Tous</button>
             {allArrs.map(arr => (
               <button key={arr} className={`arr-filter-btn${dashArr.has(arr) ? " active" : ""}`} type="button" onClick={() => setDashArr(prev => { const next = new Set(prev); if (next.has(arr)) { next.delete(arr); } else { next.add(arr); } return next; })}>{arr}</button>
             ))}
+          </>)}
+          <div style={{ marginLeft: "auto", display: "flex", gap: "0.35rem" }}>
+            <button type="button" className="vue-btn" onClick={onExportCsv} title="Exporter en CSV">
+              <i className="fa-solid fa-download" /> CSV
+            </button>
+            <button type="button" className="vue-btn vue-btn--xlsx" onClick={onExportXlsx} title="Exporter en Excel (couleurs)">
+              <i className="fa-solid fa-file-excel" /> XLSX
+            </button>
           </div>
-        )}
+        </div>
         <div className="sub-tabs">
           {([["croise","fa-table","Tableau"],["chart","fa-chart-bar","Graphique"]] as const).map(([key, icon, label]) => (
             <button key={key} className={`sub-tab${dashSubTab === key ? " active" : ""}`} type="button" onClick={() => setDashSubTab(key)}>

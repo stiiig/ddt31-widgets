@@ -1,3 +1,10 @@
+/* ── Scrollbars toujours visibles - règle globale macOS ── */
+::-webkit-scrollbar { -webkit-appearance: none; height: 8px; width: 8px; }
+::-webkit-scrollbar-track { background: #f0f0f0; }
+::-webkit-scrollbar-thumb { background: #bbb; border-radius: 4px; min-height: 40px; min-width: 40px; }
+::-webkit-scrollbar-thumb:hover { background: #888; }
+* { scrollbar-width: thin; scrollbar-color: #bbb #f0f0f0; }
+
 /* ── Reset & base ── */
 *, *::before, *::after { box-sizing: border-box; }
 body {

@@ -1501,56 +1501,32 @@ export default function EnregistrementPage() {
   // ──────────────────────────────────────────
   // Export CSV
   // ──────────────────────────────────────────
-  function handleExportCsv() {
-    const headers = ["MAJCS", "Commune", "N° acte", "Nom du projet", "Arrondissement", "Stratégie", "Logements", "Acte", "Permis", "Enjeux", "Motifs", "Réglementation", "Réception préf.", "Visa mairie", "Saisi par", "Saisi le"];
-    const data = filteredRows.map(row => {
-      const motifList = fromGristList(row.motif);
-      const objetList = fromGristList(row.objet);
-      const sels = getRowSelections(row);
-      const commune = row.communeId ? communesByIdRef.current.get(row.communeId) : null;
-      return [
-        row.majcs,
-        row.communeName,
-        row.nActe,
-        row.nomProjet,
-        row.arr,
-        sels.join(", "),
-        row.logements,
-        row.type,
-        row.type2,
-        motifList.join(", "),
-        objetList.join(", "),
-        commune?.reglementation || "",
-        formatDate(row.receptionPref),
-        formatDate(row.visaMairie),
-        row.createdByName,
-        formatDateTime(row.createdAt),
-      ];
-    });
-    const period = getDashPeriodLabel(dashVue, dashMonth, dashYear).replace(/\s+/g, "_");
-    exportCsv(`enregistrement_${period}.csv`, headers, data);
-  }
+  const EXPORT_COL_METAS: XlsxColMeta[] = [
+    { label: "MAJCS",           width: 8  },
+    { label: "Commune",         width: 22 },
+    { label: "N° acte",         width: 13 },
+    { label: "Nom du projet",   width: 30 },
+    { label: "Arrondissement",  width: 16 },
+    { label: "Stratégie",       width: 14 },
+    { label: "Logements",       width: 12 },
+    { label: "Acte",            width: 12 },
+    { label: "Permis",          width: 12 },
+    { label: "Enjeux",          width: 30 },
+    { label: "Motifs",          width: 30 },
+    { label: "Réglementation",  width: 20 },
+    { label: "Réception préf.", width: 16 },
+    { label: "Visa mairie",     width: 14 },
+    { label: "Saisi par",       width: 16 },
+    { label: "Saisi le",        width: 18 },
+  ];
 
-  function handleExportXlsx() {
-    const colMetas: XlsxColMeta[] = [
-      { label: "MAJCS",           width: 8  },
-      { label: "Commune",         width: 22 },
-      { label: "N° acte",         width: 13 },
-      { label: "Nom du projet",   width: 30 },
-      { label: "Arrondissement",  width: 16 },
-      { label: "Stratégie",       width: 14 },
-      { label: "Logements",       width: 12 },
-      { label: "Acte",            width: 12 },
-      { label: "Permis",          width: 12 },
-      { label: "Enjeux",          width: 30 },
-      { label: "Motifs",          width: 30 },
-      { label: "Réglementation",  width: 20 },
-      { label: "Réception préf.", width: 16 },
-      { label: "Visa mairie",     width: 14 },
-      { label: "Saisi par",       width: 16 },
-      { label: "Saisi le",        width: 18 },
-    ];
-    const xlsxRows: XlsxRow[] = filteredRows.map(row => {
+  function buildExportRows(): XlsxRow[] {
+    const N = EXPORT_COL_METAS.length;
+    const empty = Array(N).fill("") as string[];
+    const totalRow = (label: string, count: number, kind: XlsxRow["kind"]): XlsxRow =>
+      ({ kind, values: [label, count, ...Array(N - 2).fill("")] });
+
+    const rows: XlsxRow[] = filteredRows.map(row => {
       const motifList = fromGristList(row.motif);
       const objetList = fromGristList(row.objet);
       const sels = getRowSelections(row);
@@ -1560,26 +1536,69 @@ export default function EnregistrementPage() {
                                    : sels.includes("Fixe")     ? "tag-fixe"
                                    : "commune";
       return { kind, values: [
-        row.majcs,
-        row.communeName,
-        row.nActe,
-        row.nomProjet,
-        row.arr,
-        sels.join(", "),
-        row.logements,
-        row.type,
-        row.type2,
-        motifList.join(", "),
-        objetList.join(", "),
+        row.majcs, row.communeName, row.nActe, row.nomProjet, row.arr,
+        sels.join(", "), row.logements, row.type, row.type2,
+        motifList.join(", "), objetList.join(", "),
         commune?.reglementation || "",
-        formatDate(row.receptionPref),
-        formatDate(row.visaMairie),
-        row.createdByName,
-        formatDateTime(row.createdAt),
+        formatDate(row.receptionPref), formatDate(row.visaMairie),
+        row.createdByName, formatDateTime(row.createdAt),
       ]};
     });
+
+    // ── Séparateur
+    rows.push({ kind: "separator", values: empty });
+
+    // ── TOTAL général
+    rows.push(totalRow(`TOTAL`, filteredRows.length, "total"));
+
+    // ── Par type d'acte
+    const byType: Record<string, number> = {};
+    filteredRows.forEach(r => { if (r.type) byType[r.type] = (byType[r.type] || 0) + 1; });
+    const typeKeys = [...new Set(filteredRows.map(r => r.type).filter(Boolean))].sort() as string[];
+    if (typeKeys.length > 0) {
+      rows.push({ kind: "separator", values: empty });
+      typeKeys.forEach(t => rows.push(totalRow(`${t}`, byType[t], "commune")));
+    }
+
+    // ── Par stratégie
+    const SEL_ORDER_EXP = ["Fixe", "Rotation", "Ciblée"] as const;
+    const bySel: Record<string, number> = {};
+    filteredRows.forEach(r => {
+      const sels = getRowSelections(r);
+      if (sels.length === 0) { bySel["Sans sélection"] = (bySel["Sans sélection"] || 0) + 1; }
+      else sels.forEach(s => { bySel[s] = (bySel[s] || 0) + 1; });
+    });
+    const selKinds: Record<string, XlsxRow["kind"]> = { Fixe: "tag-fixe", Rotation: "tag-rotation", Ciblée: "tag-ciblee", "Sans sélection": "no-tag" };
+    const selKeys = [...SEL_ORDER_EXP.filter(s => bySel[s]), ...(bySel["Sans sélection"] ? ["Sans sélection"] : [])];
+    if (selKeys.length > 0) {
+      rows.push({ kind: "separator", values: empty });
+      selKeys.forEach(s => rows.push(totalRow(s, bySel[s], selKinds[s] ?? "commune")));
+    }
+
+    // ── Par arrondissement
+    const ARR_ORDER_EXP = ["Toulouse", "Muret", "Saint-Gaudens"];
+    const byArr: Record<string, number> = {};
+    filteredRows.forEach(r => { if (r.arr) byArr[r.arr] = (byArr[r.arr] || 0) + 1; });
+    const arrKeys = ARR_ORDER_EXP.filter(a => byArr[a]);
+    if (arrKeys.length > 0) {
+      rows.push({ kind: "separator", values: empty });
+      arrKeys.forEach(a => rows.push(totalRow(a, byArr[a], "commune")));
+    }
+
+    return rows;
+  }
+
+  function handleExportCsv() {
+    const headers = EXPORT_COL_METAS.map(m => m.label);
+    const rows = buildExportRows();
     const period = getDashPeriodLabel(dashVue, dashMonth, dashYear).replace(/\s+/g, "_");
-    exportXlsx(`enregistrement_${period}.xlsx`, colMetas, xlsxRows);
+    exportCsv(`enregistrement_${period}.csv`, headers, rows.map(r => r.values));
+  }
+
+  function handleExportXlsx() {
+    const rows = buildExportRows();
+    const period = getDashPeriodLabel(dashVue, dashMonth, dashYear).replace(/\s+/g, "_");
+    exportXlsx(`enregistrement_${period}.xlsx`, EXPORT_COL_METAS, rows);
   }
 
   // ──────────────────────────────────────────

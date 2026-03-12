@@ -1036,6 +1036,21 @@ export default function DecomptePage() {
   }
 
   function CroiseTable({ communeList }: { communeList: CommuneAgg[] }) {
+    const topScrollRef = useRef<HTMLDivElement>(null);
+    const tableWrapRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+      const top  = topScrollRef.current;
+      const wrap = tableWrapRef.current;
+      if (!top || !wrap) return;
+      const spacer = top.firstElementChild as HTMLDivElement;
+      if (spacer) spacer.style.width = wrap.scrollWidth + "px";
+      const onTop  = () => { wrap.scrollLeft = top.scrollLeft; };
+      const onWrap = () => { top.scrollLeft  = wrap.scrollLeft; };
+      top.addEventListener("scroll",  onTop,  { passive: true });
+      wrap.addEventListener("scroll", onWrap, { passive: true });
+      return () => { top.removeEventListener("scroll", onTop); wrap.removeEventListener("scroll", onWrap); };
+    }, [communeList]);
+
     // Colonnes visibles : au moins une commune avec une valeur > 0
     const visibleTypes = DOC_TYPES.filter(dt => communeList.some(c => (c.counters[dt.key] || 0) > 0));
 
@@ -1089,7 +1104,9 @@ export default function DecomptePage() {
     const totalPapierActes = communeList.reduce((s, c) => s + (c.papierCount || 0), 0);
 
     return (
-      <div className="croise-wrap">
+      <>
+      <div className="croise-scroll-top" ref={topScrollRef}><div /></div>
+      <div className="croise-wrap" ref={tableWrapRef}>
         <table className="croise-table">
           <thead><tr><th>Commune</th><th className="col-arr">Arr.</th><th className="col-sel">Sél.</th>{visibleTypes.map(dt => <th key={dt.key} className={`col-num${dt.highlight ? " col-highlight" : ""}`} title={dt.label}>{dt.code}</th>)}<th className="col-num col-total">Total</th><th>Saisi par</th></tr></thead>
           <tbody>
@@ -1167,6 +1184,7 @@ export default function DecomptePage() {
           </tbody>
         </table>
       </div>
+      </>
     );
   }
 

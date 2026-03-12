@@ -2099,10 +2099,10 @@ export default function EnregistrementPage() {
                         .map(([type, count]) => <span key={type} className="tag tag--info">{type} : {count}</span>)
                       }
                       <span className="tag tag--light">Total : {filteredRows.length}</span>
-                      <button type="button" className="sub-tab" onClick={handleExportCsv} title="Exporter en CSV">
+                      <button type="button" className="sub-tab sub-tab--sm" onClick={handleExportCsv} title="Exporter en CSV">
                         <i className="fa-solid fa-download" /> CSV
                       </button>
-                      <button type="button" className="sub-tab sub-tab--xlsx" onClick={handleExportXlsx} title="Exporter en Excel (couleurs)">
+                      <button type="button" className="sub-tab sub-tab--sm sub-tab--xlsx" onClick={handleExportXlsx} title="Exporter en Excel (couleurs)">
                         <i className="fa-solid fa-file-excel" /> XLSX
                       </button>
                     </div>

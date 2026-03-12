@@ -225,10 +225,17 @@ body {
 .statut-chip--nonciblee { background: #f5f5f5; border-color: #ddd; color: #555; }
 
 /* ── Stratégie table ── */
+.strat-scroll-top {
+  overflow-x: scroll;
+  overflow-y: hidden;
+  height: 14px;
+  border-radius: 8px 8px 0 0;
+}
+.strat-scroll-top > div { height: 1px; }
 .strat-table-wrap {
   background: #fff;
   border: 1px solid #ddd;
-  border-radius: 0.5rem;
+  border-radius: 0 0 0.5rem 0.5rem;
   overflow: auto;
   box-shadow: 0 1px 3px rgba(0,0,0,.05);
 }
@@ -400,3 +407,13 @@ body {
   .tag-filter-bar { margin-left: 0; }
   .app-header__title { display: none; }
 }
+
+/* ── Scrollbars toujours visibles (mode souris) ── */
+.strat-scroll-top::-webkit-scrollbar,
+.strat-table-wrap::-webkit-scrollbar { height: 8px; }
+.strat-scroll-top::-webkit-scrollbar-track,
+.strat-table-wrap::-webkit-scrollbar-track { background: #f0f0f0; border-radius: 4px; }
+.strat-scroll-top::-webkit-scrollbar-thumb,
+.strat-table-wrap::-webkit-scrollbar-thumb { background: #bbb; border-radius: 4px; }
+.strat-scroll-top::-webkit-scrollbar-thumb:hover,
+.strat-table-wrap::-webkit-scrollbar-thumb:hover { background: #888; }

@@ -1752,6 +1752,7 @@ input[type="date"].is-empty::-webkit-datetime-edit-year-field{
 }
 .sub-tab--xlsx { color: #217346; }
 .sub-tab--xlsx:hover { color: #145c30 !important; background: #e6f4ec !important; }
+.sub-tab--sm { padding: 0.3rem 0.75rem; font-size: 0.78rem; border-bottom-width: 2px; }
 
 .sub-tab.active {
   color: var(--text-action-high-blue-france);
@@ -2281,3 +2282,13 @@ input[type="date"].is-empty::-webkit-datetime-edit-year-field{
 
 
 
+
+/* ── Scrollbars toujours visibles (mode souris) ── */
+.croise-scroll-top::-webkit-scrollbar,
+.croise-wrap::-webkit-scrollbar { height: 8px; }
+.croise-scroll-top::-webkit-scrollbar-track,
+.croise-wrap::-webkit-scrollbar-track { background: #f0f0f0; border-radius: 4px; }
+.croise-scroll-top::-webkit-scrollbar-thumb,
+.croise-wrap::-webkit-scrollbar-thumb { background: #bbb; border-radius: 4px; }
+.croise-scroll-top::-webkit-scrollbar-thumb:hover,
+.croise-wrap::-webkit-scrollbar-thumb:hover { background: #888; }

@@ -141,6 +141,20 @@ export default function StrategiePage() {
 
   // ── Refs ──
   useEffect(() => { docApiRef.current = docApi; }, [docApi]);
+  const topScrollRef = useRef<HTMLDivElement>(null);
+  const tableWrapRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const top  = topScrollRef.current;
+    const wrap = tableWrapRef.current;
+    if (!top || !wrap) return;
+    const spacer = top.firstElementChild as HTMLDivElement;
+    if (spacer) spacer.style.width = wrap.scrollWidth + "px";
+    const onTop  = () => { wrap.scrollLeft = top.scrollLeft; };
+    const onWrap = () => { top.scrollLeft  = wrap.scrollLeft; };
+    top.addEventListener("scroll",  onTop,  { passive: true });
+    wrap.addEventListener("scroll", onWrap, { passive: true });
+    return () => { top.removeEventListener("scroll", onTop); wrap.removeEventListener("scroll", onWrap); };
+  }, [rows]);
 
   // ── Toast helpers ──
   let toastCounter = 0;
@@ -424,14 +438,7 @@ export default function StrategiePage() {
                 ))}
               </div>
 
-              {/* Compteur */}
-              {!loading && (
-                <span className="strat-count">
-                  <strong>{rows.length}</strong> commune{rows.length !== 1 ? "s" : ""}
-                </span>
-              )}
-
-              {/* Export */}
+              {/* Export + compteur */}
               {!loading && rows.length > 0 && (<>
                 <button type="button" className="vue-btn" onClick={handleExportCsv} title="Exporter en CSV">
                   <i className="fa-solid fa-download" /> CSV
@@ -439,6 +446,9 @@ export default function StrategiePage() {
                 <button type="button" className="vue-btn vue-btn--xlsx" onClick={handleExportXlsx} title="Exporter en Excel (couleurs)">
                   <i className="fa-solid fa-file-excel" /> XLSX
                 </button>
+                <span className="strat-count">
+                  <strong>{rows.length}</strong> commune{rows.length !== 1 ? "s" : ""}
+                </span>
               </>)}
             </div>
 
@@ -497,8 +507,9 @@ export default function StrategiePage() {
               <h2>Aucune donnée</h2>
               <p>Aucun statut de commune ne correspond aux filtres sélectionnés pour cette période.</p>
             </div>
-          ) : (
-            <div className="strat-table-wrap">
+          ) : (<>
+            <div className="strat-scroll-top" ref={topScrollRef}><div /></div>
+            <div className="strat-table-wrap" ref={tableWrapRef}>
               <table className="strat-table">
                 <thead>
                   <tr>
@@ -565,7 +576,7 @@ export default function StrategiePage() {
                 </tbody>
               </table>
             </div>
-          )}
+          </>)}
 
         </div>
       </div>

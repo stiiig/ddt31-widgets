@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useGristInit } from "@/lib/grist/hooks";
 import { exportCsv } from "@/lib/csv";
+import { useForceScrollbars } from "@/lib/use-scrollbars";
 import { exportXlsx } from "@/lib/xlsx";
 import type { XlsxRow, XlsxColMeta } from "@/lib/xlsx";
 import type { GristDocAPI } from "@/lib/grist/meta";
@@ -123,6 +124,7 @@ function periodLabel(vue: VueType, year: number, month: number): string {
    COMPOSANT PRINCIPAL
 ══════════════════════════════════════ */
 export default function StrategiePage() {
+  useForceScrollbars();
   const { docApi, gristUser } = useGristInit({ requiredAccess: "read table" });
   const docApiRef  = useRef<GristDocAPI | null>(null);
 

@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useGristInit } from "@/lib/grist/hooks";
 import type { GristDocAPI } from "@/lib/grist/meta";
 import { exportCsv } from "@/lib/csv";
+import { useForceScrollbars } from "@/lib/use-scrollbars";
 import { exportXlsx } from "@/lib/xlsx";
 import type { XlsxRow, XlsxColMeta } from "@/lib/xlsx";
 
@@ -126,6 +127,7 @@ function debounce<T extends (...args: never[]) => void>(fn: T, delay: number): T
    COMPOSANT PRINCIPAL
 ══════════════════════════════════════ */
 export default function DecomptePage() {
+  useForceScrollbars();
   const { docApi, gristUser } = useGristInit({ requiredAccess: "full" });
   const docApiRef = useRef<GristDocAPI | null>(null);
 

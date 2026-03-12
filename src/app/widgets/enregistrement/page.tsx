@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useGristInit } from "@/lib/grist/hooks";
 import { exportCsv } from "@/lib/csv";
+import { useForceScrollbars } from "@/lib/use-scrollbars";
 import { exportXlsx } from "@/lib/xlsx";
 import type { XlsxRow, XlsxColMeta } from "@/lib/xlsx";
 
@@ -531,6 +532,7 @@ function ToastContainer({ toasts, onClose }: ToastContainerProps) {
 let toastCounter = 0;
 
 export default function EnregistrementPage() {
+  useForceScrollbars();
   const { docApi, gristUser } = useGristInit({ requiredAccess: "full" });
 
   // — Mode & form —

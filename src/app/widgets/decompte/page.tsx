@@ -102,9 +102,9 @@ function formatTime(iso: string): string {
   if (!iso) return "";
   try {
     const d = new Date(iso);
-    const date = d.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
+    const date = d.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" });
     const time = d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
-    return `${date} ${time}`;
+    return `${date}\u00A0${time}`;
   } catch { return iso; }
 }
 function isSameDay(iso: string, ref: Date): boolean {

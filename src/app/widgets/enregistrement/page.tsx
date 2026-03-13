@@ -81,7 +81,7 @@ const ORIGINE_DEFAULT = "@CTES";
 
 const COM = {
   Nom: "Nom commune", INSEE: "Code INSEE", ARR: "Arrondissement",
-  LOG: "Logements", ENJEUX: "Enjeux", HORS_ZI: "Hors_ZI",
+  LOG: "Logements", ENJEUX: "Enjeux", PPR: "PPR", HORS_ZI: "Hors_ZI",
 };
 
 // ═══════════════════════════════════════════════════════════
@@ -96,6 +96,7 @@ interface Commune {
   logementsFmt: string;
   reglementation: string;
   enjeux: string[];
+  ppr: string;
   horsZI: boolean;
   nameNorm: string;
   inseeNorm: string;
@@ -683,6 +684,7 @@ export default function EnregistrementPage() {
     const colArr    = pickCol(r, [COM.ARR]);
     const colLog    = pickCol(r, [COM.LOG]);
     const colEnj    = pickCol(r, [COM.ENJEUX]);
+    const colPPR    = pickCol(r, [COM.PPR]);
     const colHorsZI = pickCol(r, [COM.HORS_ZI]);
     const colRegl   = pickCol(r, ["Reglementation", "Réglementation", "Reglementation_"]);
     if (!colNom || !colInsee || !colArr || !colLog) throw new Error("Colonnes Communes manquantes.");
@@ -700,9 +702,10 @@ export default function EnregistrementPage() {
       const logementsFmt = formatLogements((r[colLog] as unknown[])[i]);
       const reglementation = cleanStr(colRegl ? (r[colRegl] as unknown[])[i] : null);
       const enjeux       = colEnj ? fromGristList((r[colEnj] as unknown[])[i]) : [];
+      const ppr          = cleanStr(colPPR ? (r[colPPR] as unknown[])[i] : null);
       const horsZI       = colHorsZI ? Boolean((r[colHorsZI] as unknown[])[i]) : true;
       const c: Commune = {
-        id, nom, insee, arr, logementsFmt, reglementation, enjeux, horsZI,
+        id, nom, insee, arr, logementsFmt, reglementation, enjeux, ppr, horsZI,
         nameNorm: norm(nom), inseeNorm: (insee || "").toString().trim(),
         display: joinDots([nom, insee, arr, logementsFmt, reglementation]),
         metaSelected: joinDots([insee, arr, logementsFmt, reglementation]),
@@ -2329,6 +2332,9 @@ export default function EnregistrementPage() {
                           { field: "motif", label: "Enjeux" },
                           { field: "objet", label: "Motifs" },
                           { field: "reglementation", label: "Réglementation" },
+                          { field: "communeEnjeux", label: "Enjeux" },
+                          { field: "communePPR", label: "PPR" },
+                          { field: "communeZI", label: "ZI" },
                           { field: "receptionPref", label: "Réception préf." },
                           { field: "visaMairie", label: "Visa mairie" },
                           { field: "createdByName", label: "Saisi par", minWidth: "10rem" },
@@ -2387,6 +2393,14 @@ export default function EnregistrementPage() {
                             </td>
                             {/* reglementation */}
                             <td>{commune?.reglementation ? <span className="tag tag--reglementation">{commune.reglementation}</span> : "—"}</td>
+                            {/* communeEnjeux */}
+                            <td className="col-nowrap">
+                              {commune?.enjeux && commune.enjeux.length > 0 ? commune.enjeux.map(e => <span key={e} className="tag tag--info" style={{ marginRight: "0.25rem" }}>{e}</span>) : "—"}
+                            </td>
+                            {/* communePPR */}
+                            <td>{commune?.ppr ? <span className="tag tag--info">{commune.ppr}</span> : "—"}</td>
+                            {/* communeZI — Hors_ZI inversé : false → "ZI", true → "Hors ZI" */}
+                            <td>{commune ? <span className="tag tag--info">{commune.horsZI ? "Hors ZI" : "ZI"}</span> : "—"}</td>
                             {/* receptionPref */}
                             <td>{formatDate(row.receptionPref)}</td>
                             {/* visaMairie */}

@@ -14,7 +14,7 @@ jobs:
   auto-pr-merge:
     runs-on: ubuntu-latest
     steps:
-      - name: Create and merge PR
+      - name: Deploy branch tree to master
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -23,59 +23,42 @@ jobs:
             const owner = context.repo.owner;
             const repo = context.repo.repo;
 
-            // Check if PR already exists
-            const prs = await github.rest.pulls.list({
+            // Récupérer le SHA de master et le tree de la branche
+            const masterRef = await github.rest.git.getRef({ owner, repo, ref: 'heads/master' });
+            const masterSha = masterRef.data.object.sha;
+
+            const branchRef = await github.rest.git.getRef({ owner, repo, ref: `heads/${branch}` });
+            const branchSha = branchRef.data.object.sha;
+
+            // Si déjà à jour, skip
+            if (masterSha === branchSha) {
+              console.log('Branche déjà à jour avec master, rien à faire.');
+              return;
+            }
+
+            // Récupérer le tree de la branche
+            const branchCommit = await github.rest.git.getCommit({ owner, repo, commit_sha: branchSha });
+            const treeSha = branchCommit.data.tree.sha;
+
+            // Créer un commit sur master avec le tree de la branche
+            const newCommit = await github.rest.git.createCommit({
               owner, repo,
-              head: `${owner}:${branch}`,
-              base: 'master',
-              state: 'open'
+              message: `[Auto] ${branch}`,
+              tree: treeSha,
+              parents: [masterSha]
             });
+            console.log(`Commit créé : ${newCommit.data.sha}`);
 
-            let pr;
-            if (prs.data.length === 0) {
-              // Create PR
-              const created = await github.rest.pulls.create({
-                owner, repo,
-                title: `[Auto] ${branch}`,
-                head: branch,
-                base: 'master',
-                body: 'Merge automatique depuis une branche Claude.'
-              });
-              pr = created.data;
-              console.log(`PR créée : #${pr.number}`);
-            } else {
-              pr = prs.data[0];
-              console.log(`PR existante : #${pr.number}`);
-            }
+            // Avancer master vers ce commit
+            await github.rest.git.updateRef({
+              owner, repo,
+              ref: 'heads/master',
+              sha: newCommit.data.sha,
+              force: false
+            });
+            console.log(`master avancé à ${newCommit.data.sha}`);
 
-            // Attendre que GitHub calcule le statut de merge
-            let merged = false;
-            for (let attempt = 1; attempt <= 10; attempt++) {
-              await new Promise(r => setTimeout(r, 5000));
-              const prInfo = await github.rest.pulls.get({ owner, repo, pull_number: pr.number });
-              const state = prInfo.data.mergeable_state;
-              console.log(`Tentative ${attempt}/10 — mergeable_state: ${state}`);
-              if (prInfo.data.merged) { console.log('Déjà mergée.'); merged = true; break; }
-              if (state === 'clean' || state === 'unstable' || state === 'has_hooks') {
-                await github.rest.pulls.merge({ owner, repo, pull_number: pr.number, merge_method: 'squash' });
-                console.log(`PR #${pr.number} mergée.`);
-                merged = true;
-                break;
-              }
-              if (state === 'dirty') {
-                // Conflit dû au squash précédent — merger master dans la branche pour nettoyer
-                console.log('État dirty : merge de master dans la branche pour résoudre les conflits...');
-                try {
-                  await github.rest.repos.merge({ owner, repo, base: branch, head: 'master', commit_message: 'Sync master into branch' });
-                  console.log('Sync effectué, nouvelle tentative...');
-                } catch(e) {
-                  console.log(`Sync échoué: ${e.message}`);
-                }
-              }
-            }
-            if (!merged) throw new Error('Merge échoué après 10 tentatives');
-
-            // Déclencher manuellement le deploy (GITHUB_TOKEN ne trigger pas les workflows automatiquement)
+            // Déclencher le deploy (GITHUB_TOKEN ne trigger pas les workflows automatiquement)
             await new Promise(r => setTimeout(r, 2000));
             await github.rest.actions.createWorkflowDispatch({
               owner, repo,

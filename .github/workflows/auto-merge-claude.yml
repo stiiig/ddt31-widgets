@@ -48,20 +48,32 @@ jobs:
               console.log(`PR existante : #${pr.number}`);
             }
 
-            // Retry merge jusqu'à ce que la PR soit mergeable (GitHub a besoin de temps pour calculer)
+            // Attendre que GitHub calcule le statut de merge
+            let merged = false;
             for (let attempt = 1; attempt <= 10; attempt++) {
               await new Promise(r => setTimeout(r, 5000));
               const prInfo = await github.rest.pulls.get({ owner, repo, pull_number: pr.number });
               const state = prInfo.data.mergeable_state;
               console.log(`Tentative ${attempt}/10 — mergeable_state: ${state}`);
-              if (prInfo.data.merged) { console.log('Déjà mergée.'); break; }
+              if (prInfo.data.merged) { console.log('Déjà mergée.'); merged = true; break; }
               if (state === 'clean' || state === 'unstable' || state === 'has_hooks') {
                 await github.rest.pulls.merge({ owner, repo, pull_number: pr.number, merge_method: 'squash' });
                 console.log(`PR #${pr.number} mergée.`);
+                merged = true;
                 break;
               }
-              if (attempt === 10) throw new Error(`PR non mergeable après 10 tentatives (état: ${state})`);
+              if (state === 'dirty') {
+                // Conflit dû au squash précédent — merger master dans la branche pour nettoyer
+                console.log('État dirty : merge de master dans la branche pour résoudre les conflits...');
+                try {
+                  await github.rest.repos.merge({ owner, repo, base: branch, head: 'master', commit_message: 'Sync master into branch' });
+                  console.log('Sync effectué, nouvelle tentative...');
+                } catch(e) {
+                  console.log(`Sync échoué: ${e.message}`);
+                }
+              }
             }
+            if (!merged) throw new Error('Merge échoué après 10 tentatives');
 
             // Déclencher manuellement le deploy (GITHUB_TOKEN ne trigger pas les workflows automatiquement)
             await new Promise(r => setTimeout(r, 2000));

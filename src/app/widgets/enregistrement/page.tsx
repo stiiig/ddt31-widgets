@@ -1508,8 +1508,8 @@ export default function EnregistrementPage() {
     { label: "Logements",       width: 12 },
     { label: "Acte",            width: 12 },
     { label: "Permis",          width: 12 },
-    { label: "Enjeux",          width: 30 },
-    { label: "Motifs",          width: 30 },
+    { label: "Enjeux pré-identifiés", width: 30 },
+    { label: "Motifs de contrôle",   width: 30 },
     { label: "Réglementation",  width: 20 },
     { label: "Réception préf.", width: 16 },
     { label: "Visa mairie",     width: 14 },
@@ -2234,7 +2234,7 @@ export default function EnregistrementPage() {
                     {/* 6. Enjeux */}
                     {uniqueMotifs.length > 0 && (
                       <div className="filters-group">
-                        <span className="filter-label">Enjeux :</span>
+                        <span className="filter-label">Enjeux pré-identifiés :</span>
                         <div className="filter-buttons">
                           {uniqueMotifs.map(m => (
                             <button key={m} type="button"
@@ -2252,7 +2252,7 @@ export default function EnregistrementPage() {
                     {/* 7. Motifs */}
                     {uniqueObjets.length > 0 && (
                       <div className="filters-group">
-                        <span className="filter-label">Motifs :</span>
+                        <span className="filter-label">Motifs de contrôle :</span>
                         <div className="filter-buttons">
                           {uniqueObjets.map(o => (
                             <button key={o} type="button"
@@ -2336,8 +2336,8 @@ export default function EnregistrementPage() {
                           { field: "logements", label: "Logements", num: true },
                           { field: "type", label: "Acte" },
                           { field: "type2", label: "Permis" },
-                          { field: "motif", label: "Enjeux" },
-                          { field: "objet", label: "Motifs" },
+                          { field: "motif", label: "Enjeux pré-identifiés" },
+                          { field: "objet", label: "Motifs de contrôle" },
                           { field: "reglementation", label: "Réglementation" },
                           { field: "receptionPref", label: "Réception préf." },
                           { field: "visaMairie", label: "Visa mairie" },

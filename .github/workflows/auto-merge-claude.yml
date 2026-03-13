@@ -8,6 +8,7 @@ on:
 permissions:
   contents: write
   pull-requests: write
+  actions: write
 
 jobs:
   auto-pr-merge:
@@ -57,3 +58,12 @@ jobs:
             });
 
             console.log(`PR #${pr.number} mergée.`);
+
+            // Déclencher manuellement le deploy (GITHUB_TOKEN ne trigger pas les workflows automatiquement)
+            await new Promise(r => setTimeout(r, 2000));
+            await github.rest.actions.createWorkflowDispatch({
+              owner, repo,
+              workflow_id: 'deploy.yml',
+              ref: 'master'
+            });
+            console.log('Deploy déclenché.');

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, Fragment } from "react";
 import { useGristInit } from "@/lib/grist/hooks";
 import type { GristDocAPI } from "@/lib/grist/meta";
 import { exportCsv } from "@/lib/csv";
@@ -1306,7 +1306,7 @@ export default function DecomptePage() {
             const showSeparator = !separatorInserted && !isToday && idx > 0;
             if (showSeparator) separatorInserted = true;
             return (
-              <React.Fragment key={idx}>
+              <Fragment key={idx}>
                 {showSeparator && <div className="log-separator">Jours précédents</div>}
               <div className="log-item">
                 <div className={`log-item__icon ${iconCls}`}>{sign}{Math.abs(log.delta)}</div>
@@ -1319,7 +1319,7 @@ export default function DecomptePage() {
                   <i className="fa-solid fa-rotate-left" /> Annuler
                 </button>
               </div>
-              </React.Fragment>
+              </Fragment>
             );
           });
           })()}

@@ -1,0 +1,59 @@
+name: Auto-merge Claude branches
+
+on:
+  push:
+    branches:
+      - "claude/**"
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-pr-merge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create and merge PR
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const branch = context.ref.replace('refs/heads/', '');
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+
+            // Check if PR already exists
+            const prs = await github.rest.pulls.list({
+              owner, repo,
+              head: `${owner}:${branch}`,
+              base: 'master',
+              state: 'open'
+            });
+
+            let pr;
+            if (prs.data.length === 0) {
+              // Create PR
+              const created = await github.rest.pulls.create({
+                owner, repo,
+                title: `[Auto] ${branch}`,
+                head: branch,
+                base: 'master',
+                body: 'Merge automatique depuis une branche Claude.'
+              });
+              pr = created.data;
+              console.log(`PR créée : #${pr.number}`);
+            } else {
+              pr = prs.data[0];
+              console.log(`PR existante : #${pr.number}`);
+            }
+
+            // Wait a moment then merge
+            await new Promise(r => setTimeout(r, 3000));
+
+            await github.rest.pulls.merge({
+              owner, repo,
+              pull_number: pr.number,
+              merge_method: 'squash'
+            });
+
+            console.log(`PR #${pr.number} mergée.`);

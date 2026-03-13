@@ -68,6 +68,10 @@ const MOTIF_TO_COL: Record<string, string> = { "Site classé": "Classe" };
 // (nom de la propriété dans l'interface Commune, pas le nom de colonne Grist)
 const COMMUNE_ENJEUX_MAP: Record<string, string> = { STEP: "STEP", RT: "RT", PEB: "PEB", LLS: "LLS" };
 
+// Items de la section "Enjeux liés à la commune" — ne sont PAS enregistrés dans
+// Enjeux_pre_identifies quand juste cochés ; uniquement dans Motifs_controle quand "Oui"
+const COMMUNE_ENJEUX_ITEMS = ["ZI", "RT", "STEP", "PEB", "LLS"] as const;
+
 const TYPE_LABELS: Record<string, string> = {
   PC: "Permis de construire", PA: "Permis d'aménager",
   PD: "Permis de démolir",   DP: "Déclaration préalable",
@@ -880,6 +884,20 @@ export default function EnregistrementPage() {
 
       const motifsSel = fromGristList(record[COLS.Enjeux]);
       const objetsSel = fromGristList(record[COLS.MotifsControle]);
+
+      // Restaure les enjeux commune (ZI/RT/STEP/PEB/LLS) depuis leurs colonnes Enjeu_ individuelles
+      // (ils ne sont plus enregistrés dans COLS.Enjeux depuis la modification de l'enregistrement)
+      const communeMotifItems = ["ZI", "RT", "STEP", "PEB"] as string[];
+      const communeObjetItems = ["LLS"] as string[];
+      for (const item of communeMotifItems) {
+        const v = record[enjeuColForItem(item)];
+        if ((v === "Oui" || v === "Non") && !motifsSel.includes(item)) motifsSel.push(item);
+      }
+      for (const item of communeObjetItems) {
+        const v = record[enjeuColForItem(item)];
+        if ((v === "Oui" || v === "Non") && !objetsSel.includes(item)) objetsSel.push(item);
+      }
+
       setSelectedMotifs(motifsSel);
       setSelectedObjets(objetsSel);
 
@@ -1136,12 +1154,15 @@ export default function EnregistrementPage() {
       [COLS.VisaMairie]: formVisaMairie || null,
       [COLS.ReceptionPref]: formReceptionPref || null,
       [COLS.Origine]: formOrigine || null,
-      // Tous les items cochés → Enjeux_pre_identifies
-      [COLS.Enjeux]: toGristList([...selectedMotifs, ...selectedObjets]),
-      // INDOLORES cochés + ZN/ZA quand Oui → Motifs_controle
+      // Items projet uniquement (STEP/RT/ZI/PEB/LLS exclus) → Enjeux_pre_identifies
+      [COLS.Enjeux]: toGristList([...selectedMotifs, ...selectedObjets].filter(
+        item => !(COMMUNE_ENJEUX_ITEMS as readonly string[]).includes(item)
+      )),
+      // INDOLORES cochés + ZN/ZA quand Oui + STEP/RT/ZI/PEB/LLS quand Oui → Motifs_controle
       [COLS.MotifsControle]: toGristList([
         ...[...selectedMotifs, ...selectedObjets].filter(item => INDOLORES.has(item)),
         ...["ZN", "ZA"].filter(item => enjeuValues[item] === "Oui"),
+        ...(COMMUNE_ENJEUX_ITEMS as readonly string[]).filter(item => enjeuValues[item] === "Oui"),
       ]),
       ...enjeuCols,
       [COLS.EnjeuOld]: selectedMotifs.length === 1 ? (enjeuValues[selectedMotifs[0]] ?? null) : null,
@@ -1435,9 +1456,10 @@ export default function EnregistrementPage() {
     ? getStatutSelection(statutsByKeyRef.current, selectedCommune.id, currentTrimestre, formReceptionPref)
     : [];
   const visibleSelBadges = currentSelections.filter(s => SHOW_SELECTIONS.has(s));
-  // padding-right dynamique : 2.5rem (bouton ×) + N × 5.5rem par badge sélection
-  const communeInputPaddingRight = visibleSelBadges.length > 0
-    ? `${2.5 + visibleSelBadges.length * 5.5}rem`
+  const hasCommunale = !!(selectedCommune?.reglementation?.toLowerCase().includes("carte communale"));
+  // padding-right dynamique : 2.5rem (bouton ×) + N × 5.5rem par badge sélection + 9.5rem si Carte communale
+  const communeInputPaddingRight = (visibleSelBadges.length > 0 || hasCommunale)
+    ? `${2.5 + visibleSelBadges.length * 5.5 + (hasCommunale ? 9.5 : 0)}rem`
     : undefined;
 
   const communeConcernee = currentSelections.some(s => SHOW_SELECTIONS.has(s)) ||
@@ -1499,22 +1521,25 @@ export default function EnregistrementPage() {
   // Export CSV
   // ──────────────────────────────────────────
   const EXPORT_COL_METAS: XlsxColMeta[] = [
-    { label: "MAJCS",           width: 8  },
-    { label: "Commune",         width: 22 },
-    { label: "N° acte",         width: 13 },
-    { label: "Nom du projet",   width: 30 },
-    { label: "Arrondissement",  width: 16 },
-    { label: "Stratégie",       width: 14 },
-    { label: "Logements",       width: 12 },
-    { label: "Acte",            width: 12 },
-    { label: "Permis",          width: 12 },
-    { label: "Enjeux pré-identifiés", width: 30 },
-    { label: "Motifs de contrôle",   width: 30 },
-    { label: "Réglementation",  width: 20 },
-    { label: "Réception préf.", width: 16 },
-    { label: "Visa mairie",     width: 14 },
-    { label: "Saisi par",       width: 16 },
-    { label: "Saisi le",        width: 18 },
+    { label: "MAJCS",                         width: 8  },
+    { label: "Commune",                       width: 22 },
+    { label: "N° acte",                       width: 13 },
+    { label: "Nom du projet",                 width: 30 },
+    { label: "Arrondissement",                width: 16 },
+    { label: "Stratégie",                     width: 14 },
+    { label: "Réglementation",                width: 20 },
+    { label: "Logements",                     width: 12 },
+    { label: "Acte",                          width: 12 },
+    { label: "Permis",                        width: 12 },
+    { label: "ZI",                            width: 6  },
+    { label: "PPR",                           width: 6  },
+    { label: "Enjeux pré-identifiés commune", width: 30 },
+    { label: "Enjeux pré-identifiés projet",  width: 30 },
+    { label: "Motifs de contrôle",            width: 30 },
+    { label: "Réception préf.",               width: 16 },
+    { label: "Visa mairie",                   width: 14 },
+    { label: "Saisi par",                     width: 16 },
+    { label: "Saisi le",                      width: 18 },
   ];
 
   function buildExportRows(): XlsxRow[] {
@@ -1532,11 +1557,14 @@ export default function EnregistrementPage() {
                                    : sels.includes("Rotation") ? "tag-rotation"
                                    : sels.includes("Fixe")     ? "tag-fixe"
                                    : "commune";
+      const communeEnjeux = commune?.enjeux.join(", ") || "";
+      const ziVal = commune && !commune.horsZI ? "ZI" : "";
+      const pprVal = commune?.enjeux.includes("PPR") ? "PPR" : "";
       return { kind, values: [
         row.majcs, row.communeName, row.nActe, row.nomProjet, row.arr,
-        sels.join(", "), row.logements, row.type, row.type2,
+        sels.join(", "), commune?.reglementation || "", row.logements, row.type, row.type2,
+        ziVal, pprVal, communeEnjeux,
         motifList.join(", "), objetList.join(", "),
-        commune?.reglementation || "",
         formatDate(row.receptionPref), formatDate(row.visaMairie),
         row.createdByName, formatDateTime(row.createdAt),
       ]};
@@ -1820,9 +1848,12 @@ export default function EnregistrementPage() {
                             onBlur={() => setTimeout(() => setCommuneDdOpen(false), 150)}
                             aria-invalid={errors.commune ? "true" : undefined}
                           />
-                          {/* Sélection badges */}
-                          {selectedCommune && currentSelections.length > 0 && (
+                          {/* Sélection badges + Carte communale */}
+                          {selectedCommune && (hasCommunale || currentSelections.length > 0) && (
                             <span className="commune-input-badges" style={{ display: "flex", position: "absolute", right: "2.5rem", top: "50%", transform: "translateY(-50%)", pointerEvents: "none", gap: "0.25rem" }}>
+                              {hasCommunale && (
+                                <span className="commune-arr-badge commune-arr-badge--sel commune-arr-badge--communale is-visible">Carte communale</span>
+                              )}
                               {currentSelections.filter(s => SHOW_SELECTIONS.has(s)).map(s => (
                                 <span key={s} className={`commune-arr-badge commune-arr-badge--sel is-visible sel-${s.toLowerCase().replace("é", "e")}`}>{s}</span>
                               ))}
@@ -1838,20 +1869,27 @@ export default function EnregistrementPage() {
                           {/* Dropdown */}
                           {communeDdOpen && communeDdItems.length > 0 && (
                             <div className="dd-panel" role="listbox" style={{ display: "block" }}>
-                              {communeDdItems.map(c => (
-                                <button key={c.id} type="button" className="dd-item"
-                                  onMouseDown={() => handleSelectCommune(c)}>
-                                  {c.arr && <span className="type-dd__item-badge dd-arr-badge">{c.arr}</span>}
-                                  <div className="dd-item-body">
-                                    <span className="dd-title">{c.nom}</span>
-                                    {c.reglementation && (
-                                      <span className="dd-sub-info"> • {c.reglementation}</span>
-                                    )}
-                                  </div>
-                                  {c.logementsFmt && <span className="dd-item-logements">{c.logementsFmt}</span>}
-                                  {selectedCommune?.id === c.id && <span className="dd-item-check">✓</span>}
-                                </button>
-                              ))}
+                              {communeDdItems.map(c => {
+                                const ddSels = getStatutSelection(statutsByKeyRef.current, c.id, currentTrimestre, formReceptionPref)
+                                  .filter(s => SHOW_SELECTIONS.has(s));
+                                return (
+                                  <button key={c.id} type="button" className="dd-item"
+                                    onMouseDown={() => handleSelectCommune(c)}>
+                                    {c.arr && <span className="type-dd__item-badge dd-arr-badge">{c.arr}</span>}
+                                    <div className="dd-item-body">
+                                      <span className="dd-title">{c.nom}</span>
+                                      {(c.reglementation || ddSels.length > 0) && (
+                                        <span className="dd-sub-info">
+                                          {c.reglementation && ` • ${c.reglementation}`}
+                                          {ddSels.map(s => ` · ${s}`).join("")}
+                                        </span>
+                                      )}
+                                    </div>
+                                    {c.logementsFmt && <span className="dd-item-logements">{c.logementsFmt}</span>}
+                                    {selectedCommune?.id === c.id && <span className="dd-item-check">✓</span>}
+                                  </button>
+                                );
+                              })}
                             </div>
                           )}
                         </div>
@@ -1870,7 +1908,7 @@ export default function EnregistrementPage() {
                 <div className="controle-subsection">
                   <h3 className="controle-subsection__title">
                     <i className="fa-solid fa-map-marked-alt controle-subsection__icon" />
-                    Enjeux liés à la commune
+                    Enjeux pré-identifiés à la commune
                     <span className="section-title-tags">
                       {selectedCommune && (
                         <span className={`strat-tag ${communeConcernee ? "strat-tag--oui" : "strat-tag--non"}`}>
@@ -1913,7 +1951,7 @@ export default function EnregistrementPage() {
                 <div className="controle-subsection">
                   <h3 className="controle-subsection__title">
                     <i className="fa-solid fa-file-signature controle-subsection__icon" />
-                    Enjeux liés au projet
+                    Enjeux pré-identifiés liés au projet
                     <span className="section-title-tags">
                       {selectedCommune && (
                         <span className={`strat-tag ${projetConcerne ? "strat-tag--oui" : "strat-tag--non"}`}>
@@ -2333,12 +2371,15 @@ export default function EnregistrementPage() {
                           { field: "nomProjet", label: "Nom du projet", minWidth: "20rem" },
                           { field: "arr", label: "Arrondissement" },
                           { field: "selection", label: "Stratégie" },
+                          { field: "reglementation", label: "Réglementation" },
                           { field: "logements", label: "Logements", num: true },
                           { field: "type", label: "Acte" },
                           { field: "type2", label: "Permis" },
-                          { field: "motif", label: "Enjeux pré-identifiés" },
+                          { field: "zi", label: "ZI" },
+                          { field: "ppr", label: "PPR" },
+                          { field: "enjeux_commune", label: "Enjeux pré-identifiés commune" },
+                          { field: "motif", label: "Enjeux pré-identifiés projet" },
                           { field: "objet", label: "Motifs de contrôle" },
-                          { field: "reglementation", label: "Réglementation" },
                           { field: "receptionPref", label: "Réception préf." },
                           { field: "visaMairie", label: "Visa mairie" },
                           { field: "createdByName", label: "Saisi par", minWidth: "10rem" },
@@ -2381,13 +2422,25 @@ export default function EnregistrementPage() {
                                 return <span key={s} className={`commune-arr-badge commune-arr-badge--sel ${cls}`} style={{ marginRight: "0.25rem" }}>{s}</span>;
                               }) : "—"}
                             </td>
+                            {/* reglementation → après Stratégie */}
+                            <td>{commune?.reglementation ? <span className="tag tag--reglementation">{commune.reglementation}</span> : "—"}</td>
                             {/* logements → Logements */}
                             <td className="col-num">{row.logements ? <span className="tag tag--light">{row.logements}</span> : "—"}</td>
                             {/* type → Acte ($Type) */}
                             <td>{row.type ? <span className="tag tag--info">{row.type}</span> : "—"}</td>
                             {/* type2 → Permis ($Type2) */}
                             <td>{row.type2 ? <span className="tag tag--info">{row.type2}</span> : "—"}</td>
-                            {/* motif → Enjeux ($Enjeux_pre_identifies) */}
+                            {/* ZI → après Permis */}
+                            <td>{commune && !commune.horsZI ? <span className="tag tag--info">ZI</span> : "—"}</td>
+                            {/* PPR → après ZI */}
+                            <td>{commune?.enjeux.includes("PPR") ? <span className="tag tag--info">PPR</span> : "—"}</td>
+                            {/* enjeux commune → depuis Communes.enjeux */}
+                            <td className="col-nowrap">
+                              {commune?.enjeux && commune.enjeux.length > 0
+                                ? commune.enjeux.map(e => <span key={e} className="tag tag--info" style={{ marginRight: "0.25rem" }}>{e}</span>)
+                                : "—"}
+                            </td>
+                            {/* motif → Enjeux pré-identifiés projet ($Enjeux_pre_identifies) */}
                             <td className="col-nowrap">
                               {motifList.length > 0 ? motifList.map(m => <span key={m} className="tag tag--info" style={{ marginRight: "0.25rem" }}>{m}</span>) : "—"}
                             </td>
@@ -2395,8 +2448,6 @@ export default function EnregistrementPage() {
                             <td className="col-nowrap">
                               {objetList.length > 0 ? objetList.map(o => <span key={o} className="tag tag--info" style={{ marginRight: "0.25rem" }}>{o}</span>) : "—"}
                             </td>
-                            {/* reglementation */}
-                            <td>{commune?.reglementation ? <span className="tag tag--reglementation">{commune.reglementation}</span> : "—"}</td>
                             {/* receptionPref */}
                             <td>{formatDate(row.receptionPref)}</td>
                             {/* visaMairie */}

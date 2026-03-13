@@ -1176,7 +1176,7 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.log-item__meta { font-size: 0.7rem; color: #888; margin-top: 0.1rem; white-space: nowrap; }
+.log-item__meta { font-size: 0.7rem; color: #888; margin-top: 0.1rem; }
 .log-item__user { font-size: 0.7rem; color: #aaa; margin-top: 0.05rem; font-style: italic; }
 .log-item__rollback {
   background: none;

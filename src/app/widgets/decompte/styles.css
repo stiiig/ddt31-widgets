@@ -1196,6 +1196,18 @@ body {
 .log-item__rollback:hover { background: #fee2e2; border-color: #fca5a5; color: #b91c1c; }
 .log-item__rollback:disabled { opacity: 0.35; cursor: not-allowed; }
 
+/* ── Log separator ── */
+.log-separator {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #aaa;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.5rem 0.75rem 0.25rem;
+  border-top: 1px solid #e5e7eb;
+  margin-top: 0.25rem;
+}
+
 /* ── Toast ── */
 .toast-container {
   position: fixed;

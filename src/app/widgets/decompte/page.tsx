@@ -100,7 +100,19 @@ function moisLabel(m: number, a: number): string { return `${MONTHS_FR[(m || 1) 
 function isoNow(): string { return new Date().toISOString(); }
 function formatTime(iso: string): string {
   if (!iso) return "";
-  try { return new Date(iso).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", second: "2-digit" }); } catch { return iso; }
+  try {
+    const d = new Date(iso);
+    const date = d.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" });
+    const time = d.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    return `${date} ${time}`;
+  } catch { return iso; }
+}
+function isSameDay(iso: string, ref: Date): boolean {
+  if (!iso) return false;
+  try {
+    const d = new Date(iso);
+    return d.getFullYear() === ref.getFullYear() && d.getMonth() === ref.getMonth() && d.getDate() === ref.getDate();
+  } catch { return false; }
 }
 function trimestreLabel(tr: string): string {
   const m = tr.match(/^(\d{4})-T(\d)$/);
@@ -1282,13 +1294,21 @@ export default function DecomptePage() {
         <div className="sidebar__body">
           {logs.length === 0 ? (
             <div className="sidebar__empty">Aucune opération pour le moment.</div>
-          ) : logs.map((log, idx) => {
+          ) : (() => {
+            const today = new Date();
+            let separatorInserted = false;
+            return logs.map((log, idx) => {
             const dt = DOC_TYPES.find(d => d.key === log.type);
             const label = dt ? dt.code : log.type;
             const sign = log.delta > 0 ? "+" : "-";
             const iconCls = log.delta > 0 ? "log-item__icon--plus" : "log-item__icon--minus";
+            const isToday = isSameDay(log.timestamp, today);
+            const showSeparator = !separatorInserted && !isToday && idx > 0;
+            if (showSeparator) separatorInserted = true;
             return (
-              <div key={idx} className="log-item">
+              <React.Fragment key={idx}>
+                {showSeparator && <div className="log-separator">Jours précédents</div>}
+              <div className="log-item">
                 <div className={`log-item__icon ${iconCls}`}>{sign}{Math.abs(log.delta)}</div>
                 <div className="log-item__body">
                   <div className="log-item__desc">{label}{log.communeNom && <> — <span style={{ fontWeight: 400, color: "#666" }}>{log.communeNom}</span></>}</div>
@@ -1299,8 +1319,10 @@ export default function DecomptePage() {
                   <i className="fa-solid fa-rotate-left" /> Annuler
                 </button>
               </div>
+              </React.Fragment>
             );
-          })}
+          });
+          })()}
         </div>
       </aside>
 

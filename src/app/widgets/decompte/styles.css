@@ -1176,7 +1176,7 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.log-item__meta { font-size: 0.7rem; color: #888; margin-top: 0.1rem; }
+.log-item__meta { font-size: 0.7rem; color: #888; margin-top: 0.1rem; white-space: nowrap; }
 .log-item__user { font-size: 0.7rem; color: #aaa; margin-top: 0.05rem; font-style: italic; }
 .log-item__rollback {
   background: none;
@@ -1196,16 +1196,19 @@ body {
 .log-item__rollback:hover { background: #fee2e2; border-color: #fca5a5; color: #b91c1c; }
 .log-item__rollback:disabled { opacity: 0.35; cursor: not-allowed; }
 
+/* Supprime la bordure du log-item juste avant le séparateur */
+.log-item:has(+ .log-separator) { border-bottom: none; }
+
 /* ── Log separator ── */
 .log-separator {
   font-size: 0.68rem;
-  font-weight: 600;
-  color: #aaa;
+  font-weight: 700;
+  color: #fff;
+  background: #2563eb;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding: 0.5rem 0.75rem 0.25rem;
-  border-top: 1px solid #e5e7eb;
-  margin-top: 0.25rem;
+  letter-spacing: 0.08em;
+  padding: 0.35rem 1.25rem;
+  margin-top: 0;
 }
 
 /* ── Toast ── */

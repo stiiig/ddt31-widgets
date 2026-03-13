@@ -52,8 +52,9 @@ const COLS = {
 const ALL_MOTIFS = ["ZI", "ZA", "ZN", "RT", "STEP", "PEB", "Site classé"] as const;
 const ALL_OBJETS = ["LLS", "ERP 1/2/3", "ERP 4/5", "EE", "Signalé", "Aléatoire", "Taille"] as const;
 
-// Objets dont l'enjeu est "Oui" par défaut (pas de question Oui/Non à poser)
-const INDOLORES = new Set(["ERP 4/5", "Taille"]);
+// Objets/motifs dont l'enjeu est "Oui" par défaut (pas de question Oui/Non à poser)
+// → enregistrés directement dans $Motifs_controle quand cochés
+const INDOLORES = new Set(["EE", "Site classé", "ERP 1/2/3", "ERP 4/5", "Signalé", "Aléatoire", "Taille"]);
 // Stratégies de sélection trimestrielle qui déclenchent un contrôle
 const CONTROLLED_SELECTIONS: string[] = ["Fixe", "Ciblée", "Rotation"];
 
@@ -458,7 +459,7 @@ interface MotifItemProps {
 
 function MotifItem({ itemKey, kind, checked, enjeuValue, onCheck, onEnjeu, hasError, children }: MotifItemProps) {
   const idKey = enjeuId(itemKey);
-  const isIndolore = itemKey === "ERP 4/5" || itemKey === "Taille";
+  const isIndolore = INDOLORES.has(itemKey);
   const inputId = `${kind}-${idKey}`;
 
   return (
@@ -1135,8 +1136,13 @@ export default function EnregistrementPage() {
       [COLS.VisaMairie]: formVisaMairie || null,
       [COLS.ReceptionPref]: formReceptionPref || null,
       [COLS.Origine]: formOrigine || null,
-      [COLS.Enjeux]: toGristList(selectedMotifs),
-      [COLS.MotifsControle]: toGristList(selectedObjets),
+      // Tous les items cochés → Enjeux_pre_identifies
+      [COLS.Enjeux]: toGristList([...selectedMotifs, ...selectedObjets]),
+      // INDOLORES cochés + ZN/ZA quand Oui → Motifs_controle
+      [COLS.MotifsControle]: toGristList([
+        ...[...selectedMotifs, ...selectedObjets].filter(item => INDOLORES.has(item)),
+        ...["ZN", "ZA"].filter(item => enjeuValues[item] === "Oui"),
+      ]),
       ...enjeuCols,
       [COLS.EnjeuOld]: selectedMotifs.length === 1 ? (enjeuValues[selectedMotifs[0]] ?? null) : null,
       [COLS.CommuneRef]: selectedCommuneRef.current?.id ?? null,
@@ -1436,20 +1442,24 @@ export default function EnregistrementPage() {
 
   const communeConcernee = currentSelections.some(s => SHOW_SELECTIONS.has(s)) ||
     [...selectedMotifs, ...selectedObjets].some(item => {
-      if (item === "ERP 4/5" || item === "Taille") return false;
+      if (INDOLORES.has(item)) return false;
       return enjeuValues[item] === "Oui" && ["ZI", "RT", "STEP", "PEB", "LLS"].includes(item);
     });
 
   const projetConcerne = (() => {
-    const PROJET_ITEMS = ["ZN", "ZA", "EE", "Site classé", "ERP 1/2/3", "Signalé", "Aléatoire"];
-    const enjeuProjetOui = PROJET_ITEMS.some(item => enjeuValues[item] === "Oui");
+    const allChecked = [...selectedMotifs, ...selectedObjets];
+    // EE, Site classé, ERP 1/2/3, Signalé, Aléatoire → Oui par défaut quand cochés
+    const indoloreProjetItems = ["EE", "Site classé", "ERP 1/2/3", "Signalé", "Aléatoire"];
+    const indoloreChecked = indoloreProjetItems.some(item => allChecked.includes(item));
+    // ZN et ZA → seulement si Oui explicitement sélectionné
+    const znZaOui = ["ZN", "ZA"].some(item => enjeuValues[item] === "Oui");
     let tailleOui = false;
     if (selectedObjets.includes("Taille")) {
       const tv = parseInt(tailleLogements, 10);
       const seuil = selectedCommune ? getSeuilLogements(selectedCommune) : Infinity;
       if (!isNaN(tv) && tv >= seuil) tailleOui = true;
     }
-    return enjeuProjetOui || tailleOui;
+    return indoloreChecked || znZaOui || tailleOui;
   })();
 
   const controlePreview = computeControlePreview(
